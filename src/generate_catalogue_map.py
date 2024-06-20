@@ -26,7 +26,7 @@ def _get_abs_directory() -> pd.DataFrame:
     frame["URL"] = url
     cats = cats[frame.index]
     cat_index = cats.str.replace("(Ceased)", "").str.strip()
-    status = pd.Series("", index=cats.index).where(cat_index == cats, "Ceased")
+    status = pd.Series(" ", index=cats.index).where(cat_index == cats, "Ceased")
     frame["Status"] = status
     frame.index = cat_index
     frame.index.name = "Catalogue ID"

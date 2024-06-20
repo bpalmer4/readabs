@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../src')
-from readabs import print_abs_catalogue
 
-print_abs_catalogue()
+import readabs as ra
+
+ra.print_abs_catalogue()
 
