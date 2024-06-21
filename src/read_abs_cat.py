@@ -19,7 +19,7 @@ from bs4 import BeautifulSoup
 # local imports
 from abs_meta_data_support import metacol
 from abs_catalogue_map import catalogue_map
-from get_url_cache import get_file, HttpError, CacheError
+from download_cache import get_file, HttpError, CacheError
 
 
 # --- functions ---
@@ -55,8 +55,8 @@ def get_data_links(
     **kwargs,
 ) -> dict[str, list[str]]:
     """Scan the webpage at the ABS URL for links to ZIP files and for
-    links to Microsoft Excel files. 
-    Return the links in a dictionary of lists by file type ending. 
+    links to Microsoft Excel files.
+    Return the links in a dictionary of lists by file type ending.
     Ensure relative links have been fully expanded."""
 
     # get relevant web-page from ABS website
@@ -71,7 +71,7 @@ def get_data_links(
 
     # save the page to disk for inspection
     if inspect_file_name:
-        with open(inspect_file_name, "w") as file_handle:
+        with open(inspect_file_name, "w", encoding="utf-8") as file_handle:
             file_handle.write(page.decode("utf-8"))
 
     # remove those pesky span tags - probably not necessary
@@ -212,7 +212,7 @@ def _unpack_excel_into_df(
 
 # private
 def _extract_from_zip(
-    zip_contents: bytes, 
+    zip_contents: bytes,
     **kwargs: Any,
 ) -> tuple[dict[str, DataFrame], DataFrame]:
     """Extract the contents of a ZIP file into tuple, where the

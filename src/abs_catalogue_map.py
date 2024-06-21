@@ -3,6 +3,7 @@
 import pandas as pd
 from io import StringIO
 
+
 def catalogue_map() -> pd.DataFrame:
     """Return the catalogue map."""
 
@@ -54,4 +55,3 @@ def catalogue_map() -> pd.DataFrame:
 8782.0.65.001,Industry,Building And Construction,Construction Activity Chain Volume Measures Australia,https://www.abs.gov.au/statistics/industry/building-and-construction/construction-activity-chain-volume-measures-australia/jun-2020,Ceased
 """
     return pd.read_csv(StringIO(csv), index_col=0)
-

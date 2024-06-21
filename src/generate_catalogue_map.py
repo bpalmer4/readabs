@@ -3,7 +3,7 @@
 # --- imports
 from io import StringIO
 import pandas as pd
-from get_url_cache import get_file
+from download_cache import get_file
 
 
 # --- functions
@@ -14,7 +14,9 @@ def _get_abs_directory() -> pd.DataFrame:
     # get ABS web page of catalogue numbers
     url = "https://www.abs.gov.au/about/data-services/help/abs-time-series-directory"
     page = get_file(url)
-    links = pd.read_html(StringIO(page.decode("utf-8")), extract_links="body")[1]  # second table on the page
+    links = pd.read_html(StringIO(page.decode("utf-8")), extract_links="body")[
+        1
+    ]  # second table on the page
 
     # extract catalogue numbers
     cats = links["Catalogue Number"].apply(pd.Series)[0]

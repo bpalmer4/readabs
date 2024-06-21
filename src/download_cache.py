@@ -1,5 +1,5 @@
 """URL based data capture over the interwebs with a cache facility.
-The default cache durectory can be specified by setting the environment 
+The default cache directory can be specified by setting the environment 
 variable READABS_CACHE_DIR."""
 
 # --- imports
@@ -16,13 +16,13 @@ import requests
 
 
 # --- constants
-# define the defaut cache directory
+# define the default cache directory
 DEFAULT_CACHE_DIR = "./.readabs_cache"
 READABS_CACHE_DIR = getenv("READABS_CACHE_DIR", DEFAULT_CACHE_DIR)
 READABS_CACHE_PATH = Path(READABS_CACHE_DIR)
 
 
-# --- classes and functions
+# --- Exception classes
 class HttpError(Exception):
     """A problem retrieving data from HTTP."""
 
@@ -31,6 +31,7 @@ class CacheError(Exception):
     """A problem retrieving data from the cache."""
 
 
+# --- functions
 def check_response(url: str, response: requests.Response) -> None:
     """Raise an Exception if we could not retrieve URL."""
     code = response.status_code
@@ -39,11 +40,10 @@ def check_response(url: str, response: requests.Response) -> None:
 
 
 def request_get(url: str) -> bytes:
-    """Use requests to get the contents of the specified URL."""
-    gotten = requests.get(url, allow_redirects=True, timeout=20)  # timeout in seconds
+    """Use python requests to get the contents of the specified URL."""
+    gotten = requests.get(url, allow_redirects=True, timeout=20)  # timeout seconds
     check_response(url, gotten)
-    contents = gotten.content  # bytes
-    return contents
+    return gotten.content  # bytes
 
 
 def save_to_cache(file: Path, contents: bytes, verbose: bool) -> None:
@@ -53,25 +53,27 @@ def save_to_cache(file: Path, contents: bytes, verbose: bool) -> None:
             print("Removing old cache file.")
         file.unlink()
     if verbose:
-        print(f"Saving to cache: {file}")
+        print(f"About to save to cache: {file}")
     file.open(mode="w", buffering=-1, encoding=None, errors=None, newline=None)
     file.write_bytes(contents)
 
 
-def retrieve_from_cache(file: Path) -> bytes:
+def retrieve_from_cache(file: Path, verbose: bool) -> bytes:
     """Retrieve bytes from file-system."""
     if not file.exists() or not file.is_file():
         raise CacheError(f"Cached file not available: {file.name}")
+    if verbose:
+        print(f"Retrieving from cache: {file}")
     return file.read_bytes()
 
 
 def get_file(
     url: str,
     cache_dir: Path = READABS_CACHE_PATH,
-    cache_name_prefix: str = "cache",
+    cache_prefix: str = "cache",
     verbose: bool = False,
 ) -> bytes:
-    """Get file from URL or local file-system cache, depending on freshness.
+    """Get a file from URL or local file-system cache, depending on freshness.
     Note: we create the cache_dir if it does not exist.
     Returns: the contents of the file as bytes."""
 
@@ -82,7 +84,7 @@ def get_file(
         hash_name = md5(url.encode("utf-8")).hexdigest()
         tail_name = url.split("/")[-1].split("?")[0]
         file_name = re.sub(
-            bad_cache_pattern, "", f"{cache_name_prefix}--{hash_name}--{tail_name}"
+            bad_cache_pattern, "", f"{cache_prefix}--{hash_name}--{tail_name}"
         )
         return Path(cache_dir / file_name)
 
@@ -123,22 +125,34 @@ def get_file(
         return url_bytes
 
     # return the data that has been cached previously
-    if verbose:
-        print("Retrieving data from cache.")
-    return retrieve_from_cache(file_path)
+    return retrieve_from_cache(file_path, verbose)
 
 
 # --- preliminary testing:
 DO_TEST = False
-
 if __name__ == "__main__" and DO_TEST:
-    # prepare the test cases
-    URL1 = (
-        "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/"
-        + "labour-force-australia/nov-2023/6202001.xlsx"
-    )
 
-    # do the testing
-    for u in (URL1,):
-        content = get_file(u, verbose=True)
-        print(f"{len(content)} bytes retrieved from {u}.")
+    # define a test function
+    def cache_test() -> None:
+        """A Quick test of the retrieval and caching system."""
+
+        # prepare the test case
+        url1 = (
+            "https://www.abs.gov.au/statistics/labour/employment-and-"
+            + "unemployment/labour-force-australia/nov-2023/6202001.xlsx"
+        )
+
+        # do the testing
+        width = 20
+        print("Test commencing.")
+        for u in (url1, url1):
+            # first retrieval should be from the web, second from the cache
+            print("=" * width)
+            content = get_file(u, verbose=True)
+            print("-" * width)
+            print(f"{len(content)} bytes retrieved from {u}.")
+        print("=" * width)
+        print("Test completed.")
+
+    # run the test
+    cache_test()
