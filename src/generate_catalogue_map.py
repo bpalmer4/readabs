@@ -1,6 +1,7 @@
 """Generate the catalogue_map.py file."""
 
 # --- imports
+from io import StringIO
 import pandas as pd
 from get_url_cache import get_file
 
@@ -13,22 +14,24 @@ def _get_abs_directory() -> pd.DataFrame:
     # get ABS web page of catalogue numbers
     url = "https://www.abs.gov.au/about/data-services/help/abs-time-series-directory"
     page = get_file(url)
-    links = pd.read_html(page, extract_links="body")[1]  # second table on the page
+    links = pd.read_html(StringIO(page.decode("utf-8")), extract_links="body")[1]  # second table on the page
 
     # extract catalogue numbers
     cats = links["Catalogue Number"].apply(pd.Series)[0]
-    url = links["Topic"].apply(pd.Series)[1]
+    urls = links["Topic"].apply(pd.Series)[1]
     root = "https://www.abs.gov.au/statistics/"
-    snip = url.str.replace(root, "")
-    snip = snip[~snip.str.contains("http")].str.replace("-", " ").str.title()  # remove bad cases
+    snip = urls.str.replace(root, "")
+    snip = (
+        snip[~snip.str.contains("http")].str.replace("-", " ").str.title()
+    )  # remove bad cases
     frame = snip.str.split("/", expand=True).iloc[:, :3]
-    frame.columns = ["Theme", "Parent Topic", "Topic"]
+    frame.columns = pd.Index(["Theme", "Parent Topic", "Topic"])
     frame["URL"] = url
     cats = cats[frame.index]
     cat_index = cats.str.replace("(Ceased)", "").str.strip()
     status = pd.Series(" ", index=cats.index).where(cat_index == cats, "Ceased")
     frame["Status"] = status
-    frame.index = cat_index
+    frame.index = pd.Index(cat_index)
     frame.index.name = "Catalogue ID"
     return frame
 
@@ -36,7 +39,7 @@ def _get_abs_directory() -> pd.DataFrame:
 def produce_catalogue_map():
     """Generate the catalogue_map.py file."""
     directory = _get_abs_directory()
-    with open("catalogue_map.py", "w") as file:
+    with open("catalogue_map.py", "w", encoding="utf-8") as file:
         file.write('"""Catalogue map for ABS data."""\n\n')
         file.write("import pandas as pd\n")
         file.write("from io import StringIO\n\n")
