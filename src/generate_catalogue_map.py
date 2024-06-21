@@ -39,7 +39,7 @@ def _get_abs_directory() -> pd.DataFrame:
 def produce_catalogue_map():
     """Generate the catalogue_map.py file."""
     directory = _get_abs_directory()
-    with open("catalogue_map.py", "w", encoding="utf-8") as file:
+    with open("abs_catalogue_map.py", "w", encoding="utf-8") as file:
         file.write('"""Catalogue map for ABS data."""\n\n')
         file.write("import pandas as pd\n")
         file.write("from io import StringIO\n\n")
