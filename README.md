@@ -57,4 +57,6 @@ data, meta = ra.read_abs_pairs(pairs={"series_id": "cat_id", })
  * ABS data tables are downloaded and stored in a cache. By default the cache
    directory is "./.readabs_cache/" You can change the default directory name by setting
    the environemnt variable "READABS_CACHE_DIR" with the name of the preferred directory.
+ * the read functions have a number of standard arduments:
+   - `verbose=True` provides detailed information on the data retrieval process.
 

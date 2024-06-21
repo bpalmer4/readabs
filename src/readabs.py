@@ -8,8 +8,8 @@ from collections import namedtuple
 import pandas as pd
 
 # local imports
-from get_url_cache import *
 from catalogue_map import catalogue_map
+from data_capture import get_data_links
 
 
 # --- constants

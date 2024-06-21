@@ -16,4 +16,5 @@ __pycache__/
 
 # unnecessary detail to be ignored
 src/.readabs_cache/**
+tests/.readabs_cache/**
 
