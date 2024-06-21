@@ -6,7 +6,7 @@
 # analytic imports
 
 # local imports
-from catalogue_map import catalogue_map
+from abs_catalogue_map import catalogue_map
 from read_abs_cat import (
     # makes these available to the user
     get_data_links,
