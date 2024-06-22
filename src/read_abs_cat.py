@@ -7,7 +7,6 @@ and package that data into DataFrames."""
 import calendar
 import re
 import zipfile
-from functools import cache
 from io import BytesIO
 from typing import Any, cast
 
@@ -20,21 +19,22 @@ from bs4 import BeautifulSoup
 from abs_meta_data_support import metacol
 from abs_catalogue_map import catalogue_map
 from download_cache import get_file, HttpError, CacheError
+from read_support import check_kwargs, get_args
 
 
 # --- functions ---
 # private
 def _make_absolute_url(
     url: str,
+    prefix: str = "https://www.abs.gov.au"
 ) -> str:
     """Convert a relative URL address found on the ABS site to
     an absolute URL address."""
 
-    prefix = "https://www.abs.gov.au"
     # remove a prefix if it already exists (just to be sure)
     url = url.replace(prefix, "")
     url = url.replace(prefix.replace("https://", "http://"), "")
-    # add the prefix (back) ...
+    # then add the prefix (back) ...
     return f"{prefix}{url}"
 
 
@@ -47,8 +47,7 @@ def _get_table_name(url: str) -> str:
     return table_name
 
 
-# public
-@cache
+# public (but really only for testing)
 def get_data_links(
     url: str,
     inspect_file_name="",  # for debugging - save the page to disk
@@ -56,20 +55,20 @@ def get_data_links(
 ) -> dict[str, list[str]]:
     """Scan the webpage at the ABS URL for links to ZIP files and for
     links to Microsoft Excel files.
-    Return the links in a dictionary of lists by file type ending.
-    Ensure relative links have been fully expanded."""
+    Return the links in a dictionary of lists undexed by file type ending.
+    Ensure relative links have been fully expanded to be absolute links."""
 
     # get relevant web-page from ABS website
     verbose = kwargs.get("verbose", False)
     if verbose:
-        print("Getting data links from ABS.")
+        print("Getting data links from the ABS web page.")
     try:
         page = get_file(url, **kwargs)
     except (HttpError, CacheError) as e:
         print(f"Error when obtaining links from ABS web page: {e}")
         return {}
 
-    # save the page to disk for inspection
+    # save the HTML webpage to disk for inspection
     if inspect_file_name:
         with open(inspect_file_name, "w", encoding="utf-8") as file_handle:
             file_handle.write(page.decode("utf-8"))
@@ -80,7 +79,7 @@ def get_data_links(
     page = re.sub(b"\\s+", b" ", page)  # tidy up white space
 
     # capture all links (of ZIP and Microsoft Excel types)
-    link_types = (".xlsx", ".zip")  # must be lower case
+    link_types = (".zip", ".xlsx", )  # must be lower case
     soup = BeautifulSoup(page, features="lxml")
     link_dict: dict[str, list[str]] = {}
     for link in soup.findAll("a"):
@@ -107,12 +106,15 @@ def get_data_links(
 
 # private
 def _get_meta_from_excel(
-    excel: pd.ExcelFile, tab_num: str, tab_desc: str, cat_id: str
+    excel: pd.ExcelFile,
+    table: str,
+    tab_desc: str,
+    cat_id: str,
 ) -> pd.DataFrame:
     """Capture the metadata from the Index sheet of an ABS excel file.
     Returns a DataFrame specific to the current excel file.
-    Returning an empty DataFrame, mneans that the meatadata could not
-    be identified."""
+    Returning an empty DataFrame, means that the meatadata could not
+    be identified. Meta data for each ABS data item is organised by row."""
 
     # Unfortunately, the header for some of the 3401.0
     #                spreadsheets starts on row 10
@@ -134,31 +136,27 @@ def _get_meta_from_excel(
             break
 
         if header_row == starting_rows[-1]:
-            print(f"Could not find metadata for {cat_id}-{tab_num}")
+            print(f"Could not find metadata for {cat_id}-{tab_desc}")
             return pd.DataFrame()
+
+    # add the table name and table description to the metadata
+    file_meta[metacol.table] = table.strip()
+    file_meta[metacol.tdesc] = tab_desc.strip()
+    file_meta[metacol.cat] = cat_id.strip()
 
     # make damn sure there are no rogue white spaces
     for col in required:
         file_meta[col] = file_meta[col].str.strip()
 
-    # standarise some units
-    file_meta[metacol.unit] = (
-        file_meta[metacol.unit]
-        .str.replace("000 Hours", "Thousand Hours")
-        .replace("$'000,000", "$ Million")
-        .replace("$'000", " $ Thousand")
-        .replace("000,000", "Millions")
-        .replace("000", "Thousands")
-    )
-    file_meta[metacol.table] = tab_num.strip()
-    file_meta[metacol.tdesc] = tab_desc.strip()
-    file_meta[metacol.cat] = cat_id.strip()
     return file_meta
 
 
 # private
 def _unpack_excel_into_df(
-    excel: pd.ExcelFile, meta: DataFrame, freq: str, verbose: bool
+    excel: pd.ExcelFile,
+    meta: DataFrame,
+    freq: str,
+    verbose: bool,
 ) -> DataFrame:
     """Take an ABS excel file and put all the Data sheets into a single
     pandas DataFrame and return that DataFrame."""
@@ -172,19 +170,6 @@ def _unpack_excel_into_df(
             index_col=0,
         ).dropna(how="all", axis="index")
         data.index = pd.to_datetime(data.index)
-
-        for i in sheet_data.columns:
-            if i in data.columns:
-                # Remove duplicate Series IDs before merging
-                del sheet_data[i]
-                continue
-            if verbose and sheet_data[i].isna().all():
-                # Warn if data series is all NA
-                problematic = meta.loc[meta["Series ID"] == i][
-                    ["Table", "Data Item Description", "Series Type"]
-                ]
-                print(f"Warning, this data series is all NA: {i} (details below)")
-                print(f"{problematic}\n\n")
 
         # merge data into a large dataframe
         if len(data) == 0:
@@ -207,59 +192,117 @@ def _unpack_excel_into_df(
         if isinstance(data.index, pd.DatetimeIndex):
             data = data.to_period(freq=freq)
 
+    # check for NA columns - rarely happens
+    # Note: these empty columns are not removed,
+    # but it is useful to know they are there
+    if data.isna().all().any() and verbose:
+        cols = data.columns[data.isna().all()]
+        print("Caution: these columns are all NA in "
+              + f"{meta[metacol.table].iloc[0]}: {cols}")
+
+    # check for duplicate columns - should not happen
+    # Note: these duplicate columns are removed
+    duplicates = data.columns.duplicated()
+    if duplicates.any():
+        if verbose:
+            dup_table = meta[metacol.table].iloc[0]
+            print(f"Note: duplicates removed from {dup_table}: "
+                  + f"{data.columns[duplicates]}")
+        data = data.loc[:, ~duplicates].copy()
     return data
 
 
 # private
-def _extract_from_zip(
+def _extract_data_from_excel(
+        raw_bytes: bytes,
+        table_name: str,
+        **kwargs: Any
+) -> tuple[DataFrame, DataFrame]:
+    """Convert the raw bytes of an Excel file into a pandas DataFrame.
+    Returns the actual data and meta data in two separate DataFrames."""
+
+    ignore_errors = kwargs.get("ignore_errors", False)
+    verbose = kwargs.get("verbose", False)
+
+    # convert the raw bytes into a pandas ExcelFile
+    try:
+        excel = pd.ExcelFile(BytesIO(raw_bytes))
+    except Exception as e:
+        message = f"With {table_name}: could not convert raw bytes to ExcelFile.\n{e}"
+        if ignore_errors:
+            if verbose:
+                print(message)
+            return pd.DataFrame(), pd.DataFrame()
+        raise RuntimeError(message) from e
+
+    excel = pd.ExcelFile(BytesIO(raw_bytes))
+
+    # get table information (ie. the meta data)
+    if "Index" not in excel.sheet_names:
+        print(
+            "Caution: Could not find the 'Index' "
+            f"sheet in {table_name}. File not included"
+        )
+        return pd.DataFrame(), pd.DataFrame()
+
+    # get table header information
+    header = excel.parse("Index", nrows=8)  # ???
+    cat_id = header.iat[3, 1].split(" ")[0].strip()
+    tab_desc = header.iat[4, 1].split(".", 1)[-1].strip()
+
+    # get the metadata rows
+    file_meta = _get_meta_from_excel(excel, table_name, tab_desc, cat_id)
+    if len(file_meta) == 0:
+        return pd.DataFrame(), pd.DataFrame()
+
+    # establish freq - used for making the index a PeriodIndex
+    freq_dict = {"annual": "Y", "biannual": "Q", "quarter": "Q", "month": "M"}
+    freqlist = file_meta["Freq."].str.lower().unique()
+    if not len(freqlist) == 1 or freqlist[0] not in freq_dict:
+        print(f"Unrecognised data frequency {freqlist} for {tab_desc}")
+        return pd.DataFrame(), pd.DataFrame()
+    freq = freq_dict[freqlist[0]]
+
+    data = _unpack_excel_into_df(
+        excel,
+        file_meta,
+        freq,
+        verbose=kwargs.get("verbose", False)
+    )
+
+    return data, file_meta
+
+
+# private
+def _process_zip_binary(
     zip_contents: bytes,
     **kwargs: Any,
 ) -> tuple[dict[str, DataFrame], DataFrame]:
-    """Extract the contents of a ZIP file into tuple, where the
+    """Extract the contents of a ZIP file into a tuple, where the
     first element is a dictionary of DataFrames; and the second
-    element is the ABS meta data in a DataFrame."""
+    element is the related ABS meta data in a DataFrame."""
 
     verbose = kwargs.get("verbose", False)
     if verbose:
-        print("Extracting DataFrames from the zip-file.")
-    freq_dict = {"annual": "Y", "biannual": "Q", "quarter": "Q", "month": "M"}
-    returnable: dict[str, DataFrame] = {}
-    meta = DataFrame()
+        print("Extracting DataFrames from the zip-file binary.")
+    returnable_data: dict[str, DataFrame] = {}
+    returnable_meta = DataFrame()
 
     with zipfile.ZipFile(BytesIO(zip_contents)) as zipped:
         for count, element in enumerate(zipped.infolist()):
             # get the zipfile into pandas
-            excel = pd.ExcelFile(BytesIO(zipped.read(element.filename)))
-
-            # get table information (ie. the meta data)
-            if "Index" not in excel.sheet_names:
-                print(
-                    "Caution: Could not find the 'Index' "
-                    f"sheet in {element.filename}. File not included"
-                )
-                continue
-
-            # get table header information
-            header = excel.parse("Index", nrows=8)  # ???
-            cat_id = header.iat[3, 1].split(" ")[0].strip()
             table_name = _get_table_name(url=element.filename)
-            tab_desc = header.iat[4, 1].split(".", 1)[-1].strip()
-
-            # get the metadata rows
-            file_meta = _get_meta_from_excel(excel, table_name, tab_desc, cat_id)
-            if len(file_meta) == 0:
+            raw_bytes = zipped.read(element.filename)
+            excel_df, file_meta = _extract_data_from_excel(
+                raw_bytes, table_name, **kwargs
+            )
+            if len(excel_df) == 0:
+                # this table could not be captured
                 continue
 
-            # establish freq - used for making the index a PeriodIndex
-            freqlist = file_meta["Freq."].str.lower().unique()
-            if not len(freqlist) == 1 or freqlist[0] not in freq_dict:
-                print(f"Unrecognised data frequency {freqlist} for {tab_desc}")
-                continue
-            freq = freq_dict[freqlist[0]]
-
-            # fix tabulation when ABS uses the same table numbers for data
-            # This happens occasionally
-            if table_name in returnable:
+            # fix tabulation if ABS used the same table numbers for data
+            if table_name in returnable_data:
+                # This really just should not happen, but if it does, we need to dix it
                 tmp = f"{table_name}-{count}"
                 if verbose:
                     print(f"Changing duplicate table name from {table_name} to {tmp}.")
@@ -267,46 +310,74 @@ def _extract_from_zip(
                 file_meta[metacol.table] = table_name
 
             # aggregate the meta data
-            meta = pd.concat([meta, file_meta])
+            returnable_meta = pd.concat([returnable_meta, file_meta])
 
             # add the table to the returnable dictionary
-            returnable[table_name] = _unpack_excel_into_df(
-                excel, file_meta, freq, verbose
-            )
+            returnable_data[table_name] = excel_df
 
-    return returnable, meta
+    return returnable_data, returnable_meta
 
 
-def read_abs_cat(cat: str, **kwargs: Any) -> tuple[dict[str, DataFrame], DataFrame]:
+# public -- primary entry point for this module
+def read_abs_cat(
+        cat: str,  # ABS catalogue number
+        **kwargs: Any  # keyword arguments
+) -> tuple[dict[str, DataFrame], DataFrame]:
     """Get all the data tables and the metadata for a given ABS catalogue number.
     The data tables are returned as a dictionary of DataFrames, which is
-    indexed by the table name. The metadata is returned as a separate 9DataFrame."""
+    indexed by the table name. The metadata is returned as a separate DataFrame."""
+
+    # check/get the keyword arguments
+    check_kwargs(kwargs, "read_abs_cat")
+    args = get_args(kwargs)
+
+    if not args["get_zip"] and not args["get_excel"] and not args["get_excel_if_no_zip"]:
+        raise ValueError("read_abs_dict: either get_zip or get_excel must be True.")
 
     # convert the catalogue number to the ABS webpage URL
     cm = catalogue_map()
     if cat not in cm.index:
         raise ValueError(f"ABS catalogue number {cat} not found.")
-    url = cm.loc[cat, "URL"]
+    url = cm["URL"].astype(str)[cat]
 
     # get the URL links to the relevant ABS data files on that webpage
-    links = get_data_links(url, **kwargs)
+    links = get_data_links(url, **args)
     if not links:
         print(f"No data files found for catalogue number {cat}")
         return {}, DataFrame()  # return an empty dictionary, DataFrame
 
     # read the data files into a dictionary of DataFrames
-    abs_data: dict[str, DataFrame] = {}
+    abs_dict: dict[str, DataFrame] = {}
     abs_meta: DataFrame = DataFrame()
 
-    for link_type in ".zip", ".xlsx":
+    for link_type in ".zip", ".xlsx":  # .zip must come first
         for link in links.get(link_type, []):
-            if link_type == ".zip":
-                zip_contents = get_file(link, **kwargs)
-                d, m = _extract_from_zip(zip_contents, **kwargs)
-                abs_data.update(d)
-                abs_meta = pd.concat([abs_meta, m], axis=0)
-            elif link_type == ".xlsx":
-                # still to do
-                pass
 
-    return abs_data, abs_meta
+            if link_type == ".zip" and args["get_zip"]:
+                zip_contents = get_file(link, **args)
+                if len(zip_contents) == 0:
+                    continue
+                zip_data, zip_meta = _process_zip_binary(zip_contents, **args)
+                abs_dict.update(zip_data)
+                abs_meta = pd.concat([abs_meta, zip_meta], axis=0)
+
+            elif link_type == ".xlsx" and (args["get_excel"]
+                or (args["get_excel_if_no_zip"] and not args["get_zip"])
+                or (args["get_excel_if_no_zip"] and not links.get(".zip", [])) ):
+                name = _get_table_name(link)
+                if name in abs_dict:
+                    continue
+                if args["verbose"] and args["get_zip"] and links.get(".zip", []):
+                    print(f"Getting {link.rsplit('/', 1)[-1]} separately "
+                          + "because it was not in a zip file.")
+                raw_bytes = get_file(link, **args)
+                if len(raw_bytes) == 0:
+                    continue
+                excel_df, file_meta = _extract_data_from_excel(raw_bytes, name, **args)
+                if len(excel_df) == 0:
+                    continue
+                abs_dict[name] = excel_df
+                abs_meta = pd.concat([abs_meta, file_meta], axis=0)
+
+    # reset the index of the metadata
+    return abs_dict, abs_meta.reset_index()

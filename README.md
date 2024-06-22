@@ -54,9 +54,17 @@ data, meta = ra.read_abs_pairs(pairs={"series_id": "cat_id", })
 
 ## Notes:
 
+ * This package does not manipulate the ABS data. If the same data_column name is 
+   duplicated, then the duplicates are removed. But otherwise the data is returned as it
+   was downloaded. This includes any NA-only (ie. empty) columns where they occur.
  * ABS data tables are downloaded and stored in a cache. By default the cache
    directory is "./.readabs_cache/" You can change the default directory name by setting
    the environemnt variable "READABS_CACHE_DIR" with the name of the preferred directory.
- * the read functions have a number of standard arduments:
-   - `verbose=True` provides detailed information on the data retrieval process.
+ * the read functions have a number of standard arguments:
+   - `verbose=True` - print detailed information on the data retrieval process.
+   - `get_zip=False` - do not download .zip files
+   - `get_excel=False` - do not download .xlsx files. Note at least one of get_zip and 
+     get_excel must be true.
+   - `ignore_errors=True` - process as much as possible while ignoring any download 
+     errors.
 
