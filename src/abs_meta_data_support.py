@@ -1,4 +1,6 @@
-"""Support for working with ABS meta data."""
+"""abs_meta_data_sypport.py
+
+Support for working with ABS meta data."""
 
 from collections import namedtuple
 

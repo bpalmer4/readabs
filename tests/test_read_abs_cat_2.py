@@ -1,3 +1,5 @@
+"""Test the read_abs_cat.py module."""
+
 import time
 import sys
 sys.path.append('../src')

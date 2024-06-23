@@ -1,3 +1,5 @@
+"""Test the get_data_links() in readabs.py package."""
+
 import sys
 sys.path.append('../src')
 

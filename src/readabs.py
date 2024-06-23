@@ -12,9 +12,16 @@ from read_abs_cat import (
     get_data_links,
     read_abs_cat,
 )
+from read_abs_series import read_abs_series
 from abs_meta_data_support import metacol
 
-_ = (get_data_links, read_abs_cat, metacol)  # silence linters/checkers
+_ = (
+    # silence linters/checkers
+    get_data_links,
+    metacol,
+    read_abs_cat,
+    read_abs_series,
+)
 
 
 # --- functions

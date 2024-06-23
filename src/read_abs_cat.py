@@ -1,5 +1,8 @@
-"""Download timeseries data from the
+"""read_abs_cat.py
+
+Download all timeseries data from the
 Australian Bureau of Statistics (ABS)
+for a specified ABS catalogue identifier
 and package that data into DataFrames."""
 
 # --- imports ---
@@ -7,6 +10,7 @@ and package that data into DataFrames."""
 import calendar
 import re
 import zipfile
+from functools import cache
 from io import BytesIO
 from typing import Any, cast
 
@@ -319,13 +323,26 @@ def _process_zip_binary(
 
 
 # public -- primary entry point for this module
+@cache  # minimise slowness with repeat business
 def read_abs_cat(
         cat: str,  # ABS catalogue number
         **kwargs: Any  # keyword arguments
 ) -> tuple[dict[str, DataFrame], DataFrame]:
-    """Get all the data tables and the metadata for a given ABS catalogue number.
-    The data tables are returned as a dictionary of DataFrames, which is
-    indexed by the table name. The metadata is returned as a separate DataFrame."""
+    """Read the ABS data for a catalogue id and return the data.
+
+    Parameters
+    ----------
+    cat : str
+        The ABS catalogue number.
+    **kwargs : Any
+        Keyword arguments for the read_abs_cat function.
+        
+    Returns
+    -------
+    tuple[dict[str, DataFrame], DataFrame]
+        A dictionary of DataFrames and a DataFrame of the meta data.
+        The dictionary is indexed by table names, which can be found
+        in the meta data DataFrame."""
 
     # check/get the keyword arguments
     check_kwargs(kwargs, "read_abs_cat")
