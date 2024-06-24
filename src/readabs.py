@@ -11,6 +11,13 @@ from get_data_links import get_data_links
 from read_abs_cat import read_abs_cat
 from read_abs_series import read_abs_series
 from abs_meta_data_support import metacol
+from ultilities import (
+	percent_change,
+	annualise_rates,
+	annualise_percentages,
+	qtly_to_monthly,
+	monthly_to_qtly,
+)
 
 _ = (
     # silence linters/checkers
@@ -18,6 +25,11 @@ _ = (
     metacol,
     read_abs_cat,
     read_abs_series,
+	percent_change,
+	annualise_rates,
+	annualise_percentages,
+	qtly_to_monthly,
+	monthly_to_qtly,
 )
 
 

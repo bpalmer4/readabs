@@ -29,8 +29,7 @@ def get_table_name(url: str) -> str:
 
 # private
 def historicise_links(
-    link_dict: dict[str, list[str]],
-    history: str
+    link_dict: dict[str, list[str]], history: str
 ) -> dict[str, list[str]]:
     """Age an ABS link so that it points to a historical version of the data.
     Note: the history string is typically in "mon-yr" format, but not alwayts.

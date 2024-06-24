@@ -1,7 +1,8 @@
 # readabs
 
-readabs is an open-source python package to download timeseries data from
-the Australian Bureau of Statistics (ABS) into a pandas DataFrame.
+readabs is an open-source python package to download and work with 
+imeseries data from the Australian Bureau of Statistics (ABS),
+using pandas DataFrames.
 
 
 ---
@@ -49,9 +50,44 @@ data, meta = ra.read_abs_series(cat="id", series="id1")
 data, meta = ra.read_abs_series(cat="id", series=("id1", "id2, ...))
 ```
 
+### Additional utility functions
+While not necessary for working with ABS data, the package includes some useful
+functions for manipulating ABS data:
+
+Calculate percentage change over n_periods.
+```python
+change_data = percentage_change(data, n_periods)
+```
+
+Annualise monthly or quarterly percentage rates.
+```python
+annualised = annualise_percentages(data, periods_per_year)
+```
+
+Convert a pandas timeseries with a Quarterly PeriodIndex to an
+timeseries with a Monthly PeriodIndex.
+```python
+monthly_data = qtly_to_monthly(
+    quarterly_data, 
+    interpolate, # default is True
+    limit,  # default is 2, only used if interpolate is True
+    dropna,  # default is True,
+)
+```
+
+Convert monthly data to quarterly data by taking the mean or sum of
+the three months in each quarter. Ignore quarters with less than
+three months data. Drop NA items. 
+```python
+quarterly_data = monthly_to_qtly(
+    data,
+    q_ending,  # default is "DEC"
+    f, the func
+    tion to apply ("sum" or "mean"), the default is "mean"
+)
+```
 
 ---
-
 
 ## Notes:
 
@@ -70,7 +106,8 @@ data, meta = ra.read_abs_series(cat="id", series=("id1", "id2, ...))
    - `history=""` - provide a month-year string to extract historical ABS data.  
      For example, you can set history="dec-2023" to the get the ABS data for a 
      catalogue identifier that was originally published in respect of Q4 of 2023. 
-     Note: not all ABS data sources are structured so that this technique works.
+     Note: not all ABS data sources are structured so that this technique works
+     in every case; but most are.
    - `verbose=False` - Do not print detailed information on the data retrieval process.
      Setting this to true may help diagnose why something might be going wrong with the
      data retrieval process. 
@@ -86,11 +123,13 @@ data, meta = ra.read_abs_series(cat="id", series=("id1", "id2, ...))
      For most ABS catalogue items, it is sufficient to just download the one zip 
      file. But note, some catalogue items do not have a zip file. Others have 
      quite a number of zip files.
-  - `single_excel_only=""` - if this argument is set to a table name, only that
-    .xlsx file will be downloaded. If set, and only a limited subset of available
-    data is needed, this can speed up download times significantly. Note: overrides
-    get_zip, get_excel_if_no_zip, get_excel and single_zip_only.
- - `single_excel_only=""` - if this argument is set to a zip file name (without
+  - `single_excel_only=""` - if this argument is set to a table name (without the 
+    ,xlsx extention), only that excel file will be downloaded. If set, and only a 
+    limited subset of available data is needed, this can speed up download 
+    times significantly. Note: overrides get_zip, get_excel_if_no_zip, get_excel and 
+    single_zip_only.
+ - `single_zip_only=""` - if this argument is set to a zip file name (without
    the .zip extention), only that zip file will be downloaded. If set, and only a 
    limited subset of available data is needed, this can speed up download times 
    significantly. Note: overrides get_zip, get_excel_if_no_zip, and get_excel.
+

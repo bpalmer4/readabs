@@ -1,6 +1,6 @@
 """read_abs_series.py
 
-Get specific ABS data series by their ABS series ID."""
+Get specific ABS data series by their ABS series identifiers."""
 
 # --- imports
 # system imports
@@ -21,7 +21,7 @@ def read_abs_series(
     series_id: str | Sequence[str],
     **kwargs: Any,
 ) -> tuple[DataFrame, DataFrame]:
-    """Get specific ABS data series by their ABS catalogue ID and series ID.
+    """Get specific ABS data series by their ABS catalogue ID and series ID
 
     Parameters
     ----------
@@ -30,7 +30,9 @@ def read_abs_series(
     series_id : str | Sequence[str]
         An ABS series ID or a sequence of ABS series IDs.
     **kwargs : Any
-        Keyword arguments for the read_abs_series function.
+        Keyword arguments for the read_abs_series function,
+        which are the same as the keyword arguments for the r
+        read_abs_cat function.
 
     Returns
     -------
@@ -66,7 +68,6 @@ def read_abs_series(
         # confirm thay the index of the series is compatible
         table = cat_meta.loc[identifier, metacol.table]
         data_series = cat_data[table][identifier]
-        print("DEBUG: ", data_series.index.dtype, table)
         if (
             len(return_data) > 0
             and cast(PeriodIndex, return_data.index).freq
