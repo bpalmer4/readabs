@@ -1,0 +1,22 @@
+[project]
+name = "readabs"
+version = "0.0.1a"
+authors = [
+  { name="Bryan Palmer", email="palmer.bryan@gmail.com" },
+]
+description = "Get ABS timeseries data as pandas DataFrames"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/bpalmer4/readabs"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+

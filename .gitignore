@@ -15,14 +15,24 @@ __pycache__/
 .DS_Store
 
 # unnecessary detail to be ignored
-readabs/.readabs_cache/**
-src/.readabs_cache/**
-src/readabs/.readabs_cache/**
-tests/.readabs_cache/**
+*.readabs_cache/
 tests/test.output
 
 # ignore packaging stuff
-dist/**
-readabs.egg-info/**
-build/**
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
 
