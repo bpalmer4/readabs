@@ -18,7 +18,7 @@ from abs_meta_data_support import metacol
 # --- functions
 def read_abs_series(
     cat: str,
-    series_id: str|Sequence[str],
+    series_id: str | Sequence[str],
     **kwargs: Any,
 ) -> tuple[DataFrame, DataFrame]:
     """Get specific ABS data series by their ABS catalogue ID and series ID.
@@ -44,7 +44,7 @@ def read_abs_series(
 
     # read the ABS category data
     cat_data, cat_meta = read_abs_cat(cat, **args)
-    
+
     # drop repeated series_ids in the meta data, make series_ids the index
     cat_meta.index = cat_meta[metacol.id]
     cat_meta = cat_meta.groupby(cat_meta.index).first()
@@ -66,10 +66,12 @@ def read_abs_series(
         # confirm thay the index of the series is compatible
         table = cat_meta.loc[identifier, metacol.table]
         data_series = cat_data[table][identifier]
-        print('DEBUG: ', data_series.index.dtype, table)
-        if (len(return_data) > 0 and
-            cast(PeriodIndex, return_data.index).freq
-            != cast(PeriodIndex, data_series.index).freq):
+        print("DEBUG: ", data_series.index.dtype, table)
+        if (
+            len(return_data) > 0
+            and cast(PeriodIndex, return_data.index).freq
+            != cast(PeriodIndex, data_series.index).freq
+        ):
             if args["verbose"]:
                 print(f"Frequency mismatch for series ID {identifier}")
             if args["ignore_errors"]:
@@ -78,7 +80,9 @@ def read_abs_series(
 
         # add the series data and meta data to the return values
         if len(return_data) > 0:
-            return_data = return_data.reindex(return_data.index.union(data_series.index))
+            return_data = return_data.reindex(
+                return_data.index.union(data_series.index)
+            )
         return_data[identifier] = data_series
         return_meta = concat([return_meta, cat_meta.loc[identifier]], axis=1)
 

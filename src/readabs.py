@@ -7,11 +7,8 @@
 
 # local imports
 from abs_catalogue_map import catalogue_map
-from read_abs_cat import (
-    # makes these available to the user
-    get_data_links,
-    read_abs_cat,
-)
+from get_data_links import get_data_links
+from read_abs_cat import read_abs_cat
 from read_abs_series import read_abs_series
 from abs_meta_data_support import metacol
 

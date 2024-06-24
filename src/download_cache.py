@@ -1,4 +1,5 @@
-"""URL based data capture over the interwebs with a cache facility.
+"""download_cache.py - a module for downloading and caching data from the web.
+
 The default cache directory can be specified by setting the environment 
 variable READABS_CACHE_DIR."""
 
@@ -36,55 +37,63 @@ class CacheError(Exception):
 
 # --- functions
 def check_for_bad_response(
-        url: str,
-        response: requests.Response,
-        **kwargs: Any,
+    url: str,
+    response: requests.Response,
+    **kwargs: Any,
 ) -> bool:
-    """Raise an Exception if we could not retrieve URL. 
-    If ignore_errors is True, return True if there is a problem,
+    """Raise an Exception if we could not retrieve the URL.
+    If "ignore_errors" is True, return True if there is a problem,
     otherwise raise an exception if there is a problem."""
 
-    verbose = kwargs.get("verbose", False)
-    ignore_errors = False
+    ignore_errors = kwargs.get("ignore_errors", False)
     code = response.status_code
     if code != 200 or response.headers is None:
         problem = f"Problem {code} accessing: {url}."
-        if ignore_errors:
-            if verbose:
-                print(problem)
-            return True
-        raise HttpError(problem)
+        if not ignore_errors:
+            raise HttpError(problem)
+        print(problem)
+        return True
+
     return False
 
 
 def request_get(
-        url: str,
-        **kwargs: Any,
+    url: str,
+    **kwargs: Any,
 ) -> bytes:
-    """Use python requests to get the contents of the specified URL."""
+    """Use python requests to get the contents of the specified URL.
+    Depending on "ignore_errors", if something goes wrong, we either
+    raise an exception or return an empty bytes object."""
 
+    # Initialise variables
     verbose = kwargs.get("verbose", False)
     ignore_errors = kwargs.get("ignore_errors", False)
 
     if verbose:
         print(f"About to request/download: {url}")
+
     try:
         gotten = requests.get(url, allow_redirects=True, timeout=DOWNLOAD_TIMEOUT)
     except requests.exceptions.RequestException as e:
-        if ignore_errors:
-            return b""
-        raise HttpError(f"Problem accessing: {url}.") from e
-    if verbose:
-        print(f"Request complete status code: {gotten.status_code}")
-    if check_for_bad_response(url, gotten, **kwargs):
+        error = f"request_get(): there was a problem downloading {url}."
+        if not ignore_errors:
+            raise HttpError(error) from e
+        print(error)
         return b""
+
+    if check_for_bad_response(url, gotten, **kwargs):
+        # Note: check_for_bad_response() will raise an exception
+        # if it encounters a problem and ignore_errors is False.
+        # Otherwise it will print an error message and return True
+        return b""
+
     return gotten.content  # bytes
 
 
 def save_to_cache(
-        file: Path,
-        contents: bytes,
-        **kwargs: Any,
+    file: Path,
+    contents: bytes,
+    **kwargs: Any,
 ) -> None:
     """Save bytes to the file-system."""
 
@@ -109,9 +118,11 @@ def retrieve_from_cache(file: Path, **kwargs: Any) -> bytes:
     ignore_errors = kwargs.get("ignore_errors", False)
 
     if not file.exists() or not file.is_file():
+        message = f"Cached file not available: {file.name}"
         if ignore_errors:
+            print(message)
             return b""
-        raise CacheError(f"Cached file not available: {file.name}")
+        raise CacheError(message)
     if verbose:
         print(f"Retrieving from cache: {file}")
     return file.read_bytes()
