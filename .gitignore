@@ -17,10 +17,12 @@ __pycache__/
 # unnecessary detail to be ignored
 readabs/.readabs_cache/**
 src/.readabs_cache/**
+src/readabs/.readabs_cache/**
 tests/.readabs_cache/**
 tests/test.output
 
-# ignore PyPI stuff
+# ignore packaging stuff
 dist/**
 readabs.egg-info/**
+build/**
 
