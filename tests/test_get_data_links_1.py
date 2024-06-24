@@ -2,6 +2,11 @@
 
 Test over all ABS landing pages for each catalogue identifier."""
 
+print("\n\n")
+print("=" * 80)
+print("Testing get_data_links() 1")
+print("=" * 80)
+
 import sys
 
 sys.path.append("../src")

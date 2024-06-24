@@ -11,7 +11,7 @@ from get_data_links import get_data_links
 from read_abs_cat import read_abs_cat
 from read_abs_series import read_abs_series
 from abs_meta_data_support import metacol
-from ultilities import (
+from utilities import (
 	percent_change,
 	annualise_rates,
 	annualise_percentages,

@@ -1,5 +1,11 @@
 """Test the read_abs_series.py module."""
 
+print("\n\n")
+print("=" * 80)
+print("Testing read_abs_series() 1")
+print("=" * 80)
+
+
 import sys
 
 sys.path.append("../src")

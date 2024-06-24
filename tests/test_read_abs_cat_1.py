@@ -2,11 +2,18 @@
 
 Download the monthly labour force survey."""
 
+print("\n\n")
+print("=" * 80)
+print("Testing read_abs_cat() 1")
+print("=" * 80)
+
+
 import sys
 
 sys.path.append("../src")
 
 import readabs as ra
+
 
 # data retrieval - noisy because verbose is turned on.
 print("=" * 20)

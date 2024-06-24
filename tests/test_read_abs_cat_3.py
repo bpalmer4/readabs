@@ -2,6 +2,12 @@
 
 Specifically test reading a single excel file and a single zip file."""
 
+print("\n\n")
+print("=" * 80)
+print("Testing read_abs_cat() 3")
+print("=" * 80)
+
+
 import sys
 
 sys.path.append("../src")

@@ -2,6 +2,11 @@
 
 Focus on historical data."""
 
+print("\n\n")
+print("=" * 80)
+print("Testing get_data_links() 2")
+print("=" * 80)
+
 import sys
 
 sys.path.append("../src")
@@ -19,4 +24,4 @@ print(ra.get_data_links(url))
 
 # Get aged links
 print("Aged links:")
-print(ra.get_data_links(url, history="dec-23"))
+print(ra.get_data_links(url, history="dec-2023"))

@@ -2,10 +2,16 @@
 
 Test for every ABS catalogue number."""
 
+print("\n\n")
+print("=" * 80)
+print("Testing read_abs_cat() 2")
+print("=" * 80)
+
 import time
 import sys
 
 sys.path.append("../src")
+
 
 import readabs as ra
 from abs_catalogue_map import catalogue_map
