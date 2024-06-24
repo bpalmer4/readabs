@@ -19,3 +19,7 @@ src/.readabs_cache/**
 tests/.readabs_cache/**
 tests/test.output
 
+# ignore PyPI stuff
+dist/**
+readabs.egg-info/**
+
