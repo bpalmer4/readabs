@@ -1,0 +1,40 @@
+{% set name = "readabs" %}
+{% set version = "0.0.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/readabs-{{ version }}.tar.gz
+  sha256: 29cf92661275cb491c4bdbb72d0064995d4909f9fb1a842a21a461e36466d4ed
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+
+test:
+  imports:
+    - src
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/bpalmer4/readabs
+  summary: Read ABS time series data
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - bpalmer4

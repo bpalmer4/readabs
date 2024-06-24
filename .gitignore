@@ -15,7 +15,7 @@ __pycache__/
 .DS_Store
 
 # unnecessary detail to be ignored
-src/.readabs_cache/**
+readabs/.readabs_cache/**
 tests/.readabs_cache/**
 tests/test.output
 
