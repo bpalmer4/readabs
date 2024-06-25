@@ -1,11 +1,13 @@
 [project]
 name = "readabs"
-version = "0.0.1a"
+dynamic = ["version", "readme"]
 authors = [
-  { name="Bryan Palmer", email="palmer.bryan@gmail.com" },
+  {name="Bryan Palmer", email = "palmer.bryan@gmail.com"},
 ]
-description = "Get ABS timeseries data as pandas DataFrames"
-readme = "README.md"
+maintainers = [
+  {name = "Bryan Palmer", email = "palmer.bryan@gmail.com"},
+]
+description = "Get ABS timeseries data in pandas DataFrames"
 requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -19,4 +21,13 @@ Homepage = "https://github.com/bpalmer4/readabs"
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION.txt"}
+readme = {file = "README.md"}
+
+[tool.setuptools.packages.find]
+where = ["src"]  # list of folders that contain the packages (["."] by default)
+include = ["readabs"]  # package names should match these glob patterns (["*"] by default)
+namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 

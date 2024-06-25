@@ -3,7 +3,7 @@
 import re
 from typing import Any
 from bs4 import BeautifulSoup
-from download_cache import get_file, HttpError, CacheError
+from .download_cache import get_file, HttpError, CacheError
 
 
 # private

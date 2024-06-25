@@ -20,11 +20,11 @@ from pandas import DataFrame
 from bs4 import BeautifulSoup
 
 # local imports
-from abs_meta_data_support import metacol
-from get_data_links import get_data_links, get_table_name
-from abs_catalogue_map import catalogue_map
-from download_cache import get_file, HttpError, CacheError
-from read_support import check_kwargs, get_args
+from .abs_meta_data_support import metacol
+from .get_data_links import get_data_links, get_table_name
+from .abs_catalogue_map import catalogue_map
+from .download_cache import get_file, HttpError, CacheError
+from .read_support import check_kwargs, get_args
 
 
 # --- functions ---

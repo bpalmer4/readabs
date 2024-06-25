@@ -41,13 +41,13 @@ def qtly_to_monthly(
 ) -> DataT:
     """Convert a pandas timeseries with a Quarterly PeriodIndex to an
     timeseries with a Monthly PeriodIndex.
-    
+
     Arguments:
     ==========
     data - either a pandas Series or DataFrame - assumes the index is unique.
     interpolate - whether to interpolate the missing monthly data.
     dropna - whether to drop NA data
-    
+
     Notes:
     ======
     Necessitated by Pandas 2.2, which removed .resample()
@@ -85,7 +85,7 @@ def qtly_to_monthly(
     return data
 
 
-def monthly_to_qtly(data: DataT, q_ending = "DEC", f: str = "mean") -> DataT:
+def monthly_to_qtly(data: DataT, q_ending="DEC", f: str = "mean") -> DataT:
     """Convert monthly data to quarterly data by taking the mean of
     the three months in each quarter. Ignore quarters with less than
     three months data. Drop NA items. Change f to "sum" for a quarterly sum"""
