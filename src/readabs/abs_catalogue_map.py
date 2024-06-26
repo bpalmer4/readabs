@@ -3,6 +3,8 @@
 from io import StringIO
 
 from pandas import DataFrame, read_csv
+
+
 def catalogue_map() -> DataFrame:
     """Return the catalogue map."""
 

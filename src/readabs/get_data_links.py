@@ -4,7 +4,7 @@ import re
 from typing import Any
 from bs4 import BeautifulSoup
 
-# local imports - ugly, need to find out how to fix thiscd 
+# local imports - ugly, need to find out how to fix thiscd
 if __package__ is None or __package__ == "":
     from download_cache import get_file, HttpError, CacheError
 else:

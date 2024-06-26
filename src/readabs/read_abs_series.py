@@ -52,7 +52,8 @@ def read_abs_series(
     # read the ABS category data
     cat_data, cat_meta = read_abs_cat(cat, **args)
 
-    # drop repeated series_ids in the meta data, make series_ids the index
+    # drop repeated series_ids in the meta data,
+    # make unique series_ids the index
     cat_meta.index = cat_meta[metacol.id]
     cat_meta = cat_meta.groupby(cat_meta.index).first()
 

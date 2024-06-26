@@ -8,12 +8,7 @@ print("Testing read_abs_cat() 3")
 print("=" * 80)
 
 
-import sys
-
-sys.path.append("../src/readabs")
-
 import readabs as ra
-from abs_catalogue_map import catalogue_map
 
 
 # Test downloading a single table from the labour force survey

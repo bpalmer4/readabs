@@ -8,10 +8,6 @@ print("Testing read_abs_cat() 1")
 print("=" * 80)
 
 
-import sys
-
-sys.path.append("../src")
-
 import readabs as ra
 
 

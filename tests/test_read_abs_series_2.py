@@ -11,9 +11,6 @@ print("Testing read_abs_series() 2")
 print("=" * 80)
 
 
-import sys
-
-sys.path.append("../src/readabs")
 from pandas import DataFrame
 
 import readabs as ra

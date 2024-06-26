@@ -18,7 +18,7 @@ import pandas as pd
 from pandas import DataFrame
 
 # local imports - ugly, need to find out how to fix this
-#print(f"in read_abs_cat.py: __main__={__name__}, __package__={__package__}")
+# print(f"in read_abs_cat.py: __main__={__name__}, __package__={__package__}")
 if __package__ is None or __package__ == "":
     from abs_meta_data_support import metacol
     from get_data_links import get_data_links, get_table_name

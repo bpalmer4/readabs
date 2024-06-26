@@ -7,10 +7,6 @@ print("=" * 80)
 print("Testing get_data_links() 1")
 print("=" * 80)
 
-import sys
-
-sys.path.append("../src")
-
 import readabs as ra
 
 cm = ra.catalogue_map()

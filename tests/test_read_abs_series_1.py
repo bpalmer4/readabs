@@ -6,9 +6,6 @@ print("Testing read_abs_series() 1")
 print("=" * 80)
 
 
-import sys
-
-sys.path.append("../src/readabs")
 import readabs as ra
 
 

@@ -1,7 +1,7 @@
 # readabs
 
 readabs is an open-source python package to download and work with 
-imeseries data from the Australian Bureau of Statistics (ABS),
+timeseries data from the Australian Bureau of Statistics (ABS),
 using pandas DataFrames.
 
 
@@ -80,10 +80,9 @@ the three months in each quarter. Ignore quarters with less than
 three months data. Drop NA items. 
 ```python
 quarterly_data = monthly_to_qtly(
-    data,
+    monthly_data,
     q_ending,  # default is "DEC"
-    f, the func
-    tion to apply ("sum" or "mean"), the default is "mean"
+    f, # the function to apply ("sum" or "mean"), the default is "mean"
 )
 ```
 
@@ -91,14 +90,14 @@ quarterly_data = monthly_to_qtly(
 
 ## Notes:
 
- * This package largely does not manipulate the ABS data. The data is returned as it
+ * This package does not manipulate the ABS data. The data is returned as it
    was downloaded. This includes any NA-only (ie. empty) columns where they occur.
  * This package only downloads timeseries data tables. Other data tables (for example,
    pivot tables) are ignored.
  * The index for all of the downloaded tables should be a pandas PeriodIndex, with an
    appropriately selected frequency. 
- * In the process of data retrieval, the ABS data tables are downloaded and stored in a 
-   local cache. By default the cache directory is "./.readabs_cache/". 
+ * In the process of data retrieval, ABS zip and excel files are downloaded and
+   stored in a local cache. By default, the cache directory is "./.readabs_cache/". 
    You can change the default directory name by setting the environemnt variable 
    "READABS_CACHE_DIR" with the name of the preferred directory.
  * the "read" functions have a number of standard keyword arguments (with default 
@@ -115,7 +114,7 @@ quarterly_data = monthly_to_qtly(
      sometimes the ABS website has malformed links, and changing this setting is 
      necessitated. (Note: if you drop a message to the ABS, they will usually fix 
      broken links with a business day). 
-   - `get_zip=True` - Download .zip files. 
+   - `get_zip=True` - Download the excel files in .zip files.
    - `get_excel_if_no_zip=True` Only try to download .xlsx files if there are no
      zip files available to be downloaded.
    - `get_excel=False` - Do not automatically download .xlsx files. 
@@ -123,13 +122,13 @@ quarterly_data = monthly_to_qtly(
      For most ABS catalogue items, it is sufficient to just download the one zip 
      file. But note, some catalogue items do not have a zip file. Others have 
      quite a number of zip files.
-  - `single_excel_only=""` - if this argument is set to a table name (without the 
-    ,xlsx extention), only that excel file will be downloaded. If set, and only a 
-    limited subset of available data is needed, this can speed up download 
-    times significantly. Note: overrides get_zip, get_excel_if_no_zip, get_excel and 
-    single_zip_only.
- - `single_zip_only=""` - if this argument is set to a zip file name (without
-   the .zip extention), only that zip file will be downloaded. If set, and only a 
-   limited subset of available data is needed, this can speed up download times 
-   significantly. Note: overrides get_zip, get_excel_if_no_zip, and get_excel.
+   - `single_excel_only=""` - if this argument is set to a table name (without the 
+     .xlsx extention), only that excel file will be downloaded. If set, and only a 
+     limited subset of available data is needed, this can speed up download 
+     times significantly. Note: overrides get_zip, get_excel_if_no_zip, get_excel and 
+     single_zip_only.
+   - `single_zip_only=""` - if this argument is set to a zip file name (without
+     the .zip extention), only that zip file will be downloaded. If set, and only a 
+     limited subset of available data is needed, this can speed up download times 
+     significantly. Note: overrides get_zip, get_excel_if_no_zip, and get_excel.
 

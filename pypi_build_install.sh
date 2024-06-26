@@ -1,5 +1,8 @@
 #!/bin/zsh
-# make sure the version number is correct in setup.py
+# make sure the version number is correct in:
+# ./readabs/src/readabs/__init__.py
+
+rm dist/*
 
 pip uninstall readabs
 

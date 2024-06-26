@@ -2,25 +2,20 @@
 
 Test for every ABS catalogue number."""
 
-import time
-import sys
-
-sys.path.append("../src/readabs")
-
-import readabs as ra
-from abs_catalogue_map import catalogue_map
-
 print("\n\n")
 print("=" * 80)
 print("Testing read_abs_cat() 2")
 print("=" * 80)
 
 
+import time
+import readabs as ra
+
 
 WIDTH = 20  # characters
 SNOOZE = 5  # seconds
 
-cm = catalogue_map()
+cm = ra.catalogue_map()
 for row, data in cm.T.items():
     print("=" * WIDTH)
     print(row, data.iloc[:3].to_list())
