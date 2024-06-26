@@ -13,7 +13,7 @@ print("=" * 80)
 
 import sys
 
-sys.path.append("../src")
+sys.path.append("../src/readabs")
 from pandas import DataFrame
 
 import readabs as ra

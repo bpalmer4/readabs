@@ -1,10 +1,9 @@
 """Catalogue map for ABS data."""
 
-import pandas as pd
 from io import StringIO
 
-
-def catalogue_map() -> pd.DataFrame:
+from pandas import DataFrame, read_csv
+def catalogue_map() -> DataFrame:
     """Return the catalogue map."""
 
     csv = """Catalogue ID,Theme,Parent Topic,Topic,URL,Status
@@ -54,4 +53,4 @@ def catalogue_map() -> pd.DataFrame:
 8762.0,Industry,Building And Construction,Engineering Construction Activity Australia,https://www.abs.gov.au/statistics/industry/building-and-construction/engineering-construction-activity-australia/latest-release, 
 8782.0.65.001,Industry,Building And Construction,Construction Activity Chain Volume Measures Australia,https://www.abs.gov.au/statistics/industry/building-and-construction/construction-activity-chain-volume-measures-australia/jun-2020,Ceased
 """
-    return pd.read_csv(StringIO(csv), index_col=0)
+    return read_csv(StringIO(csv), index_col=0)

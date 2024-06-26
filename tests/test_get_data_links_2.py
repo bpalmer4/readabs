@@ -8,8 +8,7 @@ print("Testing get_data_links() 2")
 print("=" * 80)
 
 import sys
-
-sys.path.append("../src")
+sys.path.append("../src/readabs")
 
 import readabs as ra
 

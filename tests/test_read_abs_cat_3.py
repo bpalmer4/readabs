@@ -10,7 +10,7 @@ print("=" * 80)
 
 import sys
 
-sys.path.append("../src")
+sys.path.append("../src/readabs")
 
 import readabs as ra
 from abs_catalogue_map import catalogue_map

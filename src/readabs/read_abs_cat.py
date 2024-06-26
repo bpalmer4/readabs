@@ -1,14 +1,13 @@
 """read_abs_cat.py
 
-Download all timeseries data from the
-Australian Bureau of Statistics (ABS)
-for a specified ABS catalogue identifier
-and package that data into DataFrames."""
+Download all/selected timeseries data from the
+Australian Bureau of Statistics (ABS) for a specified 
+ABS catalogue identifier and package that data into a 
+dictionary of DataFrames."""
 
 # --- imports ---
 # standard library imports
 import calendar
-import re
 import zipfile
 from functools import cache
 from io import BytesIO
@@ -17,14 +16,21 @@ from typing import Any, Callable, cast
 # analytic imports
 import pandas as pd
 from pandas import DataFrame
-from bs4 import BeautifulSoup
 
-# local imports
-from .abs_meta_data_support import metacol
-from .get_data_links import get_data_links, get_table_name
-from .abs_catalogue_map import catalogue_map
-from .download_cache import get_file, HttpError, CacheError
-from .read_support import check_kwargs, get_args
+# local imports - ugly, need to find out how to fix this
+#print(f"in read_abs_cat.py: __main__={__name__}, __package__={__package__}")
+if __package__ is None or __package__ == "":
+    from abs_meta_data_support import metacol
+    from get_data_links import get_data_links, get_table_name
+    from abs_catalogue_map import catalogue_map
+    from read_support import check_kwargs, get_args
+    from download_cache import get_file
+else:
+    from .abs_meta_data_support import metacol
+    from .get_data_links import get_data_links, get_table_name
+    from .abs_catalogue_map import catalogue_map
+    from .read_support import check_kwargs, get_args
+    from .download_cache import get_file
 
 
 # --- functions ---

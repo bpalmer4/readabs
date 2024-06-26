@@ -7,7 +7,7 @@ print("=" * 80)
 
 import sys
 
-sys.path.append("../src")
+sys.path.append("../src/readabs")
 
 import readabs as ra
 

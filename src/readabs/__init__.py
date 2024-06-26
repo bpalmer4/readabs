@@ -1,4 +1,4 @@
 from . import readabs
 from .readabs import *
 
-name = "readabs"
+__version__ = "0.0.2"
