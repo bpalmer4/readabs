@@ -1,8 +1,8 @@
 [project]
 name = "readabs"
-dynamic = ["version", "readme"]
+dynamic = ["version",]
 authors = [
-  {name="Bryan Palmer", email = "palmer.bryan@gmail.com"},
+  {name = "Bryan Palmer", email = "palmer.bryan@gmail.com"},
 ]
 maintainers = [
   {name = "Bryan Palmer", email = "palmer.bryan@gmail.com"},
@@ -24,7 +24,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.dynamic]
 version = {attr = "readabs.__init__.__version__"}
-readme = {file = "README.md"}
 
 [tool.setuptools.packages.find]
 where = ["src"]  # list of folders that contain the packages (["."] by default)
