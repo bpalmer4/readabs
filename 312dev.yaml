@@ -1,0 +1,57 @@
+# micromamba env create -f 312dev.yaml
+name: 312dev
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  # python version 3.12
+  - python >=3.12, <3.13
+  # conda/pip - build - dist
+  - conda-build
+  - grayskull
+  - wheel
+  - setuptools
+  - pip
+  - build
+  - twine
+  # Jupyter notebooks
+  - jupyter 
+  - jupyterlab 
+  - nodejs 
+  - watermark
+  - jupyterlab-spellchecker 
+  - jupyterlab_code_formatter
+  # data science
+  - pandas
+  - numpy
+  - matplotlib
+  - seaborn
+  - statsmodels 
+  - scipy 
+  - tabulate
+  # Microsoft Excel 
+  - openpyxl
+  - xlrd
+  # web stuff
+  - lxml 
+  - bs4
+  - requests_cache
+  # python linters and formatters
+  - pylint 
+  - flake8 
+  - black 
+  - nbqa 
+  - ruff 
+  - isort
+  - mypy
+  - pandas-stubs
+  - types-Pillow
+  - types-Pygments 
+  - types-colorama 
+  - types-decorator 
+  - types-jsonschema 
+  - types-six 
+  - types-ujson
+  - types-beautifulsoup4
+  - types-requests
+
