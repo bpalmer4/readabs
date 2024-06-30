@@ -1,4 +1,6 @@
-"""To do"""
+"""For a specified Catalogue number, download from the ABS 
+website the links for the zip files and the Microsoft Excel 
+files that contain the data tables."""
 
 import re
 from typing import Any

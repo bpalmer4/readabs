@@ -155,35 +155,38 @@ def get_file(
         raise CacheError(f"Cache path is not a directory: {cache_dir.name}")
 
     # get URL modification time in UTC
-    response = requests.head(url, allow_redirects=True, timeout=20)
-    if not check_for_bad_response(url, response, **kwargs):
-        source_time = response.headers.get("Last-Modified", None)
-    else:
-        source_time = None
-    source_mtime = (
-        None if source_time is None else pd.to_datetime(source_time, utc=True)
-    )
-
-    # get cache modification time in UTC
-    target_mtime: datetime | None = None
-    file_path = get_fpath()
-    if file_path.exists() and file_path.is_file():
-        target_mtime = pd.to_datetime(
-            datetime.fromtimestamp(file_path.stat().st_mtime, tz=timezone.utc), utc=True
+    file_path = get_fpath()  # the cache file path
+    if not kwargs.get("cache_only", False):
+        # download from url if it is fresher than the cache version
+        response = requests.head(url, allow_redirects=True, timeout=20)
+        if not check_for_bad_response(url, response, **kwargs):
+            source_time = response.headers.get("Last-Modified", None)
+        else:
+            source_time = None
+        source_mtime = (
+            None if source_time is None else pd.to_datetime(source_time, utc=True)
         )
 
-    # get and save URL source data
-    if target_mtime is None or (  # cache is empty, or
-        source_mtime is not None
-        and source_mtime > target_mtime  # URL is fresher than cache
-    ):
-        url_bytes = request_get(url, **kwargs)  # raises exception if it fails
-        save_to_cache(file_path, url_bytes, **kwargs)
-        # - change file mod time to reflect mtime at URL
-        if source_mtime is not None and len(url_bytes) > 0:
-            unixtime = source_mtime.value / 1_000_000_000  # convert to seconds
-            utime(file_path, (unixtime, unixtime))
-        return url_bytes
+        # get cache modification time in UTC
+        target_mtime: datetime | None = None
+        if file_path.exists() and file_path.is_file():
+            target_mtime = pd.to_datetime(
+                datetime.fromtimestamp(file_path.stat().st_mtime, tz=timezone.utc),
+                utc=True,
+            )
+
+        # get and save URL source data
+        if target_mtime is None or (  # cache is empty, or
+            source_mtime is not None
+            and source_mtime > target_mtime  # URL is fresher than cache
+        ):
+            url_bytes = request_get(url, **kwargs)  # raises exception if it fails
+            save_to_cache(file_path, url_bytes, **kwargs)
+            # - change file mod time to reflect mtime at URL
+            if source_mtime is not None and len(url_bytes) > 0:
+                unixtime = source_mtime.value / 1_000_000_000  # convert to seconds
+                utime(file_path, (unixtime, unixtime))
+            return url_bytes
 
     # return the data that has been cached previously
     return retrieve_from_cache(file_path, **kwargs)

@@ -16,10 +16,10 @@ DataT = TypeVar("DataT", Series, DataFrame)
 
 
 # --- functions
-def percent_change(data: DataT, m_periods: int) -> DataT:
+def percent_change(data: DataT, n_periods: int) -> DataT:
     """Calculate an percentage change in a series over n_periods."""
 
-    return (data / data.shift(m_periods) - 1) * 100
+    return (data / data.shift(n_periods) - 1) * 100
 
 
 def annualise_rates(data: DataT, periods_per_year: int | float = 12) -> DataT:

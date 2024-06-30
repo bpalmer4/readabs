@@ -15,6 +15,7 @@ DEFAULTS: dict[str, Any] = {
     "single_zip_only": "",
     "single_excel_only": "",
     "history": "",
+    "cache_only": False,
 }
 
 

@@ -11,11 +11,13 @@ using pandas DataFrames.
 ## Usage:
 
 
-Standand import arrangements 
+Standand import arrangements. Metacol is a Namedtuple that allows just a couple of
+keystrokes to access the column names in the meta data (did='Data Item Description', stype='Series Type', id='Series ID', start='Series Start', end='Series End', num='No. Obs.', unit='Unit', dtype='Data Type', freq='Freq.', cmonth='Collection Month', table='Table', tdesc='Table Description', cat='Catalogue number').  
 ```python
 import readabs as ra
-from readabs import metacol  # short column names for meta data DataFrames
+from readabs import metacol as mc  # short column names for meta data DataFrames
 ```
+
 
 
 Print a list of available catalogue identifiers from the ABS. You may need
@@ -47,8 +49,35 @@ Get two DataFrames in a tuple, the first containing the actual data, and the
 second containing the meta data for one or more specified ABS series identifiers.
 ```python
 data, meta = ra.read_abs_series(cat="id", series="id1")
-data, meta = ra.read_abs_series(cat="id", series=("id1", "id2, ...))
+data, meta = ra.read_abs_series(cat="id", series=("id1", "id2", ...))
 ```
+
+Search the metadata for one or more matching data items. Note:
+- The search terms are strings placed in a dictionary with the form 
+  `{"search phrase": "meta data column name", ...}`. 
+- Additional optional arguments are:
+     - `exact_match` - bool - whether to match using == (exact) or .str.contains() (inexact)
+       [But note that the table name is always matched exactly].
+     - `regex` - bool - for .str.contains() - whether to use regular expressions.
+     - `validate_unique` - bool - raise a ValueError if the search result is not a single 
+       unique match.
+     - `verbose` - bool - print additional information while searching; which can
+       be useful when diagnosing problems with search terms.
+- Returns a pandas DataFrame (subseted from meta), Note: The index for the returned 
+  meta data will be ABS series_ids. Duplicate indexes will be removed from the meta 
+  data (ie. where the ABS has a series in more than one table, this function will only 
+  report the first match.)
+
+```python
+found_meta = ra.search_meta(meta, search_terms, **kwargs)
+
+```
+
+The find_id function uses the search_mete function to return a tuple of three strings: the table name, the series identifier, and the units of measurement. The keyword arguments are the same for search_meta.
+```python
+table, series_id, units = find_id(meta, search_terms, **kwargs)
+```
+
 
 ### Additional utility functions
 While not necessary for working with ABS data, the package includes some useful

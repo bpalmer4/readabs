@@ -1,4 +1,4 @@
-"""Generate the catalogue_map.py file."""
+"""Generate the abs_catalogue_map.py file."""
 
 # --- imports
 from io import StringIO
