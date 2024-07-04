@@ -1,5 +1,5 @@
 from . import readabs
 from .readabs import *
 
-__version__ = "0.0.5"
+__version__ = "0.0.6a1"
 

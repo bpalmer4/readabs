@@ -2,7 +2,12 @@
 
 readabs is an open-source python package to download and work with 
 timeseries data from the Australian Bureau of Statistics (ABS),
-using pandas DataFrames.
+using pandas DataFrames. 
+
+readabs automates the downloading of zip files and excel
+excel files and the capture of that data using pandas. It does not
+use the ABS APIs (see: 
+[here](https://www.abs.gov.au/about/data-services/application-programming-interfaces-apis)).
 
 
 ---
@@ -15,7 +20,7 @@ Standand import arrangements. Metacol is a Namedtuple that allows just a couple 
 keystrokes to access the column names in the meta data (did='Data Item Description', stype='Series Type', id='Series ID', start='Series Start', end='Series End', num='No. Obs.', unit='Unit', dtype='Data Type', freq='Freq.', cmonth='Collection Month', table='Table', tdesc='Table Description', cat='Catalogue number').  
 ```python
 import readabs as ra
-from readabs import metacol as mc  # short column names for meta data DataFrames
+from readabs import metacol as mc
 ```
 
 
@@ -89,7 +94,7 @@ change_data = percentage_change(data, n_periods)
 ```
 
 Annualise monthly or quarterly percentage rates.
-```python
+```python0
 annualised = annualise_percentages(data, periods_per_year)
 ```
 
@@ -114,6 +119,13 @@ quarterly_data = monthly_to_qtly(
     f, # the function to apply ("sum" or "mean"), the default is "mean"
 )
 ```
+
+Recalibrate a DataFrame or a Series so that its values are within the 
+range -1000 to +1000. Adjust the units to match the recalibrated series.
+```python
+series, units = ra.recalibrate(series, units)
+```
+
 
 ---
 

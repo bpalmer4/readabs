@@ -31,3 +31,7 @@ where = ["src"]  # list of folders that contain the packages (["."] by default)
 include = ["readabs"]  # package names should match these glob patterns (["*"] by default)
 exclude = ["test", "tests", "test_*"]
 namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
+
+[tool.setuptools.package-data]
+"pkgname" = ["py.typed"]
+
