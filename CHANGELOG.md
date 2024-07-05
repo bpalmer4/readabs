@@ -6,6 +6,7 @@ Version 0.0.6 - released x (Canberra, Australia)
 
 - Minor changes
    * Updated the README.md file.
+   # Minor change to the unit recalibrate() utility
    * Updated version number in '__init__.py'
 ---
 

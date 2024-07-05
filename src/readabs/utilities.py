@@ -178,14 +178,18 @@ def recalibrate(
     """Recalibrate a Series/DataFrame so the data in in the range -1000 to 1000."""
 
     # prepare the units for recalibration
-    units = (
-        units.strip()
-        .replace("000 Hours", "Thousand Hours")
-        .replace("$'000,000", "$ Million")
-        .replace("$'000", " $ Thousand")
-        .replace("000,000", "Millions")
-        .replace("000", "Thousands")
-    )
+    substitutions = [
+    	("000 Hours", "Thousand Hours"),
+    	("$'000,000", "$ Million"),
+    	("$'000", " $ Thousand"),
+    	("'000,000", "Millions"),
+    	("'000", "Thousands"),
+    	("000,000", "Millions"),
+    	("000", "Thousands"),
+    ]
+    units = units.strip()
+    for pattern, replacement in substitutions:
+    	units = units.replace(pattern, replacement)
 
     # do the recalibration
     flat_data = data.to_numpy().flatten()
