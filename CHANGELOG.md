@@ -1,11 +1,11 @@
-Version 0.0.6 - released x (Canberra, Australia)
+Version 0.0.6 - released 07-JUL-2024 (Canberra, Australia)
 
 - Major changes
    * Changes to allow for typing information 
 
 - Minor changes
    * Updated the README.md file.
-   # Minor change to the unit recalibrate() utility
+   * Minor change to the unit recalibrate() utility
    * Updated version number in '__init__.py'
 ---
 
