@@ -1,3 +1,9 @@
+Version 0.0.7 - released 8-JUL-2024 (Canberra, Australia)
+
+- Minor changes
+   * fixed a bug in monthly_to_qtly() in 'src/readabs/utilities.py'
+---
+
 Version 0.0.6 - released 07-JUL-2024 (Canberra, Australia)
 
 - Major changes

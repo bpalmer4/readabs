@@ -96,7 +96,7 @@ def monthly_to_qtly(data: DataT, q_ending="DEC", f: str = "mean") -> DataT:
     return (
         data.groupby(PeriodIndex(data.index, freq=f"Q-{q_ending}"))
         .agg([f, "count"])
-        .apply(lambda x: x["mean"] if x["count"] == 3 else nan, axis=1)
+        .apply(lambda x: x[f] if x["count"] == 3 else nan, axis=1)
         .dropna()
     )
 
