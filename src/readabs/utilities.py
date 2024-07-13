@@ -179,17 +179,17 @@ def recalibrate(
 
     # prepare the units for recalibration
     substitutions = [
-    	("000 Hours", "Thousand Hours"),
-    	("$'000,000", "$ Million"),
-    	("$'000", " $ Thousand"),
-    	("'000,000", "Millions"),
-    	("'000", "Thousands"),
-    	("000,000", "Millions"),
-    	("000", "Thousands"),
+        ("000 Hours", "Thousand Hours"),
+        ("$'000,000", "$ Million"),
+        ("$'000", " $ Thousand"),
+        ("'000,000", "Millions"),
+        ("'000", "Thousands"),
+        ("000,000", "Millions"),
+        ("000", "Thousands"),
     ]
     units = units.strip()
     for pattern, replacement in substitutions:
-    	units = units.replace(pattern, replacement)
+        units = units.replace(pattern, replacement)
 
     # do the recalibration
     flat_data = data.to_numpy().flatten()

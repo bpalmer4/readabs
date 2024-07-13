@@ -4,7 +4,12 @@
 
 cd ~/readabs
 
-rm dist/*
+if [ ! -d ./dist ]; then
+    mkdir dist
+fi
+if [ -n "$(ls -A ./dist 2>/dev/null)" ]; then
+  rm ./dist/*
+fi
 
 pip uninstall readabs
 

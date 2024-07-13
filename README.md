@@ -57,6 +57,14 @@ data, meta = ra.read_abs_series(cat="id", series="id1")
 data, meta = ra.read_abs_series(cat="id", series=("id1", "id2", ...))
 ```
 
+
+Grab ABS DataFrames for non-timeseries data. This does not do anything other than get 
+the data as a disctionary of DataFrames.
+```python
+abs_dict = ra.grab_abs_url(url="url")
+```
+
+
 Search the metadata for one or more matching data items. Note:
 - The search terms are strings placed in a dictionary with the form 
   `{"search phrase": "meta data column name", ...}`. 
@@ -141,8 +149,8 @@ series, units = ra.recalibrate(series, units)
    stored in a local cache. By default, the cache directory is "./.readabs_cache/". 
    You can change the default directory name by setting the environemnt variable 
    "READABS_CACHE_DIR" with the name of the preferred directory.
- * the "read" functions have a number of standard keyword arguments (with default 
-   settings as follows):
+ * the "read" anf "grab" functions have a number of standard keyword arguments  
+   (with default settings as follows):
    - `history=""` - provide a month-year string to extract historical ABS data.  
      For example, you can set history="dec-2023" to the get the ABS data for a 
      catalogue identifier that was originally published in respect of Q4 of 2023. 

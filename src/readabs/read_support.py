@@ -5,6 +5,8 @@ those arguments that are not provided."""
 
 from typing import Any
 
+HYPHEN = "---"
+
 DEFAULTS: dict[str, Any] = {
     # argument_name: default_value,
     "verbose": False,
@@ -23,10 +25,27 @@ def check_kwargs(kwargs: dict[str, Any], name: str) -> None:
     """Warn if there are any invalid keyword args."""
     for k in kwargs:
         if k not in DEFAULTS:
-            print(f"{name}: Unexpected keyword argument {k}")
+            print(f"{name}(): Unexpected keyword argument {k}")
 
 
-def get_args(kwargs: dict[str, Any]) -> dict[str, Any]:
+def get_args(kwargs: dict[str, Any], name: str) -> dict[str, Any]:
     """Return a dictionary with only the valid kwargs
-    (and their default values if a valid key is missing from kwargs)."""
-    return {k: kwargs.get(k, v) for k, v in DEFAULTS.items()}
+    (and their default values if a valid key is missing from kwargs).
+    Specifically check that one of the following flags is True:
+    [get_zip, get_excel, get_excel_if_no_zip, get_zip, single_zip_only,
+    single_excel_only]."""
+
+    args = {k: kwargs.get(k, v) for k, v in DEFAULTS.items()}
+    if (
+        not args["get_zip"]
+        and not args["get_excel"]
+        and not args["get_excel_if_no_zip"]
+        and not args["single_zip_only"]
+        and not args["single_excel_only"]
+    ):
+        raise ValueError(
+            f"{name}(): At least one of get_zip or get_excel or get_excel_if_no_zip "
+            + "or single_zip_only or single_excel_only must be True."
+        )
+
+    return args

@@ -47,7 +47,7 @@ def read_abs_series(
 
     # check for unexpected keyword arguments/get defaults
     check_kwargs(kwargs, "read_abs_series")
-    args = get_args(kwargs)
+    args = get_args(kwargs, "read_abs_series")
 
     # read the ABS category data
     cat_data, cat_meta = read_abs_cat(cat, **args)

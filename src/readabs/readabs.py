@@ -12,6 +12,7 @@ if __package__ is None or __package__ == "":
     from get_data_links import get_data_links
     from read_abs_cat import read_abs_cat
     from read_abs_series import read_abs_series
+    from grab_abs_url import grab_abs_url
     from abs_meta_data_support import metacol
     from read_support import check_kwargs, get_args
     from utilities import (
@@ -29,6 +30,7 @@ else:
     from .get_data_links import get_data_links
     from .read_abs_cat import read_abs_cat
     from .read_abs_series import read_abs_series
+    from .grab_abs_url import grab_abs_url
     from .abs_meta_data_support import metacol
     from .read_support import check_kwargs, get_args
     from .utilities import (

@@ -1,3 +1,12 @@
+Version 0.0.8 - released 13-JUL-2024 (Canberra, Australia)
+
+- Major changes
+   * Rewrote 'read_abs_cat.py' and created 'grab_abs_url.py' to
+     separate the ABS table capture code from the timeseries 
+     compilation code. Also, it is now possible to capture non-
+     timeseries data from the ABS. 
+---
+
 Version 0.0.7 - released 8-JUL-2024 (Canberra, Australia)
 
 - Minor changes
