@@ -1,3 +1,11 @@
+Version 0.0.9 - released 14-JUL_2024 (Canberra, Australia)
+
+- Minor changes
+   * Largely bug fixes and code tidy-ups. Some files have been
+     renamed.
+
+---
+
 Version 0.0.8 - released 13-JUL-2024 (Canberra, Australia)
 
 - Major changes

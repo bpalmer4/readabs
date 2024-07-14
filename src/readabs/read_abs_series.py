@@ -10,15 +10,15 @@ from typing import Any, Sequence, cast
 from pandas import DataFrame, PeriodIndex, concat
 
 # local imports
-if __package__ is None or __package__ == "":
-    from read_abs_cat import read_abs_cat
-    from read_support import check_kwargs, get_args
-    from abs_meta_data_support import metacol
-else:
+# multiple imports to allow for direct testing before packaging
+try:
     from .read_abs_cat import read_abs_cat
     from .read_support import check_kwargs, get_args
     from .abs_meta_data_support import metacol
-
+except ImportError:
+    from read_abs_cat import read_abs_cat
+    from read_support import check_kwargs, get_args
+    from abs_meta_data_support import metacol
 
 # --- functions
 def read_abs_series(
@@ -94,3 +94,12 @@ def read_abs_series(
         return_meta = concat([return_meta, cat_meta.loc[identifier]], axis=1)
 
     return return_data, return_meta.T
+
+
+if __name__ == "__main__":
+    # simple test
+    # Trimmed Mean - Through the year CPI growth
+    data, meta = read_abs_series("6401.0", "A3604511X", single_excel_only="640106")
+    print(data.tail())
+    print(meta.T)
+    print("Done")   

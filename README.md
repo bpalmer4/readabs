@@ -102,7 +102,7 @@ change_data = percentage_change(data, n_periods)
 ```
 
 Annualise monthly or quarterly percentage rates.
-```python0
+```python
 annualised = annualise_percentages(data, periods_per_year)
 ```
 
@@ -139,17 +139,18 @@ series, units = ra.recalibrate(series, units)
 
 ## Notes:
 
- * This package does not manipulate the ABS data. The data is returned as it
+ * This package does not manipulate the ABS data. The data is returned, much as it
    was downloaded. This includes any NA-only (ie. empty) columns where they occur.
- * This package only downloads timeseries data tables. Other data tables (for example,
-   pivot tables) are ignored.
+ * This package typically only downloads timeseries data tables. Other data tables
+   (for example, pivot tables) are ignored. This default behaviour can be overridden
+   with the keep_non_ts=True flag.
  * The index for all of the downloaded tables should be a pandas PeriodIndex, with an
    appropriately selected frequency. 
  * In the process of data retrieval, ABS zip and excel files are downloaded and
    stored in a local cache. By default, the cache directory is "./.readabs_cache/". 
    You can change the default directory name by setting the environemnt variable 
    "READABS_CACHE_DIR" with the name of the preferred directory.
- * the "read" anf "grab" functions have a number of standard keyword arguments  
+ * the "read" and "grab" functions have a number of standard keyword arguments  
    (with default settings as follows):
    - `history=""` - provide a month-year string to extract historical ABS data.  
      For example, you can set history="dec-2023" to the get the ABS data for a 

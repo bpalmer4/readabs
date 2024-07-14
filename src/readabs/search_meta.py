@@ -6,12 +6,8 @@ to identify the row or rows that match all of the search terms."""
 from typing import Any
 from pandas import DataFrame
 
-# local imports - ugly, need to find out how to fix thiscd
-if __package__ is None or __package__ == "":
-    from abs_meta_data_support import metacol
-else:
-    from .abs_meta_data_support import metacol
-
+# local imports
+from .abs_meta_data_support import metacol
 
 def search_meta(
     meta: DataFrame,  # sourced from read_abs_series() or read_abs_cat()

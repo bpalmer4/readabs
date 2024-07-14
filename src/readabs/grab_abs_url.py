@@ -1,10 +1,10 @@
 """grab_abs_url.py
 
-The ABS produces a lot of products that are not in a 
-standard time-series format. This module is designed
-to download all of the data tables on a given ABS
-webpage, as is, without looking at the format of those 
-tables, nor extracting any meta-data. """
+This module seeks to convert each sheet of each Excel file found on an
+ABS webpage into a DataFrame. The Excel files are found by following
+the links on the ABS webpage. The files will either be a stand-alone, 
+file or within a zip file. The Excel files are converted into
+DataFrames, with each sheet in each Excel file becoming a DataFrame."""
 
 # --- imports ---
 # standard library imports
@@ -17,28 +17,28 @@ from typing import Any
 import pandas as pd
 from pandas import DataFrame
 
-# local imports - ugly, need to find out how to fix this
-# print(f"in read_abs_cat.py: __main__={__name__}, __package__={__package__}")
-if __package__ is None or __package__ == "":
-    from get_data_links import get_data_links, get_table_name
-    from read_support import check_kwargs, get_args, HYPHEN
-    from download_cache import get_file
-    from abs_catalogue_map import catalogue_map
-else:
-    from .get_data_links import get_data_links, get_table_name
+# local imports
+# multiple imports to allow for direct testing before packaging
+try:
+    from .get_abs_links import get_abs_links, get_table_name
     from .read_support import check_kwargs, get_args, HYPHEN
     from .download_cache import get_file
     from .abs_catalogue_map import catalogue_map
+except ImportError:
+    from get_abs_links import get_abs_links, get_table_name
+    from read_support import check_kwargs, get_args, HYPHEN
+    from download_cache import get_file
+    from abs_catalogue_map import catalogue_map
 
 
 # --- public - primary entry point for this module
 @cache  # minimise slowness with repeat business
 def grab_abs_url(
-    url: str = None,  # ABS catalogue number
-    **kwargs: Any,  # keyword arguments
+    url: str = None,
+    **kwargs: Any,
 ) -> dict[str, DataFrame]:
-    """Identify and load Excel/zip data found on a webpage given by an
-    ABS landing page URL for an ABS Catalogue item. For example, the URL
+    """Identify and load Excel/zip data found on an ABS webpage given by an
+    URL or an ABS Catalogue item. For example, the URL
     for the ABS weekly jobs payroll data is:
     https://www.abs.gov.au/statistics/labour/jobs/weekly-payroll-jobs/latest-release
 
@@ -55,7 +55,7 @@ def grab_abs_url(
     will include data dataframes, as well as any explanatory
     material that is found in an Excel file, that has been stuffed
     (perhaps haphazardly) into a DataFrame. Note: dates and numbers
-    may be encoded as strings."""
+    may be encoded as strings/objects."""
 
     # check/get the keyword arguments
     url = _get_url(url, kwargs)  # removes "cat" from kwargs
@@ -63,7 +63,7 @@ def grab_abs_url(
     args = get_args(kwargs, "grab_abs_url")
 
     # get the URL links to the relevant ABS data files on that webpage
-    links = get_data_links(url, **args)
+    links = get_abs_links(url, **args)
     if not links:
         print(f"No data files found at URL: {url}")
         return DataFrame()  # return an empty DataFrame

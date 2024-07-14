@@ -29,15 +29,15 @@ import pandas as pd
 from pandas import DataFrame
 
 # local imports - ugly, need to find out how to fix this
-# print(f"in read_abs_cat.py: __main__={__name__}, __package__={__package__}")
-if __package__ is None or __package__ == "":
-    from abs_meta_data_support import metacol
-    from read_support import HYPHEN
-    from grab_abs_url import grab_abs_url
-else:
+# multiple imports to allow for direct testing before packaging
+try:
     from .abs_meta_data_support import metacol
     from .read_support import HYPHEN
     from .grab_abs_url import grab_abs_url
+except ImportError:
+    from abs_meta_data_support import metacol
+    from read_support import HYPHEN
+    from grab_abs_url import grab_abs_url
 
 
 # --- functions ---
@@ -65,9 +65,6 @@ def read_abs_cat(
         A dictionary of DataFrames and a DataFrame of the meta data.
         The dictionary is indexed by table names, which can be found
         in the meta data DataFrame."""
-
-    # --- set up ---
-    keep_non_ts: bool = kwargs.pop("keep_non_ts", False)
 
     # --- get the time series data ---
     raw_abs_dict = grab_abs_url(cat=cat, **kwargs)
@@ -116,7 +113,7 @@ def _copy_raw_sheets(
 
     if not keep_non_ts:
         return to_dict
-
+    
     for sheet in long_sheets:
         if sheet in from_dict:
             to_dict[sheet] = from_dict[sheet]
@@ -207,7 +204,7 @@ def _capture_data(
             print(f"You may need to check index column for {sheet_name}")
         index_column = index_column.loc[~long_row_names]
         sheet_data = sheet_data.loc[~long_row_names]
-        sheet_data.index = pd.to_datetime(index_column) #
+        sheet_data.index = pd.to_datetime(index_column)  #
         # further clearning
         sheet_data = sheet_data.dropna(how="all", axis=0)  # remobe na rows
 
@@ -218,8 +215,7 @@ def _capture_data(
             abs_meta[abs_meta[metacol.table] == short_name]
             .at[series_id, metacol.freq]
             .upper()
-            .strip()
-            [0]
+            .strip()[0]
         )
         freq = "Y" if freq == "A" else freq  # pandas prefers yearly
         freq = "Q" if freq == "B" else freq  # treat Biannual as quarterly
@@ -353,6 +349,8 @@ def _group_sheets(
 
 # --- initial testing ---
 if __name__ == "__main__":
+
+    # test 1
     d, m = read_abs_cat("6202.0", single_excel_only="6202001")
 
     print(m.columns)
@@ -364,3 +362,9 @@ if __name__ == "__main__":
     print(d["6202001"].dtypes)
     print(d["6202001"].head())
     print(d["6202001"].tail())
+    print("-" * 40)
+
+
+    # test 2
+    d, m = read_abs_cat("3101.0", keep_non_ts=True)
+    print(d.keys())

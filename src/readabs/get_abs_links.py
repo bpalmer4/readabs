@@ -1,16 +1,18 @@
-"""For a specified Catalogue number, download from the ABS 
-website the links for the zip files and the Microsoft Excel 
-files that contain the data tables."""
+"""get_abs_links.py:
+
+Module to access and scan an ABS webpage for links to Excel 
+and zip files."""
 
 import re
 from typing import Any
 from bs4 import BeautifulSoup
 
-# local imports - ugly, need to find out how to fix thiscd
-if __package__ is None or __package__ == "":
-    from download_cache import get_file, HttpError, CacheError
-else:
+# local imports
+# multiple imports to allow for direct testing before packaging
+try:
     from .download_cache import get_file, HttpError, CacheError
+except ImportError:
+    from download_cache import get_file, HttpError, CacheError
 
 
 # private
@@ -25,7 +27,7 @@ def _make_absolute_url(url: str, prefix: str = "https://www.abs.gov.au") -> str:
     return f"{prefix}{url}"
 
 
-# public (also used by read_abs_cat.py)
+# public (also used by grab_abs_url.py)
 def get_table_name(url: str) -> str:
     """Get the table name from the ABS URL."""
 
@@ -56,9 +58,9 @@ def historicise_links(
 
 
 # public
-def get_data_links(
-    url: str,  # the URL of the ABS page to scan
-    inspect_file_name="",  # for debugging - save the page to disk
+def get_abs_links(
+    url: str = "",
+    inspect_file_name="",
     **kwargs: Any,
 ) -> dict[str, list[str]]:
     """Scan the webpage at the ABS URL for links to ZIP files and for
@@ -68,8 +70,14 @@ def get_data_links(
 
     # get relevant web-page from ABS website
     verbose = kwargs.get("verbose", False)
+
+    if not url:
+        if verbose:
+            print("No URL provided to get_abs_links()")
+        return {}
+
     if verbose:
-        print("Getting data links from the ABS web page.")
+        print(f"Getting data links from the ABS web page: {url}")
     try:
         page = get_file(url, **kwargs)
     except (HttpError, CacheError) as e:
