@@ -23,12 +23,12 @@ try:
     from .get_abs_links import get_abs_links, get_table_name
     from .read_support import check_kwargs, get_args, HYPHEN
     from .download_cache import get_file
-    from .abs_catalogue_map import catalogue_map
+    from .abs_catalogue_map import abs_catalogue
 except ImportError:
     from get_abs_links import get_abs_links, get_table_name
     from read_support import check_kwargs, get_args, HYPHEN
     from download_cache import get_file
-    from abs_catalogue_map import catalogue_map
+    from abs_catalogue_map import abs_catalogue
 
 
 # --- public - primary entry point for this module
@@ -118,7 +118,7 @@ def _get_url(url: str, kwargs: dict) -> str:
     Either the 'url' or 'cat' argument must be provided."""
 
     cat = kwargs.pop("cat", None)
-    cm = catalogue_map()
+    cm = abs_catalogue()
     if cat is not None and cat in cm.index:
         url = cm.loc[cat, "URL"]
     if url is None and cat is None:

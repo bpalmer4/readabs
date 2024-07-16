@@ -180,7 +180,11 @@ def get_file(
             source_mtime is not None
             and source_mtime > target_mtime  # URL is fresher than cache
         ):
+            if kwargs.get("verbose", False):
+                print(f"Retrieving from URL: {url}")
             url_bytes = request_get(url, **kwargs)  # raises exception if it fails
+            if kwargs.get("verbose", False):
+                print(f"Saving to cache: {file_path}")
             save_to_cache(file_path, url_bytes, **kwargs)
             # - change file mod time to reflect mtime at URL
             if source_mtime is not None and len(url_bytes) > 0:

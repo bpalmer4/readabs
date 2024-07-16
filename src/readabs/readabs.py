@@ -2,12 +2,13 @@
 
 # --- imports
 # local imports
-from .search_meta import search_meta, find_id
-from .abs_catalogue_map import catalogue_map
+from .search_abs_meta import search_abs_meta, find_abs_id
+from .abs_catalogue_map import abs_catalogue
 from .read_abs_cat import read_abs_cat
 from .read_abs_series import read_abs_series
 from .grab_abs_url import grab_abs_url
 from .abs_meta_data_support import metacol
+from .get_rba_links import print_rba_catalogue, rba_catalogue
 from .utilities import (
     percent_change,
     annualise_rates,
@@ -22,7 +23,7 @@ from .utilities import (
 # --- functions
 def print_abs_catalogue() -> None:
     """Print the ABS catalogue."""
-    catalogue = catalogue_map()
+    catalogue = abs_catalogue()
     print(catalogue.loc[:, catalogue.columns != "URL"].to_markdown())
 
 
@@ -39,7 +40,10 @@ _ = (
     monthly_to_qtly,
     recalibrate,
     recalibrate_value,
-    search_meta,
-    find_id,
+    search_abs_meta,
+    find_abs_id,
     grab_abs_url,
+    # -- rba -- related 
+    print_rba_catalogue, 
+    rba_catalogue,
 )

@@ -3,9 +3,7 @@
 from io import StringIO
 
 from pandas import DataFrame, read_csv
-
-
-def catalogue_map() -> DataFrame:
+def abs_catalogue() -> DataFrame:
     """Return the catalogue map."""
 
     csv = """Catalogue ID,Theme,Parent Topic,Topic,URL,Status

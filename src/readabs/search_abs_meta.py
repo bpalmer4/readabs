@@ -1,4 +1,4 @@
-"""search_meta.py
+"""search_abs_meta.py
 
 Search a DataFrame of ABS meta data, using a dictionary of search terms,
 to identify the row or rows that match all of the search terms."""
@@ -9,7 +9,7 @@ from pandas import DataFrame
 # local imports
 from .abs_meta_data_support import metacol
 
-def search_meta(
+def search_abs_meta(
     meta: DataFrame,  # sourced from read_abs_series() or read_abs_cat()
     search_terms: dict[str, str],  # {search_term: meta_data_column_name, ...}
     exact_match: bool = False,
@@ -44,9 +44,9 @@ def search_meta(
     # establish the starting point
     meta_select = meta.copy()  # preserve the original meta data
     if verbose:
-        print(f"In search_meta() {exact_match=} {regex=} {verbose=}")
+        print(f"In search_abs_meta() {exact_match=} {regex=} {verbose=}")
         print(
-            f"In search_meta() starting with {len(meta_select)} rows in the meta_data."
+            f"In search_abs_meta() starting with {len(meta_select)} rows in the meta_data."
         )
 
     # iteratively search
@@ -79,7 +79,7 @@ def search_meta(
     return meta_select
 
 
-def find_id(
+def find_abs_id(
     meta: DataFrame,
     search_terms: dict[str, str],
     **kwargs: Any,
@@ -88,10 +88,10 @@ def find_id(
     Return a tuple of the table, series_id and units.
     By default, raises a ValueError if the search terms do
     not result in one and only one series_id.
-    Arguments are the same as for search_meta()."""
+    Arguments are the same as for search_abs_meta()."""
 
     validate_unique = kwargs.pop("validate_unique", True)
-    found = search_meta(
+    found = search_abs_meta(
         meta, search_terms, validate_unique=validate_unique, **kwargs
     ).iloc[0]
     table, series_id, units = (

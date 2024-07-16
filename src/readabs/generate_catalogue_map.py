@@ -46,7 +46,7 @@ def produce_catalogue_map():
         file.write('"""Catalogue map for ABS data."""\n\n')
         file.write("from io import StringIO\n\n")
         file.write("from pandas import DataFrame, read_csv\n")
-        file.write("def catalogue_map() -> DataFrame:\n")
+        file.write("def abs_catalogue() -> DataFrame:\n")
         file.write('    """Return the catalogue map."""\n\n')
         file.write(f'    csv = """{directory.to_csv()}"""\n')
         file.write("    return read_csv(StringIO(csv), index_col=0)\n")

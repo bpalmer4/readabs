@@ -1,19 +1,14 @@
 # readabs
 
 readabs is an open-source python package to download and work with 
-timeseries data from the Australian Bureau of Statistics (ABS),
-using pandas DataFrames. 
-
-readabs automates the downloading of zip files and excel
-excel files and the capture of that data using pandas. It does not
-use the ABS APIs (see: 
-[here](https://www.abs.gov.au/about/data-services/application-programming-interfaces-apis)).
-
+timeseries data from the Australian Bureau of Statistics (ABS) and
+(soon) the Reserve Bank of Australia (RBA), using pandas DataFrames. 
 
 ---
 
 
 ## Usage:
+### Functions for working with ABS data
 
 
 Standand import arrangements. Metacol is a Namedtuple that allows just a couple of
@@ -34,7 +29,7 @@ ra.print_abs_catalogue()
 
 Get the ABS catalogue map as a pandas DataFrame.
 ```python
-cat_map = ra.catalogue_map()
+cat_map = ra.abs_catalogue()
 ```
 
 
@@ -82,13 +77,20 @@ Search the metadata for one or more matching data items. Note:
   report the first match.)
 
 ```python
-found_meta = ra.search_meta(meta, search_terms, **kwargs)
+found_meta = ra.search_abs_meta(meta, search_terms, **kwargs)
 
 ```
 
-The find_id function uses the search_mete function to return a tuple of three strings: the table name, the series identifier, and the units of measurement. The keyword arguments are the same for search_meta.
+The find_abs_id function uses the search_abs_meta function to return a tuple of three strings: the table name, the series identifier, and the units of measurement. The keyword arguments are the same for search_abs_meta.
 ```python
-table, series_id, units = find_id(meta, search_terms, **kwargs)
+table, series_id, units = find_abs_id(meta, search_terms, **kwargs)
+```
+
+### Functions for working with RBA data
+
+```python
+ra.print_rba_catalogue()
+cat_map = rba_catalogue()
 ```
 
 

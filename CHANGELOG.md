@@ -1,9 +1,23 @@
+Version 0.0.10 - released 16-JUL-2024 (Canberra, Australia)
+
+- Major changes
+   * Working towards functions that will also capture data from
+     the Reserve Bank of Australia. As a first step:
+     - Renamed a number of functions to make it clear they are 
+       working with ABS data (and not data generally).
+     - Added functions to print_rba_catalogue() and get the 
+       rba_catalogue()
+
+- Minor changes
+   * Some files have been renamed. 
+   * Updates to README.md
+---
+
 Version 0.0.9 - released 14-JUL_2024 (Canberra, Australia)
 
 - Minor changes
    * Largely bug fixes and code tidy-ups. Some files have been
      renamed.
-
 ---
 
 Version 0.0.8 - released 13-JUL-2024 (Canberra, Australia)
