@@ -1,4 +1,13 @@
-Version 0.0.11 released X (Canberra, Australia)
+Version 0.0.12 released 17-JUL-2024 (Canberra, Australia)
+
+- Major changes
+   * Completed initial work to read in data files from the 
+     Reserve Bank of Australia (RBA). This will need work 
+     over the next few days.
+---
+
+Version 0.0.11 released 17-JUL-2024 (Canberra, Australia)
+
 - Minor changes
    * Largely bug fixes and code tidy-ups.
    * Ignore excel files that cannot be parsed into a DataFrame

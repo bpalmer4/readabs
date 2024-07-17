@@ -88,17 +88,31 @@ def qtly_to_monthly(
     return data
 
 
-def monthly_to_qtly(data: DataT, q_ending="DEC", f: str = "mean") -> DataT:
-    """Convert monthly data to quarterly data by taking the mean of
-    the three months in each quarter. Ignore quarters with less than
-    three months data. Drop NA items. Change f to "sum" for a quarterly sum"""
-
+def monthly_to_qtly_series(data: Series, q_ending="DEC", f: str = "mean") -> Series:
+    """Convert monthly Series to a quarterly Series."""
+    
     return (
         data.groupby(PeriodIndex(data.index, freq=f"Q-{q_ending}"))
         .agg([f, "count"])
         .apply(lambda x: x[f] if x["count"] == 3 else nan, axis=1)
         .dropna()
     )
+
+
+def monthly_to_qtly(data: DataT, q_ending="DEC", f: str = "mean") -> DataT:
+    """Convert monthly data to quarterly data by taking the mean of
+    the three months in each quarter. Ignore quarters with less than
+    or more than three months data. Drop NA items. Change f to "sum" 
+    for a quarterly sum"""
+
+    if isinstance(data, Series):
+        return monthly_to_qtly_series(data, q_ending, f)
+    
+    # Do each column in the DataFrame: 
+    chamber = {}
+    for col in data.columns:
+        chamber[col] = monthly_to_qtly_series(data[col], q_ending, f)
+    return DataFrame(chamber)
 
 
 # --- recalibration

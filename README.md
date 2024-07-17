@@ -92,6 +92,8 @@ These features are still in development.
 ```python
 ra.print_rba_catalogue()
 cat_map = ra.rba_catalogue()
+data_df, meta_df = ra.read_rba_table(table="A2")
+ocr_series = ra.read_rba_ocr()
 ```
 
 

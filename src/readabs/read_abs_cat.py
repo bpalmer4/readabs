@@ -28,7 +28,7 @@ import calendar
 import pandas as pd
 from pandas import DataFrame
 
-# local imports - ugly, need to find out how to fix this
+# local imports
 # multiple imports to allow for direct testing before packaging
 try:
     from .abs_meta_data_support import metacol

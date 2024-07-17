@@ -73,6 +73,7 @@ def get_rba_links(**kwargs: Any) -> DataFrame:
     return rba_catalog
 
 
+@cache
 def rba_catalogue(cache_only=False, verbose=False) -> DataFrame:
     """Return a DataFrame of RBA data file links."""
 
