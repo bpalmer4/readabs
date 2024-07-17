@@ -1,3 +1,10 @@
+Version 0.0.11 released X (Canberra, Australia)
+- Minor changes
+   * Largely bug fixes and code tidy-ups.
+   * Ignore excel files that cannot be parsed into a DataFrame
+   * Only delete empty rows after tables have been combined
+---
+
 Version 0.0.10 - released 16-JUL-2024 (Canberra, Australia)
 
 - Major changes

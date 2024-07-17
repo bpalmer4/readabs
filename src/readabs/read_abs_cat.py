@@ -113,7 +113,7 @@ def _copy_raw_sheets(
 
     if not keep_non_ts:
         return to_dict
-    
+
     for sheet in long_sheets:
         if sheet in from_dict:
             to_dict[sheet] = from_dict[sheet]
@@ -190,6 +190,8 @@ def _capture_data(
     data_sheets = [x for x in long_sheets if x.split(HYPHEN, 1)[1].startswith("Data")]
 
     for sheet_name in data_sheets:
+        if verbose:
+            print(f"About to cature data from {sheet_name=}")
         # --- capture just the data, nothing else
         sheet_data = from_dict[sheet_name].copy()
         # get the columns
@@ -205,8 +207,6 @@ def _capture_data(
         index_column = index_column.loc[~long_row_names]
         sheet_data = sheet_data.loc[~long_row_names]
         sheet_data.index = pd.to_datetime(index_column)  #
-        # further clearning
-        sheet_data = sheet_data.dropna(how="all", axis=0)  # remobe na rows
 
         # get the correct period index
         short_name = sheet_name.split(HYPHEN, 1)[0]
@@ -243,6 +243,8 @@ def _capture_data(
             )
 
     # --- step 2 - final tidy-ups
+    # remove NA rows
+    merged_data = merged_data.dropna(how="all")
     # check for NA columns - rarely happens
     # Note: these empty columns are not removed,
     # but it is useful to know they are there
@@ -350,21 +352,8 @@ def _group_sheets(
 # --- initial testing ---
 if __name__ == "__main__":
 
-    # test 1
-    d, m = read_abs_cat("6202.0", single_excel_only="6202001")
-
-    print(m.columns)
-    print(m["Table Description"].unique())
-    print(m.tail())
-
-    print(d.keys())
-    print(d["6202001"].index.dtype)
-    print(d["6202001"].dtypes)
-    print(d["6202001"].head())
-    print(d["6202001"].tail())
-    print("-" * 40)
-
-
-    # test 2
-    d, m = read_abs_cat("3101.0", keep_non_ts=True)
-    print(d.keys())
+    # --- test the function ---
+    # this ABS Catalogue ID has a mix of time 
+    # series and non-time series data. Also,
+    # it has poorly structured Excel files.
+    d, m = read_abs_cat("8731.0", keep_non_ts=True)

@@ -43,7 +43,7 @@ _ = (
     search_abs_meta,
     find_abs_id,
     grab_abs_url,
-    # -- rba -- related 
-    print_rba_catalogue, 
+    # -- rba -- related
+    print_rba_catalogue,
     rba_catalogue,
 )

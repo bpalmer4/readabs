@@ -83,14 +83,15 @@ found_meta = ra.search_abs_meta(meta, search_terms, **kwargs)
 
 The find_abs_id function uses the search_abs_meta function to return a tuple of three strings: the table name, the series identifier, and the units of measurement. The keyword arguments are the same for search_abs_meta.
 ```python
-table, series_id, units = find_abs_id(meta, search_terms, **kwargs)
+table, series_id, units = ra,find_abs_id(meta, search_terms, **kwargs)
 ```
 
 ### Functions for working with RBA data
+These features are still in development.
 
 ```python
 ra.print_rba_catalogue()
-cat_map = rba_catalogue()
+cat_map = ra.rba_catalogue()
 ```
 
 

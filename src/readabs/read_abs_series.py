@@ -20,6 +20,7 @@ except ImportError:
     from read_support import check_kwargs, get_args
     from abs_meta_data_support import metacol
 
+
 # --- functions
 def read_abs_series(
     cat: str,
@@ -102,4 +103,4 @@ if __name__ == "__main__":
     data, meta = read_abs_series("6401.0", "A3604511X", single_excel_only="640106")
     print(data.tail())
     print(meta.T)
-    print("Done")   
+    print("Done")

@@ -9,6 +9,7 @@ from pandas import DataFrame
 # local imports
 from .abs_meta_data_support import metacol
 
+
 def search_abs_meta(
     meta: DataFrame,  # sourced from read_abs_series() or read_abs_cat()
     search_terms: dict[str, str],  # {search_term: meta_data_column_name, ...}

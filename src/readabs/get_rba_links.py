@@ -4,7 +4,7 @@
 import re
 from typing import Any
 from bs4 import BeautifulSoup
-from functools import cache 
+from functools import cache
 
 # analutic imports
 from pandas import DataFrame
@@ -16,20 +16,17 @@ try:
 except ImportError:
     from download_cache import get_file, HttpError, CacheError
 
+
 # --- public functions ---
 @cache
-def get_rba_links(
-    **kwargs: Any
-) -> DataFrame:
-    """Extract links to RBA data files in Excel format 
+def get_rba_links(**kwargs: Any) -> DataFrame:
+    """Extract links to RBA data files in Excel format
     from the RBA website."""
 
     verbose = kwargs.get("verbose", False)
     cache_only = kwargs.get("cache_only", False)
     print(f"{cache_only=} {verbose=}")
-    urls = (
-        "https://www.rba.gov.au/statistics/tables/",
-    )
+    urls = ("https://www.rba.gov.au/statistics/tables/",)
     link_dict = {}
     for url in urls:
         try:
@@ -59,7 +56,7 @@ def get_rba_links(
             tail = url.rsplit("/", 1)[-1].lower()
             if "." not in tail:
                 continue
-            if not tail.endswith('.xls') and not tail.endswith('.xlsx'):
+            if not tail.endswith(".xls") and not tail.endswith(".xlsx"):
                 continue
             text, url = link.text, _make_absolute_url(url.strip())
             text = text.replace("–", "-").strip()

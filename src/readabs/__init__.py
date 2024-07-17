@@ -1,8 +1,9 @@
 """Package to download timeseries data from 
-the Australian Bureau of Statistics (ABS)."""
+the Australian Bureau of Statistics (ABS) 
+(and elsewhere)."""
 
 from . import readabs
 from .readabs import *
 
-__version__ = "0.0.10"
-
+__version__ = "0.0.11"
+__author__ = "Bryan Palmer"

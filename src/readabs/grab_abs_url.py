@@ -174,12 +174,9 @@ def _add_excel_bytes(
         excel = pd.ExcelFile(BytesIO(raw_bytes))
     except Exception as e:
         message = f"With {name}: could not convert raw bytes to ExcelFile.\n{e}"
-        if ignore_errors:
-            print(message)
-            return abs_dict
-        raise RuntimeError(message) from e
-    excel = pd.ExcelFile(BytesIO(raw_bytes))
-
+        print(message)
+        return abs_dict
+    
     # iterate over the sheets in the Excel file
     for sheet_name in excel.sheet_names:
         # grab and go - no treatment of the data
