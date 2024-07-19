@@ -49,7 +49,7 @@ _ = (
     # -- rba -- related
     print_rba_catalogue,
     rba_catalogue,
-    read_rba_table, 
-    rba_metacol, 
-    read_rba_ocr
+    read_rba_table,
+    rba_metacol,
+    read_rba_ocr,
 )

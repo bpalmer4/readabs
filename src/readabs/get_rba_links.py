@@ -3,10 +3,10 @@
 # system imports
 import re
 from typing import Any
-from bs4 import BeautifulSoup
 from functools import cache
 
 # analutic imports
+from bs4 import BeautifulSoup
 from pandas import DataFrame
 
 # local imports
@@ -24,8 +24,6 @@ def get_rba_links(**kwargs: Any) -> DataFrame:
     from the RBA website."""
 
     verbose = kwargs.get("verbose", False)
-    cache_only = kwargs.get("cache_only", False)
-    print(f"{cache_only=} {verbose=}")
     urls = ("https://www.rba.gov.au/statistics/tables/",)
     link_dict = {}
     for url in urls:

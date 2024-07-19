@@ -161,7 +161,6 @@ def _add_excel_bytes(
     'abs_dict', using 'name---sheet_name' as a key.
     When done, return the dictionary of DataFrames."""
 
-    ignore_errors = args.get("ignore_errors", False)
     verbose = args.get("verbose", False)
 
     if len(raw_bytes) == 0:
@@ -176,7 +175,7 @@ def _add_excel_bytes(
         message = f"With {name}: could not convert raw bytes to ExcelFile.\n{e}"
         print(message)
         return abs_dict
-    
+
     # iterate over the sheets in the Excel file
     for sheet_name in excel.sheet_names:
         # grab and go - no treatment of the data

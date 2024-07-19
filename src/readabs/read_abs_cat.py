@@ -93,10 +93,13 @@ def _get_time_series_data(
     # --- group the sheets and iterate over these groups
     long_groups = _group_sheets(abs_dict)
     for table, sheets in long_groups.items():
-        new_dict, meta_data = _capture(
-            cat, abs_dict, table, sheets, new_dict, meta_data, **kwargs
-        )
-
+        args = {
+            "cat": cat,
+            "from_dict": abs_dict,
+            "table": table,
+            "long_sheets": sheets,
+        }
+        new_dict, meta_data = _capture(new_dict, meta_data, args, **kwargs)
     return new_dict, meta_data
 
 
@@ -124,12 +127,9 @@ def _copy_raw_sheets(
 
 
 def _capture(
-    cat: str,
-    from_dict: dict[str, DataFrame],
-    table: str,
-    long_sheets: list[str],
     to_dict: dict[str, DataFrame],
     meta_data: DataFrame,
+    args: dict[str, Any],
     **kwargs: Any,
 ) -> tuple[dict[str, DataFrame], DataFrame]:
     """For a specific Excel file, capture *both* the time series data
@@ -142,33 +142,39 @@ def _capture(
     ignore_errors: bool = kwargs.get("ignore_errors", False)
 
     # --- step 1: capture the meta data ---
-    short_sheets = [x.split(HYPHEN, 1)[1] for x in long_sheets]
+    short_sheets = [x.split(HYPHEN, 1)[1] for x in args["long_sheets"]]
     try:
         index = short_sheets.index("Index")
     except ValueError:
-        print(f"Table {table} has no 'Index' sheet.")
-        to_dict = _copy_raw_sheets(from_dict, long_sheets, to_dict, keep_non_ts)
+        print(f"Table {args["table"]} has no 'Index' sheet.")
+        to_dict = _copy_raw_sheets(
+            args["from_dict"], args["long_sheets"], to_dict, keep_non_ts
+        )
         return to_dict, meta_data
 
-    index_sheet = long_sheets[index]
-    this_meta = _capture_meta(cat, from_dict, index_sheet, **kwargs)
+    index_sheet = args["long_sheets"][index]
+    this_meta = _capture_meta(args["cat"], args["from_dict"], index_sheet, **kwargs)
     if this_meta.empty:
-        to_dict = _copy_raw_sheets(from_dict, long_sheets, to_dict, keep_non_ts)
+        to_dict = _copy_raw_sheets(
+            args["from_dict"], args["long_sheets"], to_dict, keep_non_ts
+        )
         return to_dict, meta_data
 
     meta_data = pd.concat([meta_data, this_meta], axis=0)
 
     # --- step 2: capture the actual time series data ---
-    data = _capture_data(meta_data, from_dict, long_sheets, **kwargs)
+    data = _capture_data(meta_data, args["from_dict"], args["long_sheets"], **kwargs)
     if len(data):
-        to_dict[table] = data
+        to_dict[args["table"]] = data
     else:
         # a glitch: we have the metadata but not the actual data
-        error = f"Unexpected: {table} has no actual data."
+        error = f"Unexpected: {args["table"]} has no actual data."
         if not ignore_errors:
             raise ValueError(error)
         print(error)
-        to_dict = _copy_raw_sheets(from_dict, long_sheets, to_dict, keep_non_ts)
+        to_dict = _copy_raw_sheets(
+            args["from_dict"], args["long_sheets"], to_dict, keep_non_ts
+        )
 
     return to_dict, meta_data
 
@@ -353,7 +359,8 @@ def _group_sheets(
 if __name__ == "__main__":
 
     # --- test the function ---
-    # this ABS Catalogue ID has a mix of time 
+    # this ABS Catalogue ID has a mix of time
     # series and non-time series data. Also,
     # it has poorly structured Excel files.
     d, m = read_abs_cat("8731.0", keep_non_ts=True)
+    d, m = read_abs_cat("8731.0", keep_non_ts=False)

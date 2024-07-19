@@ -1,3 +1,11 @@
+Version 0.0.13 released X (Canberra, Australia)
+
+- Minor changes
+   * Further code tidy-ups
+   * tidy-ups to read_rba_ocr() in read_rba_table.py
+   * removed a print statment from get_rba_links.py
+---
+
 Version 0.0.12 released 17-JUL-2024 (Canberra, Australia)
 
 - Major changes
