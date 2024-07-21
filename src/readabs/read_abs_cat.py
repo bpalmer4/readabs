@@ -153,7 +153,7 @@ def _capture(
         return to_dict, meta_data
 
     index_sheet = args["long_sheets"][index]
-    this_meta = _capture_meta(args["cat"], args["from_dict"], index_sheet, **kwargs)
+    this_meta = _capture_meta(args["cat"], args["from_dict"], index_sheet)
     if this_meta.empty:
         to_dict = _copy_raw_sheets(
             args["from_dict"], args["long_sheets"], to_dict, keep_non_ts
@@ -283,7 +283,6 @@ def _capture_meta(
     cat: str,
     from_dict: dict[str, DataFrame],
     index_sheet: str,
-    **kwargs: Any,
 ) -> DataFrame:
     """Capture the metadata from the Index sheet of an ABS excel file.
     Returns a DataFrame specific to the current excel file.

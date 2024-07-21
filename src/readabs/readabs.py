@@ -1,5 +1,9 @@
 """This module exposes the functions necessary to read Australian data."""
 
+# --- package metadata
+__author__ = "Bryan Palmer"
+__email__ = "mark.the.graph@gmail.com"
+
 # --- imports
 # local imports
 from .search_abs_meta import search_abs_meta, find_abs_id
@@ -10,14 +14,13 @@ from .grab_abs_url import grab_abs_url
 from .abs_meta_data_support import metacol
 from .get_rba_links import print_rba_catalogue, rba_catalogue
 from .read_rba_table import read_rba_table, rba_metacol, read_rba_ocr
+from .recalibrate import recalibrate, recalibrate_value
 from .utilities import (
     percent_change,
     annualise_rates,
     annualise_percentages,
     qtly_to_monthly,
     monthly_to_qtly,
-    recalibrate,
-    recalibrate_value,
 )
 
 
