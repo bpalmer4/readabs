@@ -1,4 +1,18 @@
-Version 0.0.13 released X (Canberra, Australia)
+Version 0.0.14 released X )Canberra, Australia)
+
+- Major changes
+   * put the recalibrate() function into its own module.
+     Added some in-module tests.
+   * Removed the ./tests directory. In the interim, I have 
+     been placeing quick code-tests inline. Will need to 
+     more sensibly revisit code testing in the future. 
+   * Moved generate_catalogue_map.py to the main directory, 
+     as it is not part of the package. We are now keeping
+     old catalogue map files; just in case the ABS removes
+     the catalogue directory webpage I have been using.  
+---
+
+Version 0.0.13 released 19-JUL-2024 (Canberra, Australia)
 
 - Minor changes
    * Further code tidy-ups
