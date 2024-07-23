@@ -10,15 +10,9 @@ from typing import Any, Sequence, cast
 from pandas import DataFrame, PeriodIndex, concat
 
 # local imports
-# multiple imports to allow for direct testing before packaging
-try:
-    from .read_abs_cat import read_abs_cat
-    from .read_support import check_kwargs, get_args
-    from .abs_meta_data_support import metacol
-except ImportError:
-    from read_abs_cat import read_abs_cat
-    from read_support import check_kwargs, get_args
-    from abs_meta_data_support import metacol
+from readabs.read_abs_cat import read_abs_cat
+from readabs.read_support import check_kwargs, get_args
+from readabs.abs_meta_data_support import metacol
 
 
 # --- functions

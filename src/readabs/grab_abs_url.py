@@ -18,17 +18,10 @@ import pandas as pd
 from pandas import DataFrame
 
 # local imports
-# multiple imports to allow for direct testing before packaging
-try:
-    from .get_abs_links import get_abs_links, get_table_name
-    from .read_support import check_kwargs, get_args, HYPHEN
-    from .download_cache import get_file
-    from .abs_catalogue_map import abs_catalogue
-except ImportError:
-    from get_abs_links import get_abs_links, get_table_name
-    from read_support import check_kwargs, get_args, HYPHEN
-    from download_cache import get_file
-    from abs_catalogue_map import abs_catalogue
+from readabs.get_abs_links import get_abs_links, get_table_name
+from readabs.read_support import check_kwargs, get_args, HYPHEN
+from readabs.download_cache import get_file
+from readabs.abs_catalogue_map import abs_catalogue
 
 
 # --- public - primary entry point for this module

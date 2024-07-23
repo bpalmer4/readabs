@@ -3,7 +3,9 @@ Version 0.0.15 released X (Canberra, Australia)
 - Magor changes
    * Added HTML documentation in the ./docs folder. Start 
      at 'index.html'. Removed the incomplete documentation 
-     from the 'README.md' file. 
+     from the 'README.md' file.
+   * Worked out the proper import arrangements. Removed the
+     'readabs.py' file. Expanded '__init__.py'
 
 - Minor changes
    * Added __all__ to __init__.py, allow for wildcard 

@@ -8,14 +8,10 @@ from typing import Any
 from bs4 import BeautifulSoup
 
 # local imports
-# multiple imports to allow for direct testing before packaging
-try:
-    from .download_cache import get_file, HttpError, CacheError
-except ImportError:
-    from download_cache import get_file, HttpError, CacheError
+from readabs.download_cache import get_file, HttpError, CacheError
 
 
-# private
+# --- private
 def _make_absolute_url(url: str, prefix: str = "https://www.abs.gov.au") -> str:
     """Convert a relative URL address found on the ABS site to
     an absolute URL address."""
@@ -27,16 +23,7 @@ def _make_absolute_url(url: str, prefix: str = "https://www.abs.gov.au") -> str:
     return f"{prefix}{url}"
 
 
-# public (also used by grab_abs_url.py)
-def get_table_name(url: str) -> str:
-    """Get the table name from the ABS URL."""
-
-    tail = url.rsplit("/", 1)[-1]
-    table_name = tail.split(".")[0]
-    return table_name
-
-
-# private
+# --- private
 def historicise_links(
     link_dict: dict[str, list[str]], history: str
 ) -> dict[str, list[str]]:
@@ -57,7 +44,16 @@ def historicise_links(
     return new_dict
 
 
-# public
+# --- public (also used by grab_abs_url.py)
+def get_table_name(url: str) -> str:
+    """Get the table name from the ABS URL."""
+
+    tail = url.rsplit("/", 1)[-1]
+    table_name = tail.split(".")[0]
+    return table_name
+
+
+# --- public
 def get_abs_links(
     url: str = "",
     inspect_file_name="",

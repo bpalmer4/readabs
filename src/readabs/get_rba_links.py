@@ -10,11 +10,7 @@ from bs4 import BeautifulSoup
 from pandas import DataFrame
 
 # local imports
-# multiple imports to allow for direct testing before packaging
-try:
-    from .download_cache import get_file, HttpError, CacheError
-except ImportError:
-    from download_cache import get_file, HttpError, CacheError
+from readabs.download_cache import get_file, HttpError, CacheError
 
 
 # --- public functions ---

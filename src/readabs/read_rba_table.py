@@ -17,13 +17,8 @@ from pandas import (
 )
 
 # local imports
-# multiple imports to allow for direct testing before packaging
-try:
-    from .get_rba_links import rba_catalogue
-    from .download_cache import get_file, HttpError, CacheError
-except ImportError:
-    from get_rba_links import rba_catalogue
-    from download_cache import get_file, HttpError, CacheError
+from readabs.get_rba_links import rba_catalogue
+from readabs.download_cache import get_file, HttpError, CacheError
 
 # --- PUBLIC ---
 RbaMetacol = namedtuple(

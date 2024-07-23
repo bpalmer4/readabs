@@ -29,15 +29,9 @@ import pandas as pd
 from pandas import DataFrame
 
 # local imports
-# multiple imports to allow for direct testing before packaging
-try:
-    from .abs_meta_data_support import metacol
-    from .read_support import HYPHEN
-    from .grab_abs_url import grab_abs_url
-except ImportError:
-    from abs_meta_data_support import metacol
-    from read_support import HYPHEN
-    from grab_abs_url import grab_abs_url
+from readabs.abs_meta_data_support import metacol
+from readabs.read_support import HYPHEN
+from readabs.grab_abs_url import grab_abs_url
 
 
 # --- functions ---

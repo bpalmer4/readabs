@@ -7,7 +7,7 @@ from typing import Any
 from pandas import DataFrame
 
 # local imports
-from .abs_meta_data_support import metacol
+from readabs.abs_meta_data_support import metacol
 
 
 def search_abs_meta(
