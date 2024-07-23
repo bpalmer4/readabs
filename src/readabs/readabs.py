@@ -31,9 +31,8 @@ def print_abs_catalogue() -> None:
     print(catalogue.loc[:, catalogue.columns != "URL"].to_markdown())
 
 
-# --- syntactic sugar to silence linters
+# --- syntactic sugar to silence linters/checkers
 _ = (
-    # silence linters/checkers
     # -- utilities --
     percent_change,
     annualise_rates,
@@ -43,6 +42,8 @@ _ = (
     recalibrate,
     recalibrate_value,
     # -- abs -- related
+    print_abs_catalogue,
+    abs_catalogue,
     metacol,
     read_abs_cat,
     read_abs_series,

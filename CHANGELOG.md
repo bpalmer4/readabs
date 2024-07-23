@@ -1,3 +1,15 @@
+Version 0.0.15 released X (Canberra, Australia)
+
+- Magor changes
+   * Added HTML documentation in the ./docs folder. Start 
+     at 'index.html'. Removed the incomplete documentation 
+     from the 'README.md' file. 
+
+- Minor changes
+   * Added __all__ to __init__.py, allow for wildcard 
+     imports
+---
+
 Version 0.0.14 released 21-JUL-2024 (Canberra, Australia)
 
 - Major changes

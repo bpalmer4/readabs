@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>read_abs_series</title>
+  </head>
+  <body>
+    <h1>read_abs_series</h1>
+    <h2>Usage</h2>
+    <blockquote>
+      <pre>read_abs_series(cat, series_id, **kwargs)-&gt; tuple[DataFrame, DataFrame]<br></pre>
+    </blockquote>
+    <h2>What it does</h2>
+    <blockquote>
+      <p>For the selected ABS Series IDs, this function returns a tuple
+        of two DataFrames. The first DataFrame contains the actual data.
+        The second DataFrame contains the metadata. <br>
+      </p>
+    </blockquote>
+    <h2>Parameters<br>
+    </h2>
+    <blockquote>
+      <p><b>cat</b>: str -- the ABS Catalogue Number for the data to be
+        downloaded and made available by this function. This argument
+        must be specified in the function call.</p>
+      <p><b>series_id</b>: str | Sequence[str] -- an individual series
+        identifier, or a list of identifiers. This argument must be
+        specified in the function call.</p>
+      <h3>Optional keyword arguments</h3>
+      Uses the same optional keyword arguments as <a
+        moz-do-not-send="true" href="read_abs_cat.html">read_abs_cat</a>.
+      <br>
+    </blockquote>
+    <h2>Return values</h2>
+    <blockquote>
+      <p>The function returns a tuple of two DataFrames. The first is
+        the actual data associated with the requested series
+        identifiers. The second item is a DataFrame of ABS metadata for
+        the selected series.<br>
+      </p>
+    </blockquote>
+    <h2>Example</h2>
+    <blockquote>
+      <pre>import readabs as ra<br>from pandas import DataFrame<br>cat_num = "6202.0"  # The ABS labour force survey<br>unemployment_rate = "A84423050A"  # Australia, all persons, seasonally adjusted, unemployment rate<br>seo = "6202001"  # The ABS table name<br>data: tuple[DataFrame, DataFrame] = ra.read_abs_series(cat=cat_num, series_id=unemployment_rate, single_excel_only=seo)<br></pre>
+    </blockquote>
+    <a moz-do-not-send="true" href="index.html">Return to the Index</a><br>
+  </body>
+</html>
