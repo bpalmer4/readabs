@@ -92,6 +92,8 @@ def read_abs_series(
 
 
 if __name__ == "__main__":
+    # type: ignore
+
     # simple test
     # Trimmed Mean - Through the year CPI growth
     data, meta = read_abs_series("6401.0", "A3604511X", single_excel_only="640106")

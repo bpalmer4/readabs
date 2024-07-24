@@ -105,8 +105,10 @@ def monthly_to_qtly(data: DataT, q_ending="DEC", f: str = "mean") -> DataT:
     if isinstance(data, Series):
         return monthly_to_qtly_series(data, q_ending, f)
 
-    # Do each column in the DataFrame:
-    chamber = {}
-    for col in data.columns:
-        chamber[col] = monthly_to_qtly_series(data[col], q_ending, f)
-    return DataFrame(chamber)
+    if isinstance(data, DataFrame):
+        chamber = {}
+        for col in data.columns:
+            chamber[col] = monthly_to_qtly_series(data[col], q_ending, f)
+        return DataFrame(chamber)
+
+    raise ValueError("data must be a pandas Series or DataFrame")

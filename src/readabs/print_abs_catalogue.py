@@ -12,4 +12,5 @@ def print_abs_catalogue() -> None:
 
 
 if __name__ == "__main__":
+    # type: ignore
     print_abs_catalogue()

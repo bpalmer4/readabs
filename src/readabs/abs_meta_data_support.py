@@ -42,33 +42,40 @@ metacol = Metacol(
 
 # --- testing
 if __name__ == "__main__":
-    print(metacol.did)
-    print(metacol.stype)
-    print(metacol.id)
-    print(metacol.start)
-    print(metacol.end)
-    print(metacol.num)
-    print(metacol.unit)
-    print(metacol.dtype)
-    print(metacol.freq)
-    print(metacol.cmonth)
-    print(metacol.table)
-    print(metacol.tdesc)
-    print(metacol.cat)
+    # type: ignore
 
-    try:
-        print(metacol.does_not_exist)  # should raise an AttributeError
-    except AttributeError as e:
-        print(f"failed approrpriately: {e}")
+    def test_metacol():
+        """Quick test of the Metacol namedtuple."""
 
-    try:
-        metacol.did = "value"  # should raise an AttributeError
-    except AttributeError as e:
-        print(f"failed appropriately: {e}")
+        print(metacol.did)
+        print(metacol.stype)
+        print(metacol.id)
+        print(metacol.start)
+        print(metacol.end)
+        print(metacol.num)
+        print(metacol.unit)
+        print(metacol.dtype)
+        print(metacol.freq)
+        print(metacol.cmonth)
+        print(metacol.table)
+        print(metacol.tdesc)
+        print(metacol.cat)
 
-    try:
-        del metacol.did  # should raise an AttributeError
-    except AttributeError as e:
-        print(f"failed appropriately: {e}")
+        try:
+            print(metacol.does_not_exist)  # should raise an AttributeError
+        except AttributeError as e:
+            print(f"failed approrpriately: {e}")
 
-    print(metacol)
+        try:
+            metacol.did = "value"  # should raise an AttributeError
+        except AttributeError as e:
+            print(f"failed appropriately: {e}")
+
+        try:
+            del metacol.did  # should raise an AttributeError
+        except AttributeError as e:
+            print(f"failed appropriately: {e}")
+
+        print(metacol)
+
+    test_metacol()

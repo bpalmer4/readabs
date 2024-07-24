@@ -1,15 +1,16 @@
 Version 0.0.15 released X (Canberra, Australia)
 
-- Magor changes
-   * Added HTML documentation in the ./docs folder. Start 
-     at 'index.html'. Removed the incomplete documentation 
-     from the 'README.md' file.
+- Major changes
+   * Started work on documentation. Removed the incomplete 
+     documentation from the 'README.md' file.
    * Worked out the proper import arrangements. Removed the
      'readabs.py' file. Expanded '__init__.py'
 
 - Minor changes
-   * Added __all__ to __init__.py, allow for wildcard 
+   * Added __all__ to __init__.py, to allow for wildcard 
      imports
+   * Applied mypy and pylint to the package. Down to zero 
+     mypy issues and three pylint issues. 
 ---
 
 Version 0.0.14 released 21-JUL-2024 (Canberra, Australia)

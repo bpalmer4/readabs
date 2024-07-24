@@ -21,7 +21,7 @@ the metadata for each data item."""
 # --- imports ---
 # standard library imports
 from functools import cache
-from typing import Any, cast
+from typing import Any
 import calendar
 
 # analytic imports
@@ -82,7 +82,8 @@ def _get_time_series_data(
     of meta data, which describes each data item in the dictionary"""
 
     # --- set up ---
-    new_dict, meta_data = {}, DataFrame()
+    new_dict: dict[str, DataFrame] = {}
+    meta_data = DataFrame()
 
     # --- group the sheets and iterate over these groups
     long_groups = _group_sheets(abs_dict)
@@ -179,11 +180,14 @@ def _capture_data(
     long_sheets: list[str],
     **kwargs: Any,
 ) -> DataFrame:
-    """Take a list of ABS data sheets and put them into a single DataFrame."""
+    """Take a list of ABS data sheets, find the DataFrames for those sheets in the
+    from_dict, and stitch them into a single DataFrame with an appropriate
+    PeriodIndex."""
 
     # --- step 0: set up ---
     verbose: bool = kwargs.get("verbose", False)
     merged_data = DataFrame()
+    header_row: int = 8
 
     # --- step 1: capture the time series data ---
     # identify the data sheets in the list of all sheets from Excel file
@@ -192,12 +196,15 @@ def _capture_data(
     for sheet_name in data_sheets:
         if verbose:
             print(f"About to cature data from {sheet_name=}")
+
         # --- capture just the data, nothing else
         sheet_data = from_dict[sheet_name].copy()
+
         # get the columns
-        header = sheet_data.iloc[8]
-        sheet_data.columns = header
-        sheet_data = sheet_data[9:]
+        header = sheet_data.iloc[header_row]
+        sheet_data.columns = pd.Index(header)
+        sheet_data = sheet_data[(header_row + 1) :]
+
         # get the row indexes - assume long row names are not dates
         index_column = sheet_data[sheet_data.columns[0]].astype(str)
         sheet_data = sheet_data.drop(sheet_data.columns[0], axis=1)
@@ -206,7 +213,8 @@ def _capture_data(
             print(f"You may need to check index column for {sheet_name}")
         index_column = index_column.loc[~long_row_names]
         sheet_data = sheet_data.loc[~long_row_names]
-        sheet_data.index = pd.to_datetime(index_column)  #
+
+        proposed_index = pd.to_datetime(index_column)  #
 
         # get the correct period index
         short_name = sheet_name.split(HYPHEN, 1)[0]
@@ -219,15 +227,17 @@ def _capture_data(
         )
         freq = "Y" if freq == "A" else freq  # pandas prefers yearly
         freq = "Q" if freq == "B" else freq  # treat Biannual as quarterly
+        if freq not in ("Y", "Q", "M", "D"):
+            print(f"Check the frequency of the data in sheet: {sheet_name}")
+
         # create an appropriate period index
         if freq:
             if freq in ("Q", "Y"):
-                month = calendar.month_abbr[
-                    cast(pd.PeriodIndex, sheet_data.index).month.max()
-                ].upper()
+                month = calendar.month_abbr[proposed_index.dt.month.max()].upper()
                 freq = f"{freq}-{month}"
-            if isinstance(sheet_data.index, pd.DatetimeIndex):
-                sheet_data = sheet_data.to_period(freq=freq)
+            sheet_data.index = pd.PeriodIndex(proposed_index, freq=freq)
+        else:
+            raise ValueError(f"With sheet {sheet_name} could not determime PeriodIndex")
 
         # --- merge data into a single dataframe
         if len(merged_data) == 0:
@@ -305,7 +315,7 @@ def _capture_meta(
 
     # --- step 2: capture the metadata ---
     file_meta = frame.iloc[header_row + 1 :].copy()
-    file_meta.columns = header_columns
+    file_meta.columns = pd.Index(header_columns)
 
     # make damn sure there are no rogue white spaces
     for col in required:
@@ -331,14 +341,14 @@ def _capture_meta(
 
 def _group_sheets(
     abs_dict: dict[str, DataFrame],
-) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+) -> dict[str, list[str]]:
     """Group the sheets from an Excel file."""
 
     keys = list(abs_dict.keys())
-    long_pairs = [[x.split(HYPHEN, 1)[0], x] for x in keys]
+    long_pairs = [(x.split(HYPHEN, 1)[0], x) for x in keys]
 
-    def group(p_list: list[str, str]) -> dict[str, list[str]]:
-        groups = {}
+    def group(p_list: list[tuple[str, str]]) -> dict[str, list[str]]:
+        groups: dict[str, list[str]] = {}
         for x, y in p_list:
             if x not in groups:
                 groups[x] = []
@@ -350,10 +360,13 @@ def _group_sheets(
 
 # --- initial testing ---
 if __name__ == "__main__":
+    # type: ignore
 
     # --- test the function ---
     # this ABS Catalogue ID has a mix of time
     # series and non-time series data. Also,
-    # it has poorly structured Excel files.
+    # it has poorly structured Excel files. So, a good test.
     d, m = read_abs_cat("8731.0", keep_non_ts=True)
+    print(f"--- len(d) = {len(d)} ---")
     d, m = read_abs_cat("8731.0", keep_non_ts=False)
+    print(f"--- len(d) = {len(d)} ---")

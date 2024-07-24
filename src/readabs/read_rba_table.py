@@ -3,13 +3,14 @@
 Read a table from the RBA website and store it in a pandas DataFrame."""
 
 from collections import namedtuple
-from typing import Any
+from typing import Any, cast
 from io import BytesIO
 from pandas import (
     DataFrame,
     DatetimeIndex,
     PeriodIndex,
     Period,
+    Index,
     read_excel,
     Series,
     Timestamp,
@@ -79,7 +80,7 @@ def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
             print(f"Ignoring error: {message}")
             return data, meta
         raise ValueError(f"Table '{table}' not found in RBA catalogue.")
-    url = cat_map.loc[table, "URL"]
+    url = str(cat_map.loc[table, "URL"])
 
     # get Excel file
     try:
@@ -106,7 +107,7 @@ def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
 
     # extract the meta data
     meta = raw.iloc[1:11, :].T.copy()
-    meta.columns = meta.iloc[0]
+    meta.columns = Index(meta.iloc[0])
     meta = meta.iloc[1:, :]
     meta.index = meta[rba_metacol.id]
     meta[rba_metacol.table] = table
@@ -115,7 +116,7 @@ def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
 
     # extract the data
     data = raw.iloc[10:, :].copy()
-    data.columns = data.iloc[0]
+    data.columns = Index(data.iloc[0])
     data = data.iloc[1:, :]
     data.index = DatetimeIndex(data.iloc[:, 0])
     data = data.iloc[:, 1:]
@@ -142,11 +143,15 @@ def read_rba_ocr(monthly: bool = True, **kwargs: Any) -> Series:
 
     # read the OCR table from the RBA website, make float and sort, name the series
     rba, _rba_meta = read_rba_table("A2", **kwargs)  # should have a daily PeriodIndex
-    ocr = rba["ARBAMPCNCRT"]["1990-08-02":].astype(float).sort_index()
+    ocr = (
+        rba.loc[lambda x: x.index >= "1990-08-02", "ARBAMPCNCRT"]
+        .astype(float)
+        .sort_index()
+    )
     ocr.name = "RBA Official Cash Rate"
 
     # bring up to date
-    today = Period(Timestamp.today(), freq=ocr.index.freqstr)
+    today = Period(Timestamp.today(), freq=cast(PeriodIndex, ocr.index).freqstr)
     if ocr.index[-1] < today:
         ocr[today] = ocr.iloc[-1]
 
@@ -167,15 +172,40 @@ def read_rba_ocr(monthly: bool = True, **kwargs: Any) -> Series:
 
 # --- TESTING ---
 if __name__ == "__main__":
-    d, m = read_rba_table("C1")
-    print(m)
-    print(d.head())
-    print(d.tail())
-    print("=" * 20)
+    # type: ignore
 
-    ocr_ = read_rba_ocr()
-    print(ocr_.head())
-    print(ocr_.tail())
-    ocr_ = read_rba_ocr(monthly=False)
-    print(ocr_.head())
-    print(ocr_.tail())
+    def test_read_rba_table():
+        """Test the read_rba_table function."""
+
+        # test with a known table
+        d, m = read_rba_table("C1")
+        print(m)
+        print(d.head())
+        print(d.tail())
+        print("=" * 20)
+
+        # test with an unknown table
+        try:
+            d, m = read_rba_table("XYZ")
+        except ValueError as e:
+            print(e)
+        print("=" * 20)
+
+    test_read_rba_table()
+
+    def test_read_rba_ocr():
+        """Test the read_rba_ocr function."""
+
+        # test with monthly data
+        ocr = read_rba_ocr(monthly=True)
+        print(ocr.head())
+        print(ocr.tail())
+        print("=" * 20)
+
+        # test with daily data
+        ocr = read_rba_ocr(monthly=False)
+        print(ocr.head())
+        print(ocr.tail())
+        print("=" * 20)
+
+    test_read_rba_ocr()

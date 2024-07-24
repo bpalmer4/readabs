@@ -199,6 +199,7 @@ def get_file(
 # --- preliminary testing:
 DO_TEST = False
 if __name__ == "__main__" and DO_TEST:
+    # type: ignore
 
     def cache_test() -> None:
         """This function provides a quick test of the retrieval

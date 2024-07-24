@@ -27,7 +27,7 @@ from readabs.abs_catalogue_map import abs_catalogue
 # --- public - primary entry point for this module
 @cache  # minimise slowness with repeat business
 def grab_abs_url(
-    url: str = None,
+    url: str | None = None,
     **kwargs: Any,
 ) -> dict[str, DataFrame]:
     """Identify and load Excel/zip data found on an ABS webpage given by an
@@ -37,8 +37,9 @@ def grab_abs_url(
 
     Parameters
     ----------
-    url : str
+    url : str | None
         A URL for an ABS Catalogue landing page.
+
     **kwargs : Any
         Keyword arguments for the read_abs_cat function.
 
@@ -59,7 +60,7 @@ def grab_abs_url(
     links = get_abs_links(url, **args)
     if not links:
         print(f"No data files found at URL: {url}")
-        return DataFrame()  # return an empty DataFrame
+        return {}  # return an empty Dictionary
 
     # read the data files into a dictionary of DataFrames
     abs_dict: dict[str, DataFrame] = {}
@@ -105,19 +106,20 @@ def grab_abs_url(
 
 
 # --- private
-def _get_url(url: str, kwargs: dict) -> str:
+def _get_url(url: str | None, kwargs: dict) -> str:
     """If an ABS 'cat' is provided, get the URL for the ABS data
     files on the ABS webpage. Otherwise, return the URL provided.
     Either the 'url' or 'cat' argument must be provided."""
 
-    cat = kwargs.pop("cat", None)
+    cat: str | None = kwargs.pop("cat", None)
     cm = abs_catalogue()
-    if cat is not None and cat in cm.index:
-        url = cm.loc[cat, "URL"]
-    if url is None and cat is None:
-        raise ValueError("_grab_abs_url(): no URL or Catalogue number provided.")
+    url_str = url if isinstance(url, str) else ""
+    if url is None and cat is not None and cat in cm.index:
+        url_str = str(cm.loc[cat, "URL"])
+    if not url_str and cat is None:
+        raise ValueError("_grab_url(): no URL or Catalogue number provided.")
 
-    return url
+    return url_str
 
 
 def _add_zip(abs_dict: dict[str, DataFrame], link: str, **args) -> dict[str, DataFrame]:
@@ -189,7 +191,7 @@ def _add_excel(
     abs_dict: dict[str, DataFrame],
     link: str,
     **args: Any,
-) -> tuple[dict[str, DataFrame], DataFrame]:
+) -> dict[str, DataFrame]:
     """Read in an Excel file at the URL in the 'link' argument.
     Pass those bytes to _add_excel_bytes() to put the contents
     into the dictionary of DataFrames given by 'abs_dict'. When done,
@@ -210,7 +212,7 @@ def _add_excel(
 
 # --- main ---
 if __name__ == "__main__":
-    # briefly test this module
+    # type: ignore
 
     # grab a single Excel file
     test_dict = grab_abs_url(cat="6202.0", get_excel=True, single_excel_only="6202001")

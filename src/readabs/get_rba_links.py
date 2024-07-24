@@ -17,7 +17,9 @@ from readabs.download_cache import get_file, HttpError, CacheError
 @cache
 def get_rba_links(**kwargs: Any) -> DataFrame:
     """Extract links to RBA data files in Excel format
-    from the RBA website."""
+    from the RBA website.  Returns a DataFrame with the
+    following columns: 'Description' and 'URL'. The index
+    is the 'Table' number. Returns an empty DataFrame on error."""
 
     verbose = kwargs.get("verbose", False)
     urls = ("https://www.rba.gov.au/statistics/tables/",)
@@ -27,10 +29,10 @@ def get_rba_links(**kwargs: Any) -> DataFrame:
             page = get_file(url, **kwargs)
         except HttpError as e:
             print(f"Error: {e}")
-            return link_dict
+            return DataFrame()
         except CacheError as e:
             print(f"Error: {e}")
-            return link_dict
+            return DataFrame()
 
         # remove those pesky span tags - probably not necessary
         page = re.sub(b"<span[^>]*>", b" ", page)
@@ -95,5 +97,6 @@ def _make_absolute_url(url: str, prefix: str = "https://www.rba.gov.au") -> str:
 
 # --- testing ---
 if __name__ == "__main__":
+    # type: ignore
     print_rba_catalogue(cache_only=False, verbose=False)
     print_rba_catalogue(cache_only=True, verbose=True)
