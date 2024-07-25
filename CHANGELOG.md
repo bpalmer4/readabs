@@ -1,3 +1,13 @@
+Version 0.0.16 released X (Canberra, Australia)
+
+- Major changes
+   * removed the old-docs directory.
+
+- Minor changes
+   *
+
+---
+
 Version 0.0.15 released 25-Jul-2024 (Canberra, Australia)
 
 - Major changes

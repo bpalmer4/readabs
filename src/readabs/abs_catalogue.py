@@ -1,6 +1,5 @@
 """Catalogue map for ABS data."""
 
-#from io import BytesIO
 from functools import cache
 from pandas import DataFrame, Series, Index, read_html
 from readabs.download_cache import get_file
