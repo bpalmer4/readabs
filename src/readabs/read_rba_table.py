@@ -172,7 +172,6 @@ def read_rba_ocr(monthly: bool = True, **kwargs: Any) -> Series:
 
 # --- TESTING ---
 if __name__ == "__main__":
-    # type: ignore
 
     def test_read_rba_table():
         """Test the read_rba_table function."""

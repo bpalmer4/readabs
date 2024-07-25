@@ -21,14 +21,16 @@ def read_abs_series(
     series_id: str | Sequence[str],
     **kwargs: Any,
 ) -> tuple[DataFrame, DataFrame]:
-    """Get specific ABS data series by their ABS catalogue ID and series ID
+    """Get specific ABS data series by their ABS catalogue and series identifiers.
 
     Parameters
     ----------
     cat : str
         The ABS catalogue ID.
+
     series_id : str | Sequence[str]
         An ABS series ID or a sequence of ABS series IDs.
+
     **kwargs : Any
         Keyword arguments for the read_abs_series function,
         which are the same as the keyword arguments for the r
@@ -37,8 +39,21 @@ def read_abs_series(
     Returns
     -------
     tuple[DataFrame, DataFrame]
-        The ABS series data and the associated meta data.
-    """
+        A tuple of two DataFrames, one for the primary data and one for the metadata.
+
+    Example
+    -------
+
+    ```python
+    import readabs as ra
+    from pandas import DataFrame
+    cat_num = "6202.0"  # The ABS labour force survey
+    unemployment_rate = "A84423050A"
+    seo = "6202001"  # The ABS table name
+    data, meta = ra.read_abs_series(
+        cat=cat_num, series_id=unemployment_rate, single_excel_only=seo
+    )
+    ```"""
 
     # check for unexpected keyword arguments/get defaults
     check_kwargs(kwargs, "read_abs_series")
@@ -92,11 +107,14 @@ def read_abs_series(
 
 
 if __name__ == "__main__":
-    # type: ignore
 
-    # simple test
-    # Trimmed Mean - Through the year CPI growth
-    data, meta = read_abs_series("6401.0", "A3604511X", single_excel_only="640106")
-    print(data.tail())
-    print(meta.T)
-    print("Done")
+    def simple_test() -> None:
+        """Simple test of the read_abs_series function."""
+        # simple test
+        # Trimmed Mean - through the year CPI growth - seasonally adjusted
+        data, meta = read_abs_series("6401.0", "A3604511X", single_excel_only="640106")
+        print(data.tail())
+        print(meta.T)
+        print("Done")
+
+    simple_test()

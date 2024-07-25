@@ -1,7 +1,6 @@
 """get_abs_links.py:
 
-Module to access and scan an ABS webpage for links to Excel 
-and zip files."""
+Access and scan an ABS webpage for links to Excel and zip files."""
 
 import re
 from typing import Any
@@ -80,10 +79,7 @@ def get_abs_links(
         print(f"Error when obtaining links from ABS web page: {e}")
         return {}
 
-    # save the HTML webpage to disk for inspection
-    if inspect_file_name:
-        with open(inspect_file_name, "w", encoding="utf-8") as file_handle:
-            file_handle.write(page.decode("utf-8"))
+    _debug_later(inspect_file_name, page=page)
 
     # remove those pesky span tags - probably not necessary
     page = re.sub(b"<span[^>]*>", b" ", page)
@@ -99,11 +95,8 @@ def get_abs_links(
     link_dict: dict[str, list[str]] = {}
     for link in soup.findAll("a"):
         url = link.get("href")
-        if url is None:
+        if url is None or not url:
             # ignore silly cases
-            continue
-        if "pivot" in url.rsplit("/", 1)[-1].lower():
-            # ignore pivot tables
             continue
         for link_type in link_types:
             if url.lower().endswith(link_type):
@@ -113,8 +106,7 @@ def get_abs_links(
                 break
 
     # age links if required
-    history = kwargs.get("history", "")
-    if history:
+    if history := kwargs.get("history", ""):
         link_dict = historicise_links(link_dict, history)
 
     if verbose:
@@ -125,3 +117,29 @@ def get_abs_links(
         print()
 
     return link_dict
+
+
+# --- private
+def _debug_later(inspect_file_name: str, page: bytes) -> None:
+    """Write the page to a file for later inspection."""
+
+    if inspect_file_name:
+        with open(inspect_file_name, "w", encoding="utf-8") as file_handle:
+            file_handle.write(page.decode("utf-8"))
+
+
+# --- testing
+if __name__ == "__main__":
+
+    def test_get_abs_links():
+        """Quick test of the get_abs_links() function."""
+
+        url = (
+            "https://www.abs.gov.au/statistics/people/population/"
+            + "national-state-and-territory-population/latest-release"
+        )
+
+        links = get_abs_links(url, history="dec-2022", verbose=True)
+        print(links)
+
+    test_get_abs_links()

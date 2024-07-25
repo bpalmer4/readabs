@@ -190,7 +190,6 @@ def _do_recal(flat_data, units, step, operator):
 
 # --- test
 if __name__ == "__main__":
-    # type: ignore
 
     def test_recalibrate():
         """Test the recalibrate() function."""

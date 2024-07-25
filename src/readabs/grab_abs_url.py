@@ -21,35 +21,49 @@ from pandas import DataFrame
 from readabs.get_abs_links import get_abs_links, get_table_name
 from readabs.read_support import check_kwargs, get_args, HYPHEN
 from readabs.download_cache import get_file
-from readabs.abs_catalogue_map import abs_catalogue
+from readabs.abs_catalogue import abs_catalogue
 
 
 # --- public - primary entry point for this module
 @cache  # minimise slowness with repeat business
 def grab_abs_url(
-    url: str | None = None,
+    url: str = "",
     **kwargs: Any,
 ) -> dict[str, DataFrame]:
-    """Identify and load Excel/zip data found on an ABS webpage given by an
-    URL or an ABS Catalogue item. For example, the URL
-    for the ABS weekly jobs payroll data is:
-    https://www.abs.gov.au/statistics/labour/jobs/weekly-payroll-jobs/latest-release
+    """For a given URL, extract the data from the Excel and ZIP file
+    links found on that page. The data is returned as a dictionary of
+    DataFrames. The Excel files are converted into DataFrames, with
+    each sheet in each Excel file becoming a separate DataFrame. ZIP
+    files are examined for Excel files, which are similarly converted into
+    DataFrames. The dictionary of DataFrames is returned.
+
+    The preferred mechanism for reading ABS data is to use the `read_abs_cat()`
+    or `read_abs_series()` functions. This function is provided for those
+    cases where the data is not available in the ABS catalogue, where the
+    data is not a timeseries, or where the user wants to extract data from
+    a specific ABS landingpage.
+
 
     Parameters
     ----------
-    url : str | None
-        A URL for an ABS Catalogue landing page.
+    url : str = ""
+        A URL for an ABS Catalogue landing page. Either a url or
+        a catalogue number must be provided. If both are provided, the
+        URL will be used.
 
     **kwargs : Any
-        Keyword arguments for the read_abs_cat function.
+        Accepts the same keyword arguments as `read_abs_cat()`. Additionally,
+        a cat argument can be provided, which will be used to get the URL
+        (see below).
+
+    cat : str = ""
+        An ABS Catalogue number. If provided, the URL will be ignored,
+        and the Catalogue number will be used to get the URL.
 
     Returns
     -------
-    A dictionary of DataFrames extracted from the webpage. These
-    will include data dataframes, as well as any explanatory
-    material that is found in an Excel file, that has been stuffed
-    (perhaps haphazardly) into a DataFrame. Note: dates and numbers
-    may be encoded as strings/objects."""
+    dict[str, DataFrame]
+        A dictionary of DataFrames."""
 
     # check/get the keyword arguments
     url = _get_url(url, kwargs)  # removes "cat" from kwargs
@@ -106,20 +120,22 @@ def grab_abs_url(
 
 
 # --- private
-def _get_url(url: str | None, kwargs: dict) -> str:
+def _get_url(url: str, kwargs: dict) -> str:
     """If an ABS 'cat' is provided, get the URL for the ABS data
     files on the ABS webpage. Otherwise, return the URL provided.
-    Either the 'url' or 'cat' argument must be provided."""
+    Either the 'url' or 'cat' argument must be provided.
 
-    cat: str | None = kwargs.pop("cat", None)
-    cm = abs_catalogue()
-    url_str = url if isinstance(url, str) else ""
-    if url is None and cat is not None and cat in cm.index:
-        url_str = str(cm.loc[cat, "URL"])
-    if not url_str and cat is None:
-        raise ValueError("_grab_url(): no URL or Catalogue number provided.")
+    Note: kwargs is passed as a dictionary, so that it can be
+    modified in place. This is a common Python idiom."""
 
-    return url_str
+    cat: str = kwargs.pop("cat", "")  # this gets cat out of kwargs
+    cat_map = abs_catalogue()
+    if not url and cat and cat in cat_map.index:
+        url = str(cat_map.loc[cat, "URL"])
+    if not url:
+        raise ValueError("_grab_url(): no URL/cat provided.")
+
+    return url
 
 
 def _add_zip(abs_dict: dict[str, DataFrame], link: str, **args) -> dict[str, DataFrame]:
@@ -212,22 +228,28 @@ def _add_excel(
 
 # --- main ---
 if __name__ == "__main__":
-    # type: ignore
 
-    # grab a single Excel file
-    test_dict = grab_abs_url(cat="6202.0", get_excel=True, single_excel_only="6202001")
-    print(test_dict.keys())
-    print(f"Done.\n{'=' * 20}\n")
+    def simple_test() -> None:
+        """Simple test of the grab_abs_url function."""
 
-    # grab the whole shebang
-    urls = [
-        "https://www.abs.gov.au/statistics/labour/jobs/"
-        + "weekly-payroll-jobs/latest-release",
-        "https://www.abs.gov.au/statistics/people/population/"
-        + "national-state-and-territory-population/dec-2023",
-    ]
-    for url_ in urls:
-        print(f"Grabbing data from: {url_}")
-        data_dict = grab_abs_url(url_, verbose=True)
-        print(data_dict.keys())
+        # grab a single Excel file
+        test_dict = grab_abs_url(
+            cat="6202.0", get_excel=True, single_excel_only="6202001"
+        )
+        print(test_dict.keys())
         print(f"Done.\n{'=' * 20}\n")
+
+        # grab the whole shebang
+        urls = [
+            "https://www.abs.gov.au/statistics/labour/jobs/"
+            + "weekly-payroll-jobs/latest-release",
+            "https://www.abs.gov.au/statistics/people/population/"
+            + "national-state-and-territory-population/dec-2023",
+        ]
+        for url_ in urls:
+            print(f"Grabbing data from: {url_}")
+            data_dict = grab_abs_url(url_, verbose=True)
+            print(data_dict.keys())
+            print(f"Done.\n{'=' * 20}\n")
+
+    simple_test()

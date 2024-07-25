@@ -1,16 +1,21 @@
-Version 0.0.15 released X (Canberra, Australia)
+Version 0.0.15 released 25-Jul-2024 (Canberra, Australia)
 
 - Major changes
-   * Started work on documentation. Removed the incomplete 
-     documentation from the 'README.md' file.
+   * Removed the incomplete documentation from the 
+     'README.md' file.
    * Worked out the proper import arrangements. Removed the
      'readabs.py' file. Expanded '__init__.py'
+   * Removed the generate_catalogue_map.py and rewrote the 
+     abs_catalogue.py to dunamically download the catalogue.
+   * Started using pdoc3 to automate the generation of API
+     documents. API comments are a work in progress, and
+     there is no guarantee I will stick with pdoc3. 
 
 - Minor changes
    * Added __all__ to __init__.py, to allow for wildcard 
      imports
    * Applied mypy and pylint to the package. Down to zero 
-     mypy issues and three pylint issues. 
+     mypy issues and one pylint issue. 
 ---
 
 Version 0.0.14 released 21-JUL-2024 (Canberra, Australia)
@@ -21,10 +26,6 @@ Version 0.0.14 released 21-JUL-2024 (Canberra, Australia)
    * Removed the ./tests directory. In the interim, I have 
      been placeing quick code-tests inline. Will need to 
      more sensibly revisit code testing in the future. 
-   * Moved generate_catalogue_map.py to the main directory, 
-     as it is not part of the package. We are now keeping
-     old ABS catalogue map files; just in case the ABS removes
-     the catalogue directory webpage I have been using.  
 ---
 
 Version 0.0.13 released 19-JUL-2024 (Canberra, Australia)

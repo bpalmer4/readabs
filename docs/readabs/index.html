@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>readabs API documentation</title>
+<meta name="description" content="Package to download timeseries data from
+the Australian Bureau of Statistics (ABS)
+and the Reserve Bank of Australia (RBA).">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Package <code>readabs</code></h1>
+</header>
+<section id="section-intro">
+<p>Package to download timeseries data from
+the Australian Bureau of Statistics (ABS)
+and the Reserve Bank of Australia (RBA).</p>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="readabs.abs_meta_data_support" href="abs_meta_data_support.html">readabs.abs_meta_data_support</a></code></dt>
+<dd>
+<div class="desc"><p>abs_meta_data_sypport.py …</p></div>
+</dd>
+<dt><code class="name"><a title="readabs.get_rba_links" href="get_rba_links.html">readabs.get_rba_links</a></code></dt>
+<dd>
+<div class="desc"><p>get_rba_links.py: Extract links to RBA data files from the RBA website.</p></div>
+</dd>
+<dt><code class="name"><a title="readabs.utilities" href="utilities.html">readabs.utilities</a></code></dt>
+<dd>
+<div class="desc"><p>utilities.py …</p></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="readabs.abs_catalogue"><code class="name flex">
+<span>def <span class="ident">abs_catalogue</span></span>(<span>cache_only=False, verbose=False) ‑> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a DataFrame of ABS Catalogue numbers. In the first instance,
+this is downloaded from the ABS website, and cached for future use.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>cache_only</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>If True, only use the cache.</dd>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>If True, print progress messages.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>DataFrame</code></dt>
+<dd>A DataFrame of ABS Catalogue numbers.</dd>
+</dl>
+<h2 id="example">Example</h2>
+<pre><code class="language-python">import readabs as ra
+catalogue = ra.abs_catalogue()
+</code></pre></div>
+</dd>
+<dt id="readabs.annualise_percentages"><code class="name flex">
+<span>def <span class="ident">annualise_percentages</span></span>(<span>data: ~DataT, periods_per_year: int | float = 12) ‑> ~DataT</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Annualise a growth rate (expressed as a percentage) for a period.</p></div>
+</dd>
+<dt id="readabs.annualise_rates"><code class="name flex">
+<span>def <span class="ident">annualise_rates</span></span>(<span>data: ~DataT, periods_per_year: int | float = 12) ‑> ~DataT</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Annualise a growth rate for a period.
+Note: returns a percentage (and not a rate)!</p></div>
+</dd>
+<dt id="readabs.find_abs_id"><code class="name flex">
+<span>def <span class="ident">find_abs_id</span></span>(<span>meta: pandas.core.frame.DataFrame, search_terms: dict[str, str], **kwargs: Any) ‑> tuple[str, str, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Find a unique ABS series id in the meta data.
+Return a tuple of the table, series_id and units.
+By default, raises a ValueError if the search terms do
+not result in one and only one series_id.
+Arguments are the same as for search_abs_meta().</p></div>
+</dd>
+<dt id="readabs.grab_abs_url"><code class="name flex">
+<span>def <span class="ident">grab_abs_url</span></span>(<span>url: str = '', **kwargs: Any) ‑> dict[str, pandas.core.frame.DataFrame]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>For a given URL, extract the data from the Excel and ZIP file
+links found on that page. The data is returned as a dictionary of
+DataFrames. The Excel files are converted into DataFrames, with
+each sheet in each Excel file becoming a separate DataFrame. ZIP
+files are examined for Excel files, which are similarly converted into
+DataFrames. The dictionary of DataFrames is returned.</p>
+<p>The preferred mechanism for reading ABS data is to use the <code><a title="readabs.read_abs_cat" href="#readabs.read_abs_cat">read_abs_cat()</a></code>
+or <code><a title="readabs.read_abs_series" href="#readabs.read_abs_series">read_abs_series()</a></code> functions. This function is provided for those
+cases where the data is not available in the ABS catalogue, where the
+data is not a timeseries, or where the user wants to extract data from
+a specific ABS landingpage.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>url</code></strong> :&ensp;<code>str = ""</code></dt>
+<dd>A URL for an ABS Catalogue landing page. Either a url or
+a catalogue number must be provided. If both are provided, the
+URL will be used.</dd>
+<dt><strong><code>**kwargs</code></strong> :&ensp;<code>Any</code></dt>
+<dd>Accepts the same keyword arguments as <code><a title="readabs.read_abs_cat" href="#readabs.read_abs_cat">read_abs_cat()</a></code>. Additionally,
+a cat argument can be provided, which will be used to get the URL
+(see below).</dd>
+<dt><strong><code>cat</code></strong> :&ensp;<code>str = ""</code></dt>
+<dd>An ABS Catalogue number. If provided, the URL will be ignored,
+and the Catalogue number will be used to get the URL.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict[str, DataFrame]</code></dt>
+<dd>A dictionary of DataFrames.</dd>
+</dl></div>
+</dd>
+<dt id="readabs.monthly_to_qtly"><code class="name flex">
+<span>def <span class="ident">monthly_to_qtly</span></span>(<span>data: ~DataT, q_ending='DEC', f: str = 'mean') ‑> ~DataT</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert monthly data to quarterly data by taking the mean of
+the three months in each quarter. Ignore quarters with less than
+or more than three months data. Drop NA items. Change f to "sum"
+for a quarterly sum</p></div>
+</dd>
+<dt id="readabs.percent_change"><code class="name flex">
+<span>def <span class="ident">percent_change</span></span>(<span>data: ~DataT, n_periods: int) ‑> ~DataT</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculate an percentage change in a series over n_periods.</p></div>
+</dd>
+<dt id="readabs.print_abs_catalogue"><code class="name flex">
+<span>def <span class="ident">print_abs_catalogue</span></span>(<span>cache_only=False, verbose=False) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This function prints to standard output a table of the ABS
+Catalogue Numbers that contain time-series data. In addition to the
+Catalogue Numbers, the table includes the theme, parent topic and
+topic for the collection represented by each Catalogue Number.</p>
+<p>It is primarily a convenience function: The first parameter for
+the read_abs_cat() and read_abs_series() functions is the ABS
+Catalogue Number from which data is sought.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>cache_only</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>If True, only use the cache.</dd>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>If True, print progress messages.</dd>
+</dl>
+<h2 id="return-values">Return Values</h2>
+<p>The function does not return anything.</p>
+<h2 id="example">Example</h2>
+<pre><code class="language-python">import readabs as ra
+ra.print_abs_catalogue()
+</code></pre></div>
+</dd>
+<dt id="readabs.print_rba_catalogue"><code class="name flex">
+<span>def <span class="ident">print_rba_catalogue</span></span>(<span>cache_only=False, verbose=False) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Print the RBA data file links.</p></div>
+</dd>
+<dt id="readabs.qtly_to_monthly"><code class="name flex">
+<span>def <span class="ident">qtly_to_monthly</span></span>(<span>data: ~DataT, interpolate: bool = True, limit: Optional[int] = 2, dropna: bool = True) ‑> ~DataT</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert a pandas timeseries with a Quarterly PeriodIndex to an
+timeseries with a Monthly PeriodIndex.</p>
+<h1 id="arguments">Arguments:</h1>
+<p>data - either a pandas Series or DataFrame - assumes the index is unique.
+interpolate - whether to interpolate the missing monthly data.
+dropna - whether to drop NA data</p>
+<h1 id="notes">Notes:</h1>
+<p>Necessitated by Pandas 2.2, which removed .resample()
+from pandas objects with a PeriodIndex.</p></div>
+</dd>
+<dt id="readabs.rba_catalogue"><code class="name flex">
+<span>def <span class="ident">rba_catalogue</span></span>(<span>cache_only=False, verbose=False) ‑> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a DataFrame of RBA data file links.</p></div>
+</dd>
+<dt id="readabs.read_abs_cat"><code class="name flex">
+<span>def <span class="ident">read_abs_cat</span></span>(<span>cat: str, keep_non_ts: bool = False, **kwargs: Any) ‑> tuple[dict[str, pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This function returns the complete ABS Catalogue information as a
+python dictionary of pandas DataFrames, as well as the associated metadata
+in a separate DataFrame. The function automates the collection of zip and
+excel files from the ABS website. If necessary, these files are downloaded,
+and saved into a cache directory. The files are then parsed to extract time
+series data, and the associated metadata.</p>
+<p>By default, the cache directory is <code>./.readabs_cache/</code>. You can change the
+default directory name by setting the shell environment variable
+<code>READABS_CACHE_DIR</code> with the name of the preferred directory.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>cat</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ABS Catalogue Number for the data to be downloaded and made
+available by this function. This argument must be specified in the
+function call.</dd>
+<dt><strong><code>keep_non_ts</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>A flag for whether to keep the non-time-series tables
+that might form part of an ABS catalogue item. Normally, the
+non-time-series information is ignored, and not made available to
+the user.</dd>
+<dt><strong><code>**kwargs</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The following parameters may be passed as optional keyword arguments.</dd>
+<dt><strong><code>history</code></strong> :&ensp;<code>str = ""</code></dt>
+<dd>Orovide a month-year string to extract historical ABS data.
+For example, you can set history="dec-2023" to the get the ABS data
+for a catalogue identifier that was originally published in respect
+of Q4 of 2023. Note: not all ABS data sources are structured so that
+this technique works in every case; but most are.</dd>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>Setting this to true may help diagnose why something
+might be going wrong with the data retrieval process.</dd>
+<dt><strong><code>ignore_errors</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>Normally, this function will cease downloading when
+an error in encountered. However, sometimes the ABS website has
+malformed links, and changing this setting is necessitated. (Note:
+if you drop a message to the ABS, they will usually fix broken
+links with a business day).</dd>
+<dt><strong><code>get_zip</code></strong> :&ensp;<code>bool = True</code></dt>
+<dd>Download the excel files in .zip files.</dd>
+<dt><strong><code>get_excel_if_no_zip</code></strong> :&ensp;<code>bool = True</code></dt>
+<dd>Only try to download .xlsx files if there are no zip
+files available to be downloaded. Only downloading individual excel
+files when there are no zip files to download can speed up the
+download process.</dd>
+<dt><strong><code>get_excel</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>The default value means that excel files are not
+automatically download. Note: at least one of <code>get_zip</code>,
+<code>get_excel_if_no_zip</code>, or <code>get_excel</code> must be true. For most ABS
+catalogue items, it is sufficient to just download the one zip
+file. But note, some catalogue items do not have a zip file.
+Others have quite a number of zip files.</dd>
+<dt><strong><code>single_excel_only</code></strong> :&ensp;<code>str = ""</code></dt>
+<dd>If this argument is set to a table name (without the
+.xlsx extension), only that excel file will be downloaded. If
+set, and only a limited subset of available data is needed,
+this can speed up download times significantly. Note: overrides
+<code>get_zip</code>, <code>get_excel_if_no_zip</code>, <code>get_excel</code> and <code>single_zip_only</code>.</dd>
+<dt><strong><code>single_zip_only</code></strong> :&ensp;<code>str = ""</code></dt>
+<dd>If this argument is set to a zip file name (without
+the .zip extension), only that zip file will be downloaded.
+If set, and only a limited subset of available data is needed,
+this can speed up download times significantly. Note: overrides
+<code>get_zip</code>, <code>get_excel_if_no_zip</code>, and <code>get_excel</code>.</dd>
+<dt><strong><code>cache_only</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>If set to True, this function will only access
+data that has been previously cached. Normally, the function
+checks the date of the cache data against the date of the data
+on the ABS website, before deciding whether the ABS has fresher
+data that needs to be downloaded to the cache.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[dict[str, DataFrame], DataFrame]</code></dt>
+<dd>The function returns a tuple of two items. The first item is a
+python dictionary of pandas DataFrames (which is the primary data
+associated with the ABS catalogue item). The second item is a
+DataFrame of ABS metadata for the ABS collection.</dd>
+</dl>
+<h2 id="example">Example</h2>
+<pre><code class="language-python">import readabs as ra
+from pandas import DataFrame
+cat_num = &quot;6202.0&quot;  # The ABS labour force survey
+data: tuple[dict[str, DataFrame], DataFrame] = ra.read_abs_cat(cat=cat_num)
+abs_dict, meta = data
+</code></pre></div>
+</dd>
+<dt id="readabs.read_abs_series"><code class="name flex">
+<span>def <span class="ident">read_abs_series</span></span>(<span>cat: str, series_id: Union[str, Sequence[str]], **kwargs: Any) ‑> tuple[pandas.core.frame.DataFrame, pandas.core.frame.DataFrame]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get specific ABS data series by their ABS catalogue and series identifiers.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>cat</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ABS catalogue ID.</dd>
+<dt><strong><code>series_id</code></strong> :&ensp;<code>str | Sequence[str]</code></dt>
+<dd>An ABS series ID or a sequence of ABS series IDs.</dd>
+<dt><strong><code>**kwargs</code></strong> :&ensp;<code>Any</code></dt>
+<dd>Keyword arguments for the read_abs_series function,
+which are the same as the keyword arguments for the r
+read_abs_cat function.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[DataFrame, DataFrame]</code></dt>
+<dd>A tuple of two DataFrames, one for the primary data and one for the metadata.</dd>
+</dl>
+<h2 id="example">Example</h2>
+<pre><code class="language-python">import readabs as ra
+from pandas import DataFrame
+cat_num = &quot;6202.0&quot;  # The ABS labour force survey
+unemployment_rate = &quot;A84423050A&quot;
+seo = &quot;6202001&quot;  # The ABS table name
+data, meta = ra.read_abs_series(
+    cat=cat_num, series_id=unemployment_rate, single_excel_only=seo
+)
+</code></pre></div>
+</dd>
+<dt id="readabs.read_rba_ocr"><code class="name flex">
+<span>def <span class="ident">read_rba_ocr</span></span>(<span>monthly: bool = True, **kwargs: Any) ‑> pandas.core.series.Series</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Read the Official Cash Rate (OCR) from the RBA website and return it
+in a pandas Series, with either a daily or monthly PeriodIndex,
+depending on the value of the monthly parameter. The default is monthly.</p></div>
+</dd>
+<dt id="readabs.read_rba_table"><code class="name flex">
+<span>def <span class="ident">read_rba_table</span></span>(<span>table: str, **kwargs: Any) ‑> tuple[pandas.core.frame.DataFrame, pandas.core.frame.DataFrame]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Read a table from the RBA website and return the actual data
+and the meta data in a tuple of two DataFrames.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>str</code></dt>
+<dd>The table to read from the RBA website.</dd>
+<dt><strong><code>**kwargs</code></strong> :&ensp;<code>Any</code></dt>
+<dd>Additional keyword arguments.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[DataFrame, DataFrame]</code></dt>
+<dd>The actual data and the meta data in a tuple of two DataFrames.</dd>
+</dl></div>
+</dd>
+<dt id="readabs.recalibrate"><code class="name flex">
+<span>def <span class="ident">recalibrate</span></span>(<span>data: ~DataT, units: str) ‑> tuple[~DataT, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Recalibrate a Series/DataFrame so the data in in the range -1000 to 1000.
+Change the name of the units to reflect the recalibration.</p></div>
+</dd>
+<dt id="readabs.recalibrate_value"><code class="name flex">
+<span>def <span class="ident">recalibrate_value</span></span>(<span>value: float, units: str) ‑> tuple[float, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Recalibrate a floating point value.</p></div>
+</dd>
+<dt id="readabs.search_abs_meta"><code class="name flex">
+<span>def <span class="ident">search_abs_meta</span></span>(<span>meta: pandas.core.frame.DataFrame, search_terms: dict[str, str], exact_match: bool = False, regex: bool = False, validate_unique=False, **kwargs: Any) ‑> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extract from the meta data the rows that match the search_terms, by iteratively
+searching the meta data one search term at a time.</p>
+<p>Arguments:
+- meta - pandas DataFrame of metadata from the ABS
+(via read_abs_cat() or read_abs_series()).
+- search_terms - dictionary - {search_phrase: meta_column_name, &hellip;}
+Note: the search terms must be unique, as a dictionary cannot hold the
+same search term to be applied to different columns.
+- exact_natch - bool - whether to match using == (exact) or .str.contains()
+(inexact)
+- regex - bool - for .str.contains() - whether to use regular expressions
+- validate_unique - bool - raise a ValueError if search result is not unique
+- verbose - bool - print additional information while searching; which can
+be useful when diagnosing problems with search terms.</p>
+<p>Returns a pandas DataFrame (subseted from meta), Note: The index for the
+returned meta data will always comprise ABS series_ids. Duplicate indexes
+will be removed from the meta data (ie. where the ABS has a series in more
+than one table, this function will only report the first match.)</p></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="readabs.abs_meta_data_support" href="abs_meta_data_support.html">readabs.abs_meta_data_support</a></code></li>
+<li><code><a title="readabs.get_rba_links" href="get_rba_links.html">readabs.get_rba_links</a></code></li>
+<li><code><a title="readabs.utilities" href="utilities.html">readabs.utilities</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="readabs.abs_catalogue" href="#readabs.abs_catalogue">abs_catalogue</a></code></li>
+<li><code><a title="readabs.annualise_percentages" href="#readabs.annualise_percentages">annualise_percentages</a></code></li>
+<li><code><a title="readabs.annualise_rates" href="#readabs.annualise_rates">annualise_rates</a></code></li>
+<li><code><a title="readabs.find_abs_id" href="#readabs.find_abs_id">find_abs_id</a></code></li>
+<li><code><a title="readabs.grab_abs_url" href="#readabs.grab_abs_url">grab_abs_url</a></code></li>
+<li><code><a title="readabs.monthly_to_qtly" href="#readabs.monthly_to_qtly">monthly_to_qtly</a></code></li>
+<li><code><a title="readabs.percent_change" href="#readabs.percent_change">percent_change</a></code></li>
+<li><code><a title="readabs.print_abs_catalogue" href="#readabs.print_abs_catalogue">print_abs_catalogue</a></code></li>
+<li><code><a title="readabs.print_rba_catalogue" href="#readabs.print_rba_catalogue">print_rba_catalogue</a></code></li>
+<li><code><a title="readabs.qtly_to_monthly" href="#readabs.qtly_to_monthly">qtly_to_monthly</a></code></li>
+<li><code><a title="readabs.rba_catalogue" href="#readabs.rba_catalogue">rba_catalogue</a></code></li>
+<li><code><a title="readabs.read_abs_cat" href="#readabs.read_abs_cat">read_abs_cat</a></code></li>
+<li><code><a title="readabs.read_abs_series" href="#readabs.read_abs_series">read_abs_series</a></code></li>
+<li><code><a title="readabs.read_rba_ocr" href="#readabs.read_rba_ocr">read_rba_ocr</a></code></li>
+<li><code><a title="readabs.read_rba_table" href="#readabs.read_rba_table">read_rba_table</a></code></li>
+<li><code><a title="readabs.recalibrate" href="#readabs.recalibrate">recalibrate</a></code></li>
+<li><code><a title="readabs.recalibrate_value" href="#readabs.recalibrate_value">recalibrate_value</a></code></li>
+<li><code><a title="readabs.search_abs_meta" href="#readabs.search_abs_meta">search_abs_meta</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>

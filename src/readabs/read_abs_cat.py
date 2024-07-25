@@ -1,22 +1,5 @@
-"""read_abs_cat.py
-
-Download all/selected *timeseries* data from the
-Australian Bureau of Statistics (ABS) for a specified 
-ABS catalogue identifier and package that data into (1) a 
-dictionary of DataFrames and (2) a separate DataFrame of 
-meta data.
-
-Note: if you only need data from a single Excel file or a single
-zip file, you can specify the stem-name of that file in the keyword
-argument 'single_excel_only=' or 'single_zip_only='. For example, the 
-stem-name for the first Excel file in the Labour Force Survey is 
-'6202001'. Doing this can save substantial time and bandwidth.
-
-This module uses grab_abs_url.py to get the initial data. It then
-processes the timeseries data from the ABS website. It makes sure that
-dates are converted to an appropriate PeriodIndex, and that the data
-is stored in a DataFrame with the correct columns. It also captures
-the metadata for each data item."""
+"""Download *timeseries* data from the Australian Bureau 
+of Statistics (ABS) for a specified ABS catalogue identifier."""
 
 # --- imports ---
 # standard library imports
@@ -42,23 +25,108 @@ def read_abs_cat(
     keep_non_ts: bool = False,
     **kwargs: Any,
 ) -> tuple[dict[str, DataFrame], DataFrame]:
-    """Read the ABS data for a catalogue id and return the data.
+    """This function returns the complete ABS Catalogue information as a
+    python dictionary of pandas DataFrames, as well as the associated metadata
+    in a separate DataFrame. The function automates the collection of zip and
+    excel files from the ABS website. If necessary, these files are downloaded,
+    and saved into a cache directory. The files are then parsed to extract time
+    series data, and the associated metadata.
+
+    By default, the cache directory is `./.readabs_cache/`. You can change the
+    default directory name by setting the shell environment variable
+    `READABS_CACHE_DIR` with the name of the preferred directory.
 
     Parameters
     ----------
+
     cat : str
-        The ABS catalogue number.
-    keep_non_ts : bool
-        If True, keep non-time series data [default: False].
+        The ABS Catalogue Number for the data to be downloaded and made
+        available by this function. This argument must be specified in the
+        function call.
+
+    keep_non_ts : bool = False
+        A flag for whether to keep the non-time-series tables
+        that might form part of an ABS catalogue item. Normally, the
+        non-time-series information is ignored, and not made available to
+        the user.
+
     **kwargs : Any
-        Keyword arguments for the read_abs_cat function.
+        The following parameters may be passed as optional keyword arguments.
+
+    history : str = ""
+        Orovide a month-year string to extract historical ABS data.
+        For example, you can set history="dec-2023" to the get the ABS data
+        for a catalogue identifier that was originally published in respect
+        of Q4 of 2023. Note: not all ABS data sources are structured so that
+        this technique works in every case; but most are.
+
+    verbose : bool = False
+        Setting this to true may help diagnose why something
+        might be going wrong with the data retrieval process.
+
+    ignore_errors : bool = False
+        Normally, this function will cease downloading when
+        an error in encountered. However, sometimes the ABS website has
+        malformed links, and changing this setting is necessitated. (Note:
+        if you drop a message to the ABS, they will usually fix broken
+        links with a business day).
+
+    get_zip : bool = True
+        Download the excel files in .zip files.
+
+    get_excel_if_no_zip : bool = True
+        Only try to download .xlsx files if there are no zip
+        files available to be downloaded. Only downloading individual excel
+        files when there are no zip files to download can speed up the
+        download process.
+
+    get_excel : bool = False
+        The default value means that excel files are not
+        automatically download. Note: at least one of `get_zip`,
+        `get_excel_if_no_zip`, or `get_excel` must be true. For most ABS
+        catalogue items, it is sufficient to just download the one zip
+        file. But note, some catalogue items do not have a zip file.
+        Others have quite a number of zip files.
+
+    single_excel_only : str = ""
+        If this argument is set to a table name (without the
+        .xlsx extension), only that excel file will be downloaded. If
+        set, and only a limited subset of available data is needed,
+        this can speed up download times significantly. Note: overrides
+        `get_zip`, `get_excel_if_no_zip`, `get_excel` and `single_zip_only`.
+
+    single_zip_only : str = ""
+        If this argument is set to a zip file name (without
+        the .zip extension), only that zip file will be downloaded.
+        If set, and only a limited subset of available data is needed,
+        this can speed up download times significantly. Note: overrides
+        `get_zip`, `get_excel_if_no_zip`, and `get_excel`.
+
+    cache_only : bool = False
+        If set to True, this function will only access
+        data that has been previously cached. Normally, the function
+        checks the date of the cache data against the date of the data
+        on the ABS website, before deciding whether the ABS has fresher
+        data that needs to be downloaded to the cache.
 
     Returns
-    -------
+    -------------
     tuple[dict[str, DataFrame], DataFrame]
-        A dictionary of DataFrames and a DataFrame of the meta data.
-        The dictionary is indexed by table names, which can be found
-        in the meta data DataFrame."""
+        The function returns a tuple of two items. The first item is a
+        python dictionary of pandas DataFrames (which is the primary data
+        associated with the ABS catalogue item). The second item is a
+        DataFrame of ABS metadata for the ABS collection.
+
+    Example
+    -------
+
+    ```python
+    import readabs as ra
+    from pandas import DataFrame
+    cat_num = "6202.0"  # The ABS labour force survey
+    data: tuple[dict[str, DataFrame], DataFrame] = ra.read_abs_cat(cat=cat_num)
+    abs_dict, meta = data
+    ```"""
 
     # --- get the time series data ---
     raw_abs_dict = grab_abs_url(cat=cat, **kwargs)
@@ -137,15 +205,14 @@ def _capture(
     ignore_errors: bool = kwargs.get("ignore_errors", False)
 
     # --- step 1: capture the meta data ---
-    short_sheets = [x.split(HYPHEN, 1)[1] for x in args["long_sheets"]]
-    try:
-        index = short_sheets.index("Index")
-    except ValueError:
+    short_names = [x.split(HYPHEN, 1)[1] for x in args["long_sheets"]]
+    if "Index" not in short_names:
         print(f"Table {args["table"]} has no 'Index' sheet.")
         to_dict = _copy_raw_sheets(
             args["from_dict"], args["long_sheets"], to_dict, keep_non_ts
         )
         return to_dict, meta_data
+    index = short_names.index("Index")
 
     index_sheet = args["long_sheets"][index]
     this_meta = _capture_meta(args["cat"], args["from_dict"], index_sheet)
@@ -205,39 +272,8 @@ def _capture_data(
         sheet_data.columns = pd.Index(header)
         sheet_data = sheet_data[(header_row + 1) :]
 
-        # get the row indexes - assume long row names are not dates
-        index_column = sheet_data[sheet_data.columns[0]].astype(str)
-        sheet_data = sheet_data.drop(sheet_data.columns[0], axis=1)
-        long_row_names = index_column.str.len() > 20  # 19 chars in datetime str
-        if verbose and long_row_names.any():
-            print(f"You may need to check index column for {sheet_name}")
-        index_column = index_column.loc[~long_row_names]
-        sheet_data = sheet_data.loc[~long_row_names]
-
-        proposed_index = pd.to_datetime(index_column)  #
-
-        # get the correct period index
-        short_name = sheet_name.split(HYPHEN, 1)[0]
-        series_id = sheet_data.columns[0]
-        freq = (
-            abs_meta[abs_meta[metacol.table] == short_name]
-            .at[series_id, metacol.freq]
-            .upper()
-            .strip()[0]
-        )
-        freq = "Y" if freq == "A" else freq  # pandas prefers yearly
-        freq = "Q" if freq == "B" else freq  # treat Biannual as quarterly
-        if freq not in ("Y", "Q", "M", "D"):
-            print(f"Check the frequency of the data in sheet: {sheet_name}")
-
-        # create an appropriate period index
-        if freq:
-            if freq in ("Q", "Y"):
-                month = calendar.month_abbr[proposed_index.dt.month.max()].upper()
-                freq = f"{freq}-{month}"
-            sheet_data.index = pd.PeriodIndex(proposed_index, freq=freq)
-        else:
-            raise ValueError(f"With sheet {sheet_name} could not determime PeriodIndex")
+        # get the row indexes
+        sheet_data = _index_to_period(sheet_data, sheet_name, abs_meta, verbose)
 
         # --- merge data into a single dataframe
         if len(merged_data) == 0:
@@ -281,6 +317,47 @@ def _capture_data(
     merged_data = merged_data.astype(float).sort_index()
 
     return merged_data
+
+
+def _index_to_period(
+    sheet_data: DataFrame, sheet_name: str, abs_meta: DataFrame, verbose: bool
+) -> DataFrame:
+    """Convert the index of a DataFrame to a PeriodIndex."""
+
+    index_column = sheet_data[sheet_data.columns[0]].astype(str)
+    sheet_data = sheet_data.drop(sheet_data.columns[0], axis=1)
+    long_row_names = index_column.str.len() > 20  # 19 chars in datetime str
+    if verbose and long_row_names.any():
+        print(f"You may need to check index column for {sheet_name}")
+    index_column = index_column.loc[~long_row_names]
+    sheet_data = sheet_data.loc[~long_row_names]
+
+    proposed_index = pd.to_datetime(index_column)  #
+
+    # get the correct period index
+    short_name = sheet_name.split(HYPHEN, 1)[0]
+    series_id = sheet_data.columns[0]
+    freq = (
+        abs_meta[abs_meta[metacol.table] == short_name]
+        .at[series_id, metacol.freq]
+        .upper()
+        .strip()[0]
+    )
+    freq = "Y" if freq == "A" else freq  # pandas prefers yearly
+    freq = "Q" if freq == "B" else freq  # treat Biannual as quarterly
+    if freq not in ("Y", "Q", "M", "D"):
+        print(f"Check the frequency of the data in sheet: {sheet_name}")
+
+    # create an appropriate period index
+    if freq:
+        if freq in ("Q", "Y"):
+            month = calendar.month_abbr[proposed_index.dt.month.max()].upper()
+            freq = f"{freq}-{month}"
+        sheet_data.index = pd.PeriodIndex(proposed_index, freq=freq)
+    else:
+        raise ValueError(f"With sheet {sheet_name} could not determime PeriodIndex")
+
+    return sheet_data
 
 
 def _capture_meta(
@@ -360,13 +437,22 @@ def _group_sheets(
 
 # --- initial testing ---
 if __name__ == "__main__":
-    # type: ignore
 
-    # --- test the function ---
-    # this ABS Catalogue ID has a mix of time
-    # series and non-time series data. Also,
-    # it has poorly structured Excel files. So, a good test.
-    d, m = read_abs_cat("8731.0", keep_non_ts=True)
-    print(f"--- len(d) = {len(d)} ---")
-    d, m = read_abs_cat("8731.0", keep_non_ts=False)
-    print(f"--- len(d) = {len(d)} ---")
+    def simple_test():
+        """A simple test of the read_abs_cat function."""
+
+        # ABS Catalogue ID 8731.0 has a mix of time
+        # series and non-time series data. Also,
+        # it has unusually structured Excel files. So, a good test.
+
+        print("Starting test.")
+
+        d, _m = read_abs_cat("8731.0", keep_non_ts=False, verbose=False)
+        print(f"--- {len(d)=} ---")
+        print(f"--- {d.keys()=} ---")
+        for table in d.keys():
+            print(f"{table=} {d[table].shape=} {d[table].index.freqstr=}")
+
+        print("Test complete.")
+
+    simple_test()

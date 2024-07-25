@@ -22,6 +22,8 @@ Metacol = namedtuple(
         "cat",
     ],
 )
+Metacol.__doc__ = """A namedtuple of ABS meta data columns."""
+
 
 metacol = Metacol(
     did="Data Item Description",
@@ -42,7 +44,6 @@ metacol = Metacol(
 
 # --- testing
 if __name__ == "__main__":
-    # type: ignore
 
     def test_metacol():
         """Quick test of the Metacol namedtuple."""

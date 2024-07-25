@@ -97,6 +97,4 @@ def _make_absolute_url(url: str, prefix: str = "https://www.rba.gov.au") -> str:
 
 # --- testing ---
 if __name__ == "__main__":
-    # type: ignore
     print_rba_catalogue(cache_only=False, verbose=False)
-    print_rba_catalogue(cache_only=True, verbose=True)
