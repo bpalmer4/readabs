@@ -15,7 +15,63 @@ from readabs.download_cache import get_file, HttpError, CacheError
 
 # --- public functions ---
 @cache
-def get_rba_links(**kwargs: Any) -> DataFrame:
+def rba_catalogue(cache_only=False, verbose=False) -> DataFrame:
+    """Return a DataFrame of RBA Catalogue numbers. In the first instance,
+    this is downloaded from the RBA website, and cached for future use.
+
+    Parameters
+    ----------
+    cache_only : bool = False
+        If True, only use the cache.
+    verbose : bool = False
+        If True, print progress messages.
+
+    Returns
+    -------
+    DataFrame
+        A DataFrame of RBA Catalogue numbers.
+
+    Example
+    -------
+    ```python
+    import readabs as ra
+    catalogue = ra.rba_catalogue()
+    ```"""
+
+    return _get_rba_links(cache_only=cache_only, verbose=verbose)
+
+
+def print_rba_catalogue(cache_only=False, verbose=False) -> None:
+    """This function prints to standard output a table of the RBA
+    Catalogue Numbers.
+
+    Parameters
+    ----------
+    cache_only : bool = False
+        If True, only use the cache.
+    verbose : bool = False
+        If True, print progress messages.
+
+    Return values
+    -------------
+
+    The function does not return anything.
+
+    Example
+    -------
+
+    ```python
+    import readabs as ra
+    ra.print_rba_catalogue()
+    ```"""
+
+    rba_catalog = rba_catalogue(cache_only=cache_only, verbose=verbose)
+    print(rba_catalog.loc[:, rba_catalog.columns != "URL"].to_markdown())
+
+
+# --- private functions ---
+@cache
+def _get_rba_links(**kwargs: Any) -> DataFrame:
     """Extract links to RBA data files in Excel format
     from the RBA website.  Returns a DataFrame with the
     following columns: 'Description' and 'URL'. The index
@@ -67,20 +123,6 @@ def get_rba_links(**kwargs: Any) -> DataFrame:
     rba_catalog = DataFrame(link_dict).T.sort_index()
     rba_catalog.index.name = "Table"
     return rba_catalog
-
-
-@cache
-def rba_catalogue(cache_only=False, verbose=False) -> DataFrame:
-    """Return a DataFrame of RBA data file links."""
-
-    return get_rba_links(cache_only=cache_only, verbose=verbose)
-
-
-def print_rba_catalogue(cache_only=False, verbose=False) -> None:
-    """Print the RBA data file links."""
-
-    rba_catalog = rba_catalogue(cache_only=cache_only, verbose=verbose)
-    print(rba_catalog.loc[:, rba_catalog.columns != "URL"].to_markdown())
 
 
 # private

@@ -2,7 +2,6 @@
 
 Read a table from the RBA website and store it in a pandas DataFrame."""
 
-from collections import namedtuple
 from typing import Any, cast
 from io import BytesIO
 from pandas import (
@@ -18,40 +17,12 @@ from pandas import (
 )
 
 # local imports
-from readabs.get_rba_links import rba_catalogue
+from readabs.rba_catalogue import rba_catalogue
 from readabs.download_cache import get_file, HttpError, CacheError
+from readabs.rba_meta_data import rba_metacol as rm
+
 
 # --- PUBLIC ---
-RbaMetacol = namedtuple(
-    "RbaMetacol",
-    [
-        "title",
-        "desc",
-        "freq",
-        "type",
-        "unit",
-        "src",
-        "pub",
-        "id",
-        "table",
-        "tdesc",
-    ],
-)
-
-rba_metacol = RbaMetacol(
-    title="Title",
-    desc="Description",
-    freq="Frequency",
-    type="Type",
-    unit="Units",
-    src="Source",
-    pub="Publication date",
-    id="Series ID",
-    table="Table",
-    tdesc="Table Description",
-)
-
-
 def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
     """Read a table from the RBA website and return the actual data
     and the meta data in a tuple of two DataFrames.
@@ -62,11 +33,22 @@ def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
         The table to read from the RBA website.
     **kwargs : Any
         Additional keyword arguments.
+        The only keyword argument that is used is ignore_errors.
+    ignore_errors : bool = False
+        If True, then any major errors encountered will be printed and the function
+        will return empty DataFrames. If False, then any major errors encountered
+        will raise an exception.
 
     Returns
     -------
     tuple[DataFrame, DataFrame]
-        The actual data and the meta data in a tuple of two DataFrames."""
+        The primary data and the meta data in a tuple of two DataFrames.
+
+    Examples
+    --------
+    ```python
+    data, meta = read_rba_table("C1")
+    ```"""
 
     # set-up
     ignore_errors = kwargs.get("ignore_errors", False)
@@ -109,9 +91,9 @@ def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
     meta = raw.iloc[1:11, :].T.copy()
     meta.columns = Index(meta.iloc[0])
     meta = meta.iloc[1:, :]
-    meta.index = meta[rba_metacol.id]
-    meta[rba_metacol.table] = table
-    meta[rba_metacol.tdesc] = raw.iloc[0, 0]
+    meta.index = Index(meta[rm.id])
+    meta[rm.table] = table
+    meta[rm.tdesc] = raw.iloc[0, 0]
     meta = meta.dropna(how="all", axis=1)  # drop columns with all NaNs
 
     # extract the data
@@ -139,7 +121,30 @@ def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
 def read_rba_ocr(monthly: bool = True, **kwargs: Any) -> Series:
     """Read the Official Cash Rate (OCR) from the RBA website and return it
     in a pandas Series, with either a daily or monthly PeriodIndex,
-    depending on the value of the monthly parameter. The default is monthly."""
+    depending on the value of the monthly parameter. The default is monthly.
+
+    Parameters
+    ----------
+    monthly : bool = True
+        If True, then the data will be returned with a monthly PeriodIndex.
+        If False, then the data will be returned with a daily PeriodIndex.
+    **kwargs : Any
+        Additional keyword arguments. The only keyword argument that is used is ignore_errors.
+    ignore_errors : bool = False
+        If True, then any major errors encountered will be printed and the function
+        will return an empty Series. If False, then any major errors encountered
+        will raise an exception.
+
+    Returns
+    -------
+    Series
+        The OCR data in a pandas Series, with an index of either daily or monthly Periods.
+
+    Examples
+    --------
+    ```python
+    ocr = read_rba_ocr(monthly=True)
+    ```"""
 
     # read the OCR table from the RBA website, make float and sort, name the series
     rba, _rba_meta = read_rba_table("A2", **kwargs)  # should have a daily PeriodIndex
@@ -198,12 +203,14 @@ if __name__ == "__main__":
         # test with monthly data
         ocr = read_rba_ocr(monthly=True)
         print(ocr.head())
+        print("...")
         print(ocr.tail())
         print("=" * 20)
 
         # test with daily data
         ocr = read_rba_ocr(monthly=False)
         print(ocr.head())
+        print("...")
         print(ocr.tail())
         print("=" * 20)
 

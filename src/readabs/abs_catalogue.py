@@ -1,6 +1,7 @@
 """Catalogue map for ABS data."""
 
 from functools import cache
+from io import StringIO
 from pandas import DataFrame, Series, Index, read_html
 from readabs.download_cache import get_file
 
@@ -32,7 +33,7 @@ def abs_catalogue(cache_only=False, verbose=False) -> DataFrame:
     # get ABS web page of catalogue numbers
     url = "https://www.abs.gov.au/about/data-services/help/abs-time-series-directory"
     abs_bytes = get_file(url, cache_only=cache_only, verbose=verbose)
-    links = read_html(abs_bytes.decode("utf-8"), extract_links="body")[
+    links = read_html(StringIO(abs_bytes.decode("utf-8")), extract_links="body")[
         1
     ]  # second table on the page
 

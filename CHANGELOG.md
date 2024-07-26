@@ -1,14 +1,15 @@
-Version 0.0.16 released X (Canberra, Australia)
+Version 0.0.16 released 26-JUL-2024 (Canberra, Australia)
 
 - Major changes
    * removed the old-docs directory.
+   * Finished documenting the API, using pdoc3
 
 - Minor changes
-   *
+   * Some code reorganisation
 
 ---
 
-Version 0.0.15 released 25-Jul-2024 (Canberra, Australia)
+Version 0.0.15 released 25-JUL-2024 (Canberra, Australia)
 
 - Major changes
    * Removed the incomplete documentation from the 

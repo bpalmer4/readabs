@@ -40,35 +40,90 @@ working with ABS timeseries data.</p>
 <span>def <span class="ident">annualise_percentages</span></span>(<span>data: ~DataT, periods_per_year: int | float = 12) ‑> ~DataT</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Annualise a growth rate (expressed as a percentage) for a period.</p></div>
+<div class="desc"><p>Annualise a growth rate (expressed as a percentage) for a period.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The growth rate (expresed as a percentage) to annualise. Note a
+growth percentage of 5% is a growth rate of 0.05.</dd>
+<dt><strong><code>periods_per_year</code></strong> :&ensp;<code>int</code> or <code>float</code>, default <code>12</code></dt>
+<dd>The number of periods in a year. For monthly data, this is 12.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The annualised growth expressed as a percentage. For DataFrame input,
+the annualised growth rate is calculated for each column.</dd>
+</dl></div>
 </dd>
 <dt id="readabs.utilities.annualise_rates"><code class="name flex">
 <span>def <span class="ident">annualise_rates</span></span>(<span>data: ~DataT, periods_per_year: int | float = 12) ‑> ~DataT</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Annualise a growth rate for a period.
-Note: returns a percentage (and not a rate)!</p></div>
+Note: returns a percentage value (and not a rate)!</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The growth rate to annualise. Note a growth rate of 0.05 is 5%.</dd>
+<dt><strong><code>periods_per_year</code></strong> :&ensp;<code>int</code> or <code>float</code>, default <code>12</code></dt>
+<dd>The number of periods in a year. For monthly data, this is 12.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The annualised growth expressed as a percentage (not a rate).
+For DataFrame input, the annualised growth rate is calculated
+for each column.</dd>
+</dl></div>
 </dd>
 <dt id="readabs.utilities.monthly_to_qtly"><code class="name flex">
 <span>def <span class="ident">monthly_to_qtly</span></span>(<span>data: ~DataT, q_ending='DEC', f: str = 'mean') ‑> ~DataT</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Convert monthly data to quarterly data by taking the mean of
-the three months in each quarter. Ignore quarters with less than
+<div class="desc"><p>Convert monthly data to quarterly data by taking the mean (or sum)
+of the three months in each quarter. Ignore quarters with less than
 or more than three months data. Drop NA items. Change f to "sum"
-for a quarterly sum</p></div>
-</dd>
-<dt id="readabs.utilities.monthly_to_qtly_series"><code class="name flex">
-<span>def <span class="ident">monthly_to_qtly_series</span></span>(<span>data: pandas.core.series.Series, q_ending='DEC', f: str = 'mean') ‑> pandas.core.series.Series</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Convert monthly Series to a quarterly Series.</p></div>
+for a quarterly sum.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The data to convert to quarterly frequency.</dd>
+<dt><strong><code>q_ending</code></strong> :&ensp;<code>str</code>, default <code>DEC</code></dt>
+<dd>The month in which the quarter ends. For example, "DEC" for December.</dd>
+<dt><strong><code>f</code></strong> :&ensp;<code>str</code>, default <code>"mean"</code></dt>
+<dd>The function to apply to the three months in each quarter.
+Change to "sum" for a quarterly sum. The default is a
+quarterly mean.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The data with a quarterly PeriodIndex. If a quarter has less than
+three months data, the quarter is dropped. If the quarter has more
+than three months data, the quarter is dropped. Any NA data is removed.
+For DataFrame input, the function is applied to each column.</dd>
+</dl></div>
 </dd>
 <dt id="readabs.utilities.percent_change"><code class="name flex">
 <span>def <span class="ident">percent_change</span></span>(<span>data: ~DataT, n_periods: int) ‑> ~DataT</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Calculate an percentage change in a series over n_periods.</p></div>
+<div class="desc"><p>Calculate an percentage change in a contiguous, ordered series over n_periods.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The data to calculate the percentage change for.</dd>
+<dt><strong><code>n_periods</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of periods to calculate the percentage change over.
+Typically 4 for quarterly data, and 12 for monthly data.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The percentage change in the data over n_periods. For DataFrame input,
+the percentage change is calculated for each column.</dd>
+</dl></div>
 </dd>
 <dt id="readabs.utilities.qtly_to_monthly"><code class="name flex">
 <span>def <span class="ident">qtly_to_monthly</span></span>(<span>data: ~DataT, interpolate: bool = True, limit: Optional[int] = 2, dropna: bool = True) ‑> ~DataT</span>
@@ -76,13 +131,24 @@ for a quarterly sum</p></div>
 <dd>
 <div class="desc"><p>Convert a pandas timeseries with a Quarterly PeriodIndex to an
 timeseries with a Monthly PeriodIndex.</p>
-<h1 id="arguments">Arguments:</h1>
-<p>data - either a pandas Series or DataFrame - assumes the index is unique.
-interpolate - whether to interpolate the missing monthly data.
-dropna - whether to drop NA data</p>
-<h1 id="notes">Notes:</h1>
-<p>Necessitated by Pandas 2.2, which removed .resample()
-from pandas objects with a PeriodIndex.</p></div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt>data - either a pandas Series or DataFrame - assumes the index is unique.</dt>
+<dt>The data to convert to monthly frequency.</dt>
+<dt><strong><code>interpolate</code></strong> :&ensp;<code>bool</code>, default <code>True</code></dt>
+<dd>Whether to interpolate the missing monthly data.</dd>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code>, default <code>2</code></dt>
+<dd>The maximum number of consecutive missing months to interpolate.</dd>
+<dt><strong><code>dropna</code></strong> :&ensp;<code>bool</code>, default <code>True</code></dt>
+<dd>Whether to drop NA data</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The data with a Monthly PeriodIndex. If interpolate is True, the
+missing monthly data is interpolated. If dropna is True, any NA
+data is removed.</dd>
+</dl></div>
 </dd>
 </dl>
 </section>
@@ -104,7 +170,6 @@ from pandas objects with a PeriodIndex.</p></div>
 <li><code><a title="readabs.utilities.annualise_percentages" href="#readabs.utilities.annualise_percentages">annualise_percentages</a></code></li>
 <li><code><a title="readabs.utilities.annualise_rates" href="#readabs.utilities.annualise_rates">annualise_rates</a></code></li>
 <li><code><a title="readabs.utilities.monthly_to_qtly" href="#readabs.utilities.monthly_to_qtly">monthly_to_qtly</a></code></li>
-<li><code><a title="readabs.utilities.monthly_to_qtly_series" href="#readabs.utilities.monthly_to_qtly_series">monthly_to_qtly_series</a></code></li>
 <li><code><a title="readabs.utilities.percent_change" href="#readabs.utilities.percent_change">percent_change</a></code></li>
 <li><code><a title="readabs.utilities.qtly_to_monthly" href="#readabs.utilities.qtly_to_monthly">qtly_to_monthly</a></code></li>
 </ul>

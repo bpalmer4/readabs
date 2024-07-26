@@ -7,12 +7,12 @@ Get specific ABS data series by their ABS series identifiers."""
 from typing import Any, Sequence, cast
 
 # analytic imports
-from pandas import DataFrame, PeriodIndex, concat
+from pandas import DataFrame, Index, PeriodIndex, concat
 
 # local imports
 from readabs.read_abs_cat import read_abs_cat
 from readabs.read_support import check_kwargs, get_args
-from readabs.abs_meta_data_support import metacol
+from readabs.abs_meta_data import metacol
 
 
 # --- functions
@@ -64,7 +64,7 @@ def read_abs_series(
 
     # drop repeated series_ids in the meta data,
     # make unique series_ids the index
-    cat_meta.index = cat_meta[metacol.id]
+    cat_meta.index = Index(cat_meta[metacol.id])
     cat_meta = cat_meta.groupby(cat_meta.index).first()
 
     # get the ABS series data
@@ -82,7 +82,7 @@ def read_abs_series(
             raise ValueError(f"Series ID {identifier} not found in catalogue {cat}")
 
         # confirm thay the index of the series is compatible
-        table = cat_meta.loc[identifier, metacol.table]
+        table = str(cat_meta.loc[identifier, metacol.table])  # str for mypy
         data_series = cat_data[table][identifier]
         if (
             len(return_data) > 0

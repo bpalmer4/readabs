@@ -19,9 +19,40 @@ def recalibrate(
     data: DataT,
     units: str,
 ) -> tuple[DataT, str]:
-    """Recalibrate a Series/DataFrame so the data in in the range -1000 to 1000.
-    Change the name of the units to reflect the recalibration."""
+    """Recalibrate a Series or DataFrame so the data in in the range -1000 to 1000.
+    Change the name of the units to reflect the recalibration.
 
+    Note, DataT = TypeVar("DataT", Series, DataFrame). DataT is a constrained typevar.
+    If you provide a Series, you will get a Series back. If you provide a DataFrame,
+    you will get a DataFrame back.
+
+    Parameters
+    ----------
+    data : Series or DataFrame
+        The data to recalibrate.
+    units : str
+        The units of the data. This string should be in the form of
+        "Number", "Thousands", "Millions", "Billions", etc. The units
+        should be in title case.
+
+    Returns
+    -------
+    Series or DataFrame
+        The recalibrated data will be a Series if a Series was provided,
+        or a DataFrame if a DataFrame was provided.
+
+    Examples
+    --------
+    ```python
+    from pandas import Series
+    from readabs import recalibrate
+    s = Series([1_000, 10_000, 100_000, 1_000_000])
+    recalibrated, units = recalibrate(s, "$")
+    print(f"{recalibrated=}, {units=}")
+    ```"""
+
+    if not isinstance(data, (Series, DataFrame)):
+        raise TypeError("data must be a Series or DataFrame")
     units, restore_name = _prepare_units(units)
     flat_data = data.to_numpy().flatten()
     flat_data, units = _recalibrate(flat_data, units)
@@ -45,7 +76,31 @@ def recalibrate(
 
 
 def recalibrate_value(value: float, units: str) -> tuple[float, str]:
-    """Recalibrate a floating point value."""
+    """Recalibrate a floating point value. The value will be recalibrated
+    so it is in the range -1000 to 1000. The units will be changed to reflect
+    the recalibration.
+
+    Parameters
+    ----------
+    value : float
+        The value to recalibrate.
+    units : str
+        The units of the value. This string should be in the form of
+        "Number", "Thousands", "Millions", "Billions", etc. The units
+        should be in title case.
+
+    Returns
+    -------
+    tuple[float, str]
+        A tuple containing the recalibrated value and the recalibrated units.
+
+    Examples
+    --------
+    ```python
+    from readabs import recalibrate_value
+    recalibrated, units = recalibrate_value(10_000_000, "Thousand")
+    print(recalibrated, units)
+    ```"""
 
     series = Series([value])
     output, units = recalibrate(series, units)
@@ -115,7 +170,7 @@ def _find_calibration(units: str) -> str | None:
 def _perfect_already(data: np.ndarray) -> bool:
     """No need to recalibrate if the data is already perfect."""
     check_max = np.nanmax(np.abs(data))
-    return 1 <= check_max <= 1000
+    return 1 <= check_max < 1000
 
 
 def _all_zero(data: np.ndarray) -> bool:
@@ -159,7 +214,7 @@ def _recalibrate(flat_data: np.ndarray, units: str) -> tuple[np.ndarray, str]:
     if _can_recalibrate(flat_data, units):
         while True:
             maximum = np.nanmax(np.abs(flat_data))
-            if maximum > 1000:
+            if maximum >= 1000:
                 if _MAX_RECALIBRATE in units.lower():
                     print("recalibrate() is not designed for very big units")
                     break
@@ -190,6 +245,19 @@ def _do_recal(flat_data, units, step, operator):
 
 # --- test
 if __name__ == "__main__":
+
+    def test_example():
+        """Test the example in the docstring."""
+
+        s = Series([1_000, 10_000, 100_000, 1_000_000])
+        recalibrated, units = recalibrate(s, "$")
+        print(f"{recalibrated=}, {units=}")
+
+        recalibrated, units = recalibrate_value(10_000_000, "Thousand")
+        print(f"{recalibrated=}, {units=}")
+        print("=" * 40)
+
+    test_example()
 
     def test_recalibrate():
         """Test the recalibrate() function."""

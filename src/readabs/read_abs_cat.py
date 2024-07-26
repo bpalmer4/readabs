@@ -12,7 +12,7 @@ import pandas as pd
 from pandas import DataFrame
 
 # local imports
-from readabs.abs_meta_data_support import metacol
+from readabs.abs_meta_data import metacol
 from readabs.read_support import HYPHEN
 from readabs.grab_abs_url import grab_abs_url
 
@@ -411,7 +411,7 @@ def _capture_meta(
     file_meta = file_meta.iloc[:-1]
 
     # set the index to the series_id
-    file_meta.index = file_meta[metacol.id]
+    file_meta.index = pd.Index(file_meta[metacol.id])
 
     return file_meta
 

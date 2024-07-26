@@ -34,14 +34,6 @@ and the Reserve Bank of Australia (RBA).</p>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="readabs.abs_meta_data_support" href="abs_meta_data_support.html">readabs.abs_meta_data_support</a></code></dt>
-<dd>
-<div class="desc"><p>abs_meta_data_sypport.py …</p></div>
-</dd>
-<dt><code class="name"><a title="readabs.get_rba_links" href="get_rba_links.html">readabs.get_rba_links</a></code></dt>
-<dd>
-<div class="desc"><p>get_rba_links.py: Extract links to RBA data files from the RBA website.</p></div>
-</dd>
 <dt><code class="name"><a title="readabs.utilities" href="utilities.html">readabs.utilities</a></code></dt>
 <dd>
 <div class="desc"><p>utilities.py …</p></div>
@@ -80,24 +72,89 @@ catalogue = ra.abs_catalogue()
 <span>def <span class="ident">annualise_percentages</span></span>(<span>data: ~DataT, periods_per_year: int | float = 12) ‑> ~DataT</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Annualise a growth rate (expressed as a percentage) for a period.</p></div>
+<div class="desc"><p>Annualise a growth rate (expressed as a percentage) for a period.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The growth rate (expresed as a percentage) to annualise. Note a
+growth percentage of 5% is a growth rate of 0.05.</dd>
+<dt><strong><code>periods_per_year</code></strong> :&ensp;<code>int</code> or <code>float</code>, default <code>12</code></dt>
+<dd>The number of periods in a year. For monthly data, this is 12.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The annualised growth expressed as a percentage. For DataFrame input,
+the annualised growth rate is calculated for each column.</dd>
+</dl></div>
 </dd>
 <dt id="readabs.annualise_rates"><code class="name flex">
 <span>def <span class="ident">annualise_rates</span></span>(<span>data: ~DataT, periods_per_year: int | float = 12) ‑> ~DataT</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Annualise a growth rate for a period.
-Note: returns a percentage (and not a rate)!</p></div>
+Note: returns a percentage value (and not a rate)!</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The growth rate to annualise. Note a growth rate of 0.05 is 5%.</dd>
+<dt><strong><code>periods_per_year</code></strong> :&ensp;<code>int</code> or <code>float</code>, default <code>12</code></dt>
+<dd>The number of periods in a year. For monthly data, this is 12.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The annualised growth expressed as a percentage (not a rate).
+For DataFrame input, the annualised growth rate is calculated
+for each column.</dd>
+</dl></div>
 </dd>
 <dt id="readabs.find_abs_id"><code class="name flex">
 <span>def <span class="ident">find_abs_id</span></span>(<span>meta: pandas.core.frame.DataFrame, search_terms: dict[str, str], **kwargs: Any) ‑> tuple[str, str, str]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Find a unique ABS series id in the meta data.
-Return a tuple of the table, series_id and units.
-By default, raises a ValueError if the search terms do
-not result in one and only one series_id.
-Arguments are the same as for search_abs_meta().</p></div>
+<div class="desc"><p>Find a unique ABS series identifier in the ABS metadata.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>meta</code></strong> :&ensp;<code>DataFrame</code></dt>
+<dd>A pandas DataFrame of metadata from the ABS
+(via read_abs_cat() or read_abs_series()).</dd>
+<dt><strong><code>search_terms</code></strong> :&ensp;<code>dict[str, str]</code></dt>
+<dd>A dictionary {search_phrase: meta_column_name, &hellip;} of search terms.
+Note: the search terms must be unique, as a dictionary cannot hold the
+same search term to be applied to different columns.</dd>
+<dt><strong><code>**kwargs</code></strong> :&ensp;<code>Any</code></dt>
+<dd>Additional keyword arguments. The only additional keyword argument
+that is used is validate_unique.</dd>
+<dt><strong><code>validate_unique</code></strong> :&ensp;<code>bool = True</code></dt>
+<dd>Raise a ValueError if the search result is not a single
+unique match. Note: the default is True for safety.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[str, str, str]</code></dt>
+<dd>A tuple of the table, series_id and units for the unique
+series_id that matches the search terms.</dd>
+</dl>
+<h2 id="metacol">Metacol</h2>
+<p>Because the meta data is a DataFrame, the columns can be referenced by either
+their full textual name, or by the short name defined in the metacol object.
+For example, if metacol is imported as mc, to refer to the
+<code>Data Item Description</code> column, the user can refer to it as mc.did.</p>
+<h2 id="example">Example</h2>
+<pre><code class="language-python">from readabs import metacol as mc  # alias for the ABS meta data column names
+from readabs import read_abs_cat, find_abs_id, recalibrate
+cat_num = &quot;6202.0&quot;  # The ABS labour force survey
+data, meta = read_abs_cat(cat_num)
+search_terms = {
+    &quot;Employed total ;  Persons ;&quot;: mc.did,
+    &quot;Seasonally Adjusted&quot;: mc.stype,
+    &quot;6202001&quot;: mc.table,
+}
+table, series_id, units = find_abs_id(meta, search_terms)
+print(f&quot;Table: {table} Series ID: {series_id} Units: {units}&quot;)
+recal_series, recal_units = recalibrate(data[table][series_id], units)
+</code></pre></div>
 </dd>
 <dt id="readabs.grab_abs_url"><code class="name flex">
 <span>def <span class="ident">grab_abs_url</span></span>(<span>url: str = '', **kwargs: Any) ‑> dict[str, pandas.core.frame.DataFrame]</span>
@@ -138,16 +195,49 @@ and the Catalogue number will be used to get the URL.</dd>
 <span>def <span class="ident">monthly_to_qtly</span></span>(<span>data: ~DataT, q_ending='DEC', f: str = 'mean') ‑> ~DataT</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Convert monthly data to quarterly data by taking the mean of
-the three months in each quarter. Ignore quarters with less than
+<div class="desc"><p>Convert monthly data to quarterly data by taking the mean (or sum)
+of the three months in each quarter. Ignore quarters with less than
 or more than three months data. Drop NA items. Change f to "sum"
-for a quarterly sum</p></div>
+for a quarterly sum.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The data to convert to quarterly frequency.</dd>
+<dt><strong><code>q_ending</code></strong> :&ensp;<code>str</code>, default <code>DEC</code></dt>
+<dd>The month in which the quarter ends. For example, "DEC" for December.</dd>
+<dt><strong><code>f</code></strong> :&ensp;<code>str</code>, default <code>"mean"</code></dt>
+<dd>The function to apply to the three months in each quarter.
+Change to "sum" for a quarterly sum. The default is a
+quarterly mean.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The data with a quarterly PeriodIndex. If a quarter has less than
+three months data, the quarter is dropped. If the quarter has more
+than three months data, the quarter is dropped. Any NA data is removed.
+For DataFrame input, the function is applied to each column.</dd>
+</dl></div>
 </dd>
 <dt id="readabs.percent_change"><code class="name flex">
 <span>def <span class="ident">percent_change</span></span>(<span>data: ~DataT, n_periods: int) ‑> ~DataT</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Calculate an percentage change in a series over n_periods.</p></div>
+<div class="desc"><p>Calculate an percentage change in a contiguous, ordered series over n_periods.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The data to calculate the percentage change for.</dd>
+<dt><strong><code>n_periods</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of periods to calculate the percentage change over.
+Typically 4 for quarterly data, and 12 for monthly data.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The percentage change in the data over n_periods. For DataFrame input,
+the percentage change is calculated for each column.</dd>
+</dl></div>
 </dd>
 <dt id="readabs.print_abs_catalogue"><code class="name flex">
 <span>def <span class="ident">print_abs_catalogue</span></span>(<span>cache_only=False, verbose=False) ‑> None</span>
@@ -178,7 +268,21 @@ ra.print_abs_catalogue()
 <span>def <span class="ident">print_rba_catalogue</span></span>(<span>cache_only=False, verbose=False) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Print the RBA data file links.</p></div>
+<div class="desc"><p>This function prints to standard output a table of the RBA
+Catalogue Numbers.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>cache_only</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>If True, only use the cache.</dd>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>If True, print progress messages.</dd>
+</dl>
+<h2 id="return-values">Return Values</h2>
+<p>The function does not return anything.</p>
+<h2 id="example">Example</h2>
+<pre><code class="language-python">import readabs as ra
+ra.print_rba_catalogue()
+</code></pre></div>
 </dd>
 <dt id="readabs.qtly_to_monthly"><code class="name flex">
 <span>def <span class="ident">qtly_to_monthly</span></span>(<span>data: ~DataT, interpolate: bool = True, limit: Optional[int] = 2, dropna: bool = True) ‑> ~DataT</span>
@@ -186,19 +290,47 @@ ra.print_abs_catalogue()
 <dd>
 <div class="desc"><p>Convert a pandas timeseries with a Quarterly PeriodIndex to an
 timeseries with a Monthly PeriodIndex.</p>
-<h1 id="arguments">Arguments:</h1>
-<p>data - either a pandas Series or DataFrame - assumes the index is unique.
-interpolate - whether to interpolate the missing monthly data.
-dropna - whether to drop NA data</p>
-<h1 id="notes">Notes:</h1>
-<p>Necessitated by Pandas 2.2, which removed .resample()
-from pandas objects with a PeriodIndex.</p></div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt>data - either a pandas Series or DataFrame - assumes the index is unique.</dt>
+<dt>The data to convert to monthly frequency.</dt>
+<dt><strong><code>interpolate</code></strong> :&ensp;<code>bool</code>, default <code>True</code></dt>
+<dd>Whether to interpolate the missing monthly data.</dd>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code>, default <code>2</code></dt>
+<dd>The maximum number of consecutive missing months to interpolate.</dd>
+<dt><strong><code>dropna</code></strong> :&ensp;<code>bool</code>, default <code>True</code></dt>
+<dd>Whether to drop NA data</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas Series</code> or <code>DataFrame</code></dt>
+<dd>The data with a Monthly PeriodIndex. If interpolate is True, the
+missing monthly data is interpolated. If dropna is True, any NA
+data is removed.</dd>
+</dl></div>
 </dd>
 <dt id="readabs.rba_catalogue"><code class="name flex">
 <span>def <span class="ident">rba_catalogue</span></span>(<span>cache_only=False, verbose=False) ‑> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return a DataFrame of RBA data file links.</p></div>
+<div class="desc"><p>Return a DataFrame of RBA Catalogue numbers. In the first instance,
+this is downloaded from the RBA website, and cached for future use.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>cache_only</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>If True, only use the cache.</dd>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>If True, print progress messages.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>DataFrame</code></dt>
+<dd>A DataFrame of RBA Catalogue numbers.</dd>
+</dl>
+<h2 id="example">Example</h2>
+<pre><code class="language-python">import readabs as ra
+catalogue = ra.rba_catalogue()
+</code></pre></div>
 </dd>
 <dt id="readabs.read_abs_cat"><code class="name flex">
 <span>def <span class="ident">read_abs_cat</span></span>(<span>cat: str, keep_non_ts: bool = False, **kwargs: Any) ‑> tuple[dict[str, pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]</span>
@@ -328,7 +460,27 @@ data, meta = ra.read_abs_series(
 <dd>
 <div class="desc"><p>Read the Official Cash Rate (OCR) from the RBA website and return it
 in a pandas Series, with either a daily or monthly PeriodIndex,
-depending on the value of the monthly parameter. The default is monthly.</p></div>
+depending on the value of the monthly parameter. The default is monthly.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>monthly</code></strong> :&ensp;<code>bool = True</code></dt>
+<dd>If True, then the data will be returned with a monthly PeriodIndex.
+If False, then the data will be returned with a daily PeriodIndex.</dd>
+<dt><strong><code>**kwargs</code></strong> :&ensp;<code>Any</code></dt>
+<dd>Additional keyword arguments. The only keyword argument that is used is ignore_errors.</dd>
+<dt><strong><code>ignore_errors</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>If True, then any major errors encountered will be printed and the function
+will return an empty Series. If False, then any major errors encountered
+will raise an exception.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Series</code></dt>
+<dd>The OCR data in a pandas Series, with an index of either daily or monthly Periods.</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="language-python">ocr = read_rba_ocr(monthly=True)
+</code></pre></div>
 </dd>
 <dt id="readabs.read_rba_table"><code class="name flex">
 <span>def <span class="ident">read_rba_table</span></span>(<span>table: str, **kwargs: Any) ‑> tuple[pandas.core.frame.DataFrame, pandas.core.frame.DataFrame]</span>
@@ -341,49 +493,139 @@ and the meta data in a tuple of two DataFrames.</p>
 <dt><strong><code>table</code></strong> :&ensp;<code>str</code></dt>
 <dd>The table to read from the RBA website.</dd>
 <dt><strong><code>**kwargs</code></strong> :&ensp;<code>Any</code></dt>
-<dd>Additional keyword arguments.</dd>
+<dd>Additional keyword arguments.
+The only keyword argument that is used is ignore_errors.</dd>
+<dt><strong><code>ignore_errors</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>If True, then any major errors encountered will be printed and the function
+will return empty DataFrames. If False, then any major errors encountered
+will raise an exception.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>tuple[DataFrame, DataFrame]</code></dt>
-<dd>The actual data and the meta data in a tuple of two DataFrames.</dd>
-</dl></div>
+<dd>The primary data and the meta data in a tuple of two DataFrames.</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="language-python">data, meta = read_rba_table(&quot;C1&quot;)
+</code></pre></div>
 </dd>
 <dt id="readabs.recalibrate"><code class="name flex">
 <span>def <span class="ident">recalibrate</span></span>(<span>data: ~DataT, units: str) ‑> tuple[~DataT, str]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Recalibrate a Series/DataFrame so the data in in the range -1000 to 1000.
-Change the name of the units to reflect the recalibration.</p></div>
+<div class="desc"><p>Recalibrate a Series or DataFrame so the data in in the range -1000 to 1000.
+Change the name of the units to reflect the recalibration.</p>
+<p>Note, DataT = TypeVar("DataT", Series, DataFrame). DataT is a constrained typevar.
+If you provide a Series, you will get a Series back. If you provide a DataFrame,
+you will get a DataFrame back.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>Series</code> or <code>DataFrame</code></dt>
+<dd>The data to recalibrate.</dd>
+<dt><strong><code>units</code></strong> :&ensp;<code>str</code></dt>
+<dd>The units of the data. This string should be in the form of
+"Number", "Thousands", "Millions", "Billions", etc. The units
+should be in title case.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Series</code> or <code>DataFrame</code></dt>
+<dd>The recalibrated data will be a Series if a Series was provided,
+or a DataFrame if a DataFrame was provided.</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="language-python">from pandas import Series
+from readabs import recalibrate
+s = Series([1_000, 10_000, 100_000, 1_000_000])
+recalibrated, units = recalibrate(s, &quot;$&quot;)
+print(f&quot;{recalibrated=}, {units=}&quot;)
+</code></pre></div>
 </dd>
 <dt id="readabs.recalibrate_value"><code class="name flex">
 <span>def <span class="ident">recalibrate_value</span></span>(<span>value: float, units: str) ‑> tuple[float, str]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Recalibrate a floating point value.</p></div>
+<div class="desc"><p>Recalibrate a floating point value. The value will be recalibrated
+so it is in the range -1000 to 1000. The units will be changed to reflect
+the recalibration.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>value</code></strong> :&ensp;<code>float</code></dt>
+<dd>The value to recalibrate.</dd>
+<dt><strong><code>units</code></strong> :&ensp;<code>str</code></dt>
+<dd>The units of the value. This string should be in the form of
+"Number", "Thousands", "Millions", "Billions", etc. The units
+should be in title case.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[float, str]</code></dt>
+<dd>A tuple containing the recalibrated value and the recalibrated units.</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="language-python">from readabs import recalibrate_value
+recalibrated, units = recalibrate_value(10_000_000, &quot;Thousand&quot;)
+print(recalibrated, units)
+</code></pre></div>
 </dd>
 <dt id="readabs.search_abs_meta"><code class="name flex">
 <span>def <span class="ident">search_abs_meta</span></span>(<span>meta: pandas.core.frame.DataFrame, search_terms: dict[str, str], exact_match: bool = False, regex: bool = False, validate_unique=False, **kwargs: Any) ‑> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Extract from the meta data the rows that match the search_terms, by iteratively
-searching the meta data one search term at a time.</p>
-<p>Arguments:
-- meta - pandas DataFrame of metadata from the ABS
-(via read_abs_cat() or read_abs_series()).
-- search_terms - dictionary - {search_phrase: meta_column_name, &hellip;}
+<div class="desc"><p>Extract from the ABS meta data the rows that match the
+search_terms, by iteratively searching the meta data one
+search term at a time.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>meta</code></strong> :&ensp;<code>DataFrame</code></dt>
+<dd>A pandas DataFrame of metadata from the ABS
+(via read_abs_cat() or read_abs_series()).</dd>
+<dt><strong><code>search_terms</code></strong> :&ensp;<code>dict[str, str]</code></dt>
+<dd>A dictionary {search_phrase: meta_column_name, &hellip;} of search terms.
 Note: the search terms must be unique, as a dictionary cannot hold the
-same search term to be applied to different columns.
-- exact_natch - bool - whether to match using == (exact) or .str.contains()
-(inexact)
-- regex - bool - for .str.contains() - whether to use regular expressions
-- validate_unique - bool - raise a ValueError if search result is not unique
-- verbose - bool - print additional information while searching; which can
-be useful when diagnosing problems with search terms.</p>
-<p>Returns a pandas DataFrame (subseted from meta), Note: The index for the
-returned meta data will always comprise ABS series_ids. Duplicate indexes
-will be removed from the meta data (ie. where the ABS has a series in more
-than one table, this function will only report the first match.)</p></div>
+same search term to be applied to different columns.</dd>
+<dt><strong><code>exact_match</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>Whether to match using == (exact) or .str.contains() (inexact).</dd>
+<dt><strong><code>regex</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>Whether to use regular expressions in the search.</dd>
+<dt><strong><code>validate_unique</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>Raise a ValueError if the search result is not unique.</dd>
+<dt><strong><code>**kwargs</code></strong> :&ensp;<code>Any</code></dt>
+<dd>Additional keyword arguments. The only keyword argument
+that is used is verbose.</dd>
+<dt><strong><code>verbose</code></strong> :&ensp;<code>bool = False</code></dt>
+<dd>Print additional information while searching; which can
+be useful when diagnosing problems with search terms.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>DataFrame</code></dt>
+<dd>Returns a pandas DataFrame of matching rows (subseted from meta).
+Note, The index for the returned meta data will always comprise ABS
+series_ids. Duplicate indexes will be removed from the meta data
+(ie. where the same ABS series appears in more than one table, this
+function will only report the first match).</dd>
+</dl>
+<h2 id="metacol">Metacol</h2>
+<p>Because the meta data is a DataFrame, the columns can be referenced by either
+their full textual name, or by the short name defined in the metacol object.
+For example, if metacol is imported as mc, to refer to the
+<code>Data Item Description</code> column, the user can refer to it as mc.did.</p>
+<h2 id="example">Example</h2>
+<pre><code class="language-python">from readabs import metacol as mc  # alias for the ABS meta data column names
+from readabs import read_abs_cat, search_abs_meta
+cat_num = &quot;6202.0&quot;  # The ABS labour force survey
+data, meta = read_abs_cat(cat_num)
+search_terms = {
+    &quot;Unemployment rate&quot;: mc.did,  # the data item description
+    &quot;Persons&quot;: mc.did,
+    &quot;Seasonally Adjusted&quot;: mc.stype,
+    &quot;Percent&quot;: mc.unit,
+    &quot;6202001&quot;: mc.table,
+}
+rows = search_abs_meta(meta, search_terms, verbose=True)
+print(rows)  # should have three rows : FT/PT/All Unemployment rates
+</code></pre></div>
 </dd>
 </dl>
 </section>
@@ -397,8 +639,6 @@ than one table, this function will only report the first match.)</p></div>
 <ul id="index">
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="readabs.abs_meta_data_support" href="abs_meta_data_support.html">readabs.abs_meta_data_support</a></code></li>
-<li><code><a title="readabs.get_rba_links" href="get_rba_links.html">readabs.get_rba_links</a></code></li>
 <li><code><a title="readabs.utilities" href="utilities.html">readabs.utilities</a></code></li>
 </ul>
 </li>

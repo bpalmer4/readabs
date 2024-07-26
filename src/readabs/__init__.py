@@ -2,7 +2,7 @@
 the Australian Bureau of Statistics (ABS) 
 and the Reserve Bank of Australia (RBA)."""
 
-__version__ = "0.0.15"
+__version__ = "0.0.16"
 __author__ = "Bryan Palmer"
 __all__ = (
     # -- abs -- related
@@ -33,19 +33,27 @@ __pdoc__ = {
     "download_cache": False,
     "get_abs_links": False,
     "read_support": False,
+    "abs_meta_data": False,
+    "rba_meta_data": False,
 }  # hide submodules from documentation
 
 
-# local imports
+# --- local imports
+# - ABS related -
 from readabs.abs_catalogue import abs_catalogue
 from readabs.print_abs_catalogue import print_abs_catalogue
 from readabs.search_abs_meta import search_abs_meta, find_abs_id
 from readabs.read_abs_cat import read_abs_cat
 from readabs.read_abs_series import read_abs_series
 from readabs.grab_abs_url import grab_abs_url
-from readabs.abs_meta_data_support import metacol
-from readabs.get_rba_links import print_rba_catalogue, rba_catalogue
-from readabs.read_rba_table import read_rba_table, rba_metacol, read_rba_ocr
+from readabs.abs_meta_data import metacol
+
+# - RBA related -
+from readabs.rba_catalogue import print_rba_catalogue, rba_catalogue
+from readabs.read_rba_table import read_rba_table, read_rba_ocr
+from readabs.rba_meta_data import rba_metacol
+
+# - Utilities -
 from readabs.recalibrate import recalibrate, recalibrate_value
 from readabs.utilities import (
     percent_change,
