@@ -1,3 +1,10 @@
+Version 0.0.17 released 31-JUL-2024 (Canberra, Australia)
+
+- Minor changes
+   * largely tidy-ups.
+
+---
+
 Version 0.0.16 released 26-JUL-2024 (Canberra, Australia)
 
 - Major changes

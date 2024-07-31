@@ -1,6 +1,4 @@
-"""get_abs_links.py:
-
-Access and scan an ABS webpage for links to Excel and zip files."""
+"""Scan an ABS webpage for links to Excel and zip files."""
 
 import re
 from typing import Any

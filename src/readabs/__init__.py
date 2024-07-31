@@ -2,7 +2,7 @@
 the Australian Bureau of Statistics (ABS) 
 and the Reserve Bank of Australia (RBA)."""
 
-__version__ = "0.0.16"
+__version__ = "0.0.17"
 __author__ = "Bryan Palmer"
 __all__ = (
     # -- abs -- related
@@ -21,6 +21,7 @@ __all__ = (
     "rba_metacol",
     "read_rba_ocr",
     # -- utilities --
+    "Datatype",
     "percent_change",
     "annualise_rates",
     "annualise_percentages",
@@ -35,6 +36,7 @@ __pdoc__ = {
     "read_support": False,
     "abs_meta_data": False,
     "rba_meta_data": False,
+    "datatype": False,
 }  # hide submodules from documentation
 
 
@@ -54,6 +56,7 @@ from readabs.read_rba_table import read_rba_table, read_rba_ocr
 from readabs.rba_meta_data import rba_metacol
 
 # - Utilities -
+from readabs.datatype import Datatype
 from readabs.recalibrate import recalibrate, recalibrate_value
 from readabs.utilities import (
     percent_change,

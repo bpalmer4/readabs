@@ -1,6 +1,4 @@
-"""read_abs_series.py
-
-Get specific ABS data series by their ABS series identifiers."""
+"""Get specific ABS data series by their ABS series identifiers."""
 
 # --- imports
 # system imports

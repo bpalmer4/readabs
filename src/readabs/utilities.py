@@ -1,15 +1,11 @@
-"""utilities.py
-
-This module provides a small numer of utilities for
+"""This module provides a small numer of utilities for
 working with ABS timeseries data."""
 
 # --- imports
-from typing import TypeVar, Optional, cast
+from typing import Optional, cast
 from numpy import nan
 from pandas import Series, DataFrame, PeriodIndex, DatetimeIndex
-
-# - define a useful typevar for working with both Series and DataFrames
-DataT = TypeVar("DataT", Series, DataFrame)
+from readabs.datatype import Datatype as DataT
 
 
 # --- functions

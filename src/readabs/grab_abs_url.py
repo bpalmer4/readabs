@@ -1,10 +1,4 @@
-"""grab_abs_url.py
-
-This module seeks to convert each sheet of each Excel file found on an
-ABS webpage into a DataFrame. The Excel files are found by following
-the links on the ABS webpage. The files will either be a stand-alone, 
-file or within a zip file. The Excel files are converted into
-DataFrames, with each sheet in each Excel file becoming a DataFrame."""
+"""Find and extract DataFrames from an ABS webpage."""
 
 # --- imports ---
 # standard library imports

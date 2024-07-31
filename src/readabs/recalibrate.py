@@ -1,17 +1,13 @@
-"""recalibrate.py
-
-Recalibrate a Series or DataFrame so the data is in the range -1000 to 1000."""
+"""Recalibrate a Series or DataFrame so the data is in the range -1000 to 1000."""
 
 # --- imports
 import sys
-from typing import TypeVar
 from operator import mul, truediv
 
 from pandas import Series, DataFrame
 import numpy as np
 
-# - define a useful typevar for working with both Series and DataFrames
-DataT = TypeVar("DataT", Series, DataFrame)
+from readabs.datatype import Datatype as DataT
 
 
 # --- public

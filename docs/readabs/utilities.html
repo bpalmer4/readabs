@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
 <title>readabs.utilities API documentation</title>
-<meta name="description" content="utilities.py …">
+<meta name="description" content="This module provides a small numer of utilities for
+working with ABS timeseries data.">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -25,7 +26,6 @@ hljs.highlightAll();
 <h1 class="title">Module <code>readabs.utilities</code></h1>
 </header>
 <section id="section-intro">
-<p>utilities.py</p>
 <p>This module provides a small numer of utilities for
 working with ABS timeseries data.</p>
 </section>
@@ -37,7 +37,7 @@ working with ABS timeseries data.</p>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="readabs.utilities.annualise_percentages"><code class="name flex">
-<span>def <span class="ident">annualise_percentages</span></span>(<span>data: ~DataT, periods_per_year: int | float = 12) ‑> ~DataT</span>
+<span>def <span class="ident">annualise_percentages</span></span>(<span>data: ~DataType, periods_per_year: int | float = 12) ‑> ~DataType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Annualise a growth rate (expressed as a percentage) for a period.</p>
@@ -57,7 +57,7 @@ the annualised growth rate is calculated for each column.</dd>
 </dl></div>
 </dd>
 <dt id="readabs.utilities.annualise_rates"><code class="name flex">
-<span>def <span class="ident">annualise_rates</span></span>(<span>data: ~DataT, periods_per_year: int | float = 12) ‑> ~DataT</span>
+<span>def <span class="ident">annualise_rates</span></span>(<span>data: ~DataType, periods_per_year: int | float = 12) ‑> ~DataType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Annualise a growth rate for a period.
@@ -78,7 +78,7 @@ for each column.</dd>
 </dl></div>
 </dd>
 <dt id="readabs.utilities.monthly_to_qtly"><code class="name flex">
-<span>def <span class="ident">monthly_to_qtly</span></span>(<span>data: ~DataT, q_ending='DEC', f: str = 'mean') ‑> ~DataT</span>
+<span>def <span class="ident">monthly_to_qtly</span></span>(<span>data: ~DataType, q_ending='DEC', f: str = 'mean') ‑> ~DataType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Convert monthly data to quarterly data by taking the mean (or sum)
@@ -106,7 +106,7 @@ For DataFrame input, the function is applied to each column.</dd>
 </dl></div>
 </dd>
 <dt id="readabs.utilities.percent_change"><code class="name flex">
-<span>def <span class="ident">percent_change</span></span>(<span>data: ~DataT, n_periods: int) ‑> ~DataT</span>
+<span>def <span class="ident">percent_change</span></span>(<span>data: ~DataType, n_periods: int) ‑> ~DataType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Calculate an percentage change in a contiguous, ordered series over n_periods.</p>
@@ -126,7 +126,7 @@ the percentage change is calculated for each column.</dd>
 </dl></div>
 </dd>
 <dt id="readabs.utilities.qtly_to_monthly"><code class="name flex">
-<span>def <span class="ident">qtly_to_monthly</span></span>(<span>data: ~DataT, interpolate: bool = True, limit: Optional[int] = 2, dropna: bool = True) ‑> ~DataT</span>
+<span>def <span class="ident">qtly_to_monthly</span></span>(<span>data: ~DataType, interpolate: bool = True, limit: Optional[int] = 2, dropna: bool = True) ‑> ~DataType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Convert a pandas timeseries with a Quarterly PeriodIndex to an

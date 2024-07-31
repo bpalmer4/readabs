@@ -8,7 +8,6 @@ class _Metacol:
     """A dataclass to hold the names of the columns in the ABS meta data."""
 
     # pylint: disable=too-many-instance-attributes
-
     did: str = "Data Item Description"
     stype: str = "Series Type"
     id: str = "Series ID"
@@ -31,7 +30,7 @@ metacol = _Metacol()
 if __name__ == "__main__":
 
     def test_metacol():
-        """Quick test of the Metacol namedtuple."""
+        """Quick test of the Metacol dataclass."""
 
         print(metacol.did)
         print(metacol.stype)

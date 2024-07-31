@@ -36,7 +36,8 @@ and the Reserve Bank of Australia (RBA).</p>
 <dl>
 <dt><code class="name"><a title="readabs.utilities" href="utilities.html">readabs.utilities</a></code></dt>
 <dd>
-<div class="desc"><p>utilities.py …</p></div>
+<div class="desc"><p>This module provides a small numer of utilities for
+working with ABS timeseries data.</p></div>
 </dd>
 </dl>
 </section>
@@ -69,7 +70,7 @@ catalogue = ra.abs_catalogue()
 </code></pre></div>
 </dd>
 <dt id="readabs.annualise_percentages"><code class="name flex">
-<span>def <span class="ident">annualise_percentages</span></span>(<span>data: ~DataT, periods_per_year: int | float = 12) ‑> ~DataT</span>
+<span>def <span class="ident">annualise_percentages</span></span>(<span>data: ~DataType, periods_per_year: int | float = 12) ‑> ~DataType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Annualise a growth rate (expressed as a percentage) for a period.</p>
@@ -89,7 +90,7 @@ the annualised growth rate is calculated for each column.</dd>
 </dl></div>
 </dd>
 <dt id="readabs.annualise_rates"><code class="name flex">
-<span>def <span class="ident">annualise_rates</span></span>(<span>data: ~DataT, periods_per_year: int | float = 12) ‑> ~DataT</span>
+<span>def <span class="ident">annualise_rates</span></span>(<span>data: ~DataType, periods_per_year: int | float = 12) ‑> ~DataType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Annualise a growth rate for a period.
@@ -192,7 +193,7 @@ and the Catalogue number will be used to get the URL.</dd>
 </dl></div>
 </dd>
 <dt id="readabs.monthly_to_qtly"><code class="name flex">
-<span>def <span class="ident">monthly_to_qtly</span></span>(<span>data: ~DataT, q_ending='DEC', f: str = 'mean') ‑> ~DataT</span>
+<span>def <span class="ident">monthly_to_qtly</span></span>(<span>data: ~DataType, q_ending='DEC', f: str = 'mean') ‑> ~DataType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Convert monthly data to quarterly data by taking the mean (or sum)
@@ -220,7 +221,7 @@ For DataFrame input, the function is applied to each column.</dd>
 </dl></div>
 </dd>
 <dt id="readabs.percent_change"><code class="name flex">
-<span>def <span class="ident">percent_change</span></span>(<span>data: ~DataT, n_periods: int) ‑> ~DataT</span>
+<span>def <span class="ident">percent_change</span></span>(<span>data: ~DataType, n_periods: int) ‑> ~DataType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Calculate an percentage change in a contiguous, ordered series over n_periods.</p>
@@ -285,7 +286,7 @@ ra.print_rba_catalogue()
 </code></pre></div>
 </dd>
 <dt id="readabs.qtly_to_monthly"><code class="name flex">
-<span>def <span class="ident">qtly_to_monthly</span></span>(<span>data: ~DataT, interpolate: bool = True, limit: Optional[int] = 2, dropna: bool = True) ‑> ~DataT</span>
+<span>def <span class="ident">qtly_to_monthly</span></span>(<span>data: ~DataType, interpolate: bool = True, limit: Optional[int] = 2, dropna: bool = True) ‑> ~DataType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Convert a pandas timeseries with a Quarterly PeriodIndex to an
@@ -510,7 +511,7 @@ will raise an exception.</dd>
 </code></pre></div>
 </dd>
 <dt id="readabs.recalibrate"><code class="name flex">
-<span>def <span class="ident">recalibrate</span></span>(<span>data: ~DataT, units: str) ‑> tuple[~DataT, str]</span>
+<span>def <span class="ident">recalibrate</span></span>(<span>data: ~DataType, units: str) ‑> tuple[~DataType, str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Recalibrate a Series or DataFrame so the data in in the range -1000 to 1000.
@@ -572,9 +573,9 @@ print(recalibrated, units)
 <span>def <span class="ident">search_abs_meta</span></span>(<span>meta: pandas.core.frame.DataFrame, search_terms: dict[str, str], exact_match: bool = False, regex: bool = False, validate_unique=False, **kwargs: Any) ‑> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Extract from the ABS meta data the rows that match the
+<div class="desc"><p>Extract from the ABS meta data those rows that match the
 search_terms, by iteratively searching the meta data one
-search term at a time.</p>
+search_term at a time.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>meta</code></strong> :&ensp;<code>DataFrame</code></dt>

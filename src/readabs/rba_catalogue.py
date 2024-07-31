@@ -1,4 +1,4 @@
-"""get_rba_links.py: Extract links to RBA data files from the RBA website."""
+"""Extract links to RBA data files from the RBA website."""
 
 # system imports
 import re

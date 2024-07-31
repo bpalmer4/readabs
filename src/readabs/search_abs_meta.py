@@ -1,6 +1,4 @@
-"""search_abs_meta.py
-
-Search a DataFrame of ABS meta data, using a dictionary of search terms,
+"""Search a DataFrame of ABS meta data, using a dictionary of search terms,
 to identify the row or rows that match all of the search terms."""
 
 from typing import Any
@@ -19,9 +17,9 @@ def search_abs_meta(
     validate_unique=False,  # useful safety-net if you expect only one match
     **kwargs: Any,
 ) -> DataFrame:
-    """Extract from the ABS meta data the rows that match the
+    """Extract from the ABS meta data those rows that match the
     search_terms, by iteratively searching the meta data one
-    search term at a time.
+    search_term at a time.
 
     Parameters
     ----------

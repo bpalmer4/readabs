@@ -1,6 +1,4 @@
-"""read_rba_table.py
-
-Read a table from the RBA website and store it in a pandas DataFrame."""
+"""Read a table from the RBA website and store it in a pandas DataFrame."""
 
 from typing import Any, cast
 from io import BytesIO
