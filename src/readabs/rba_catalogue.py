@@ -119,6 +119,12 @@ def _get_rba_links(**kwargs: Any) -> DataFrame:
                     print(f"Note: {text} - {url} did not split into two parts?")
                 continue
             foretext, moniker = spudle
+
+            if moniker in link_dict:
+                print(f"Warning: {moniker} already exists in the dictionary {tail}")
+                if tail != ".xlsx":
+                    # do not replace a .xlsx link with an .xls link
+                    continue
             link_dict[moniker] = {"Description": foretext.strip(), "URL": url}
     rba_catalog = DataFrame(link_dict).T.sort_index()
     rba_catalog.index.name = "Table"

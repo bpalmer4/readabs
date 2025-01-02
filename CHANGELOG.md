@@ -1,3 +1,11 @@
+Version 0.0.18 released 02-JAN-2025 (Canberra, Australia)
+
+- Minor changes
+   * read_rba_table() fixed to get adjust for a malformed link on
+     the RBA website, which affected the F1 table.
+
+---
+
 Version 0.0.17 released 31-JUL-2024 (Canberra, Australia)
 
 - Minor changes

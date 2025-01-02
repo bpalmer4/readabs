@@ -2,6 +2,7 @@
 
 from typing import Any, cast
 from io import BytesIO
+import re
 from pandas import (
     DataFrame,
     DatetimeIndex,
@@ -18,6 +19,57 @@ from pandas import (
 from readabs.rba_catalogue import rba_catalogue
 from readabs.download_cache import get_file, HttpError, CacheError
 from readabs.rba_meta_data import rba_metacol as rm
+
+
+# --- PRIVATE ---
+def _get_excel_file(
+    table: str,
+    ignore_errors: bool,
+    **kwargs: Any,
+) -> bytes | None:
+    """Get the Excel file from the RBA website for the given table.
+    Return bytes if successful, otherwise return None.
+    Raises an exception if ignore_errors is False."""
+
+    # get the relevant URL for a table moniker
+    cat_map = rba_catalogue()
+    if table not in cat_map.index:
+        message = f"Table '{table}' not found in RBA catalogue."
+        if ignore_errors:
+            print(f"Ignoring error: {message}")
+            return None
+        raise ValueError(message)
+    url = str(cat_map.loc[table, "URL"])
+
+    # get Excel file - try different file name extensions
+    # becasue the RBA website sometimes changes the file
+    # extension in error
+    urls = [
+        url,
+    ]
+    rex = re.compile(r"\.[^/]*$")
+    match = rex.search(url)
+    if match is not None:
+        tail = match.group()
+        replace_with = {".xls": ".xlsx", ".xlsx": ".xls"}
+        new_url = re.sub(rex, replace_with.get(tail, tail), url)
+        if new_url != url:
+            urls += [new_url]
+
+    # try to get the Excel file - including with different exensions
+    for this_url in urls:
+        try:
+            excel = get_file(this_url, **kwargs)
+        except (HttpError, CacheError) as e:
+            if this_url == urls[-1]:
+                if ignore_errors:
+                    print(f"Ignoring error: {e}")
+                    return None
+                raise
+        else:
+            break
+
+    return excel
 
 
 # --- PUBLIC ---
@@ -52,29 +104,10 @@ def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
     ignore_errors = kwargs.get("ignore_errors", False)
     data, meta = DataFrame(), DataFrame()
 
-    # get URL
-    cat_map = rba_catalogue()
-    if table not in cat_map.index:
-        message = f"Table '{table}' not found in RBA catalogue."
-        if ignore_errors:
-            print(f"Ignoring error: {message}")
-            return data, meta
-        raise ValueError(f"Table '{table}' not found in RBA catalogue.")
-    url = str(cat_map.loc[table, "URL"])
-
-    # get Excel file
-    try:
-        excel = get_file(url, **kwargs)
-    except HttpError as e:
-        if ignore_errors:
-            print(f"Ignoring error: {e}")
-            return data, meta
-        raise
-    except CacheError as e:
-        if ignore_errors:
-            print(f"Ignoring error: {e}")
-            return data, meta
-        raise
+    # get the Excel file
+    excel = _get_excel_file(table, ignore_errors, **kwargs)
+    if excel is None:
+        return data, meta
 
     # read Excel file into DataFrame
     try:
