@@ -70,6 +70,97 @@ def print_rba_catalogue(cache_only=False, verbose=False) -> None:
 
 
 # --- private functions ---
+def _get_soup(url: str, **kwargs: Any) -> BeautifulSoup | None:
+    """Return a BeautifulSoup object from a URL.
+    Returns None on error."""
+
+    try:
+        page = get_file(url, **kwargs)
+    except (HttpError, CacheError) as e:
+        print(f"Error: {e}")
+        return None
+
+    # remove those pesky span tags - possibly not necessary
+    page = re.sub(b"<span[^>]*>", b" ", page)
+    page = re.sub(b"</span>", b" ", page)
+    page = re.sub(b"\\s+", b" ", page)  # tidy up white space
+
+    return BeautifulSoup(page, "html.parser")
+
+
+def _historical_name_fix(
+    moniker: str,
+    foretext: str,
+    prefix: str,
+) -> tuple[str, str]:
+    """Fix the historical data names. Returns a tuple of moniker and foretext."""
+
+    if "Occasional Paper" in moniker:
+        moniker, foretext = (
+            f"OP{moniker.rsplit(" ", 1)[-1]}-{foretext.rsplit(' ', 1)[-1]}",
+            f"{foretext} - {moniker}",
+        )
+
+    if "Exchange Rates" in foretext:
+        foretext = f"{foretext} - {moniker}"
+        moniker = "F11.1"
+
+    for word in ["Daily", "Monthly", "Detailed", "Summary", "Allotted"]:
+        if word in foretext:
+            moniker = f"{moniker}-{word}"
+            break
+
+    last = foretext.rsplit(" ", 1)[-1]
+    if re.match(r"\d{4}", last):
+        moniker = f"{moniker}-{last}"
+
+    moniker = f"{prefix}{moniker}"
+
+    return moniker, foretext
+
+
+def _excel_link_capture(
+    soup: BeautifulSoup,
+    prefix: str,
+) -> dict[str, dict[str, str]]:
+    """Capture all links (of Microsoft Excel types) from the
+    BeautifulSoup object. Returns a dictionary with the following
+    structure: {moniker: {"Description": text, "URL": url}}."""
+
+    link_dict = {}
+    for link in soup.findAll("a"):
+
+        url = link.get("href").strip()
+        if not url or url is None:
+            continue
+
+        tail = url.rsplit("/", 1)[-1].lower()
+        if "." not in tail:
+            continue
+        if not tail.endswith(".xls") and not tail.endswith(".xlsx"):
+            continue
+        text, url = link.text, _make_absolute_url(url.strip())
+        text = text.replace("–", "-").strip()
+
+        pair = text.rsplit(" - ", 1)
+        if len(pair) != 2:
+            continue
+        foretext, moniker = pair
+
+        if prefix:
+            # The historical data is a bit ugly. Let's clean it up.
+            moniker, foretext = _historical_name_fix(moniker, foretext, prefix)
+
+        if moniker in link_dict:
+            print(f"Warning: {moniker} already exists in the dictionary {tail}")
+            if tail != ".xlsx":
+                # do not replace a .xlsx link with an .xls link
+                continue
+        link_dict[moniker] = {"Description": foretext.strip(), "URL": url}
+
+    return link_dict
+
+
 @cache
 def _get_rba_links(**kwargs: Any) -> DataFrame:
     """Extract links to RBA data files in Excel format
@@ -77,55 +168,18 @@ def _get_rba_links(**kwargs: Any) -> DataFrame:
     following columns: 'Description' and 'URL'. The index
     is the 'Table' number. Returns an empty DataFrame on error."""
 
-    verbose = kwargs.get("verbose", False)
-    urls = ("https://www.rba.gov.au/statistics/tables/",)
+    urls = [
+        # (url, prefix)
+        ("https://www.rba.gov.au/statistics/tables/", ""),  # current
+        ("https://www.rba.gov.au/statistics/historical-data.html", "Z:"),  # history
+    ]
+
     link_dict = {}
-    for url in urls:
-        try:
-            page = get_file(url, **kwargs)
-        except HttpError as e:
-            print(f"Error: {e}")
-            return DataFrame()
-        except CacheError as e:
-            print(f"Error: {e}")
-            return DataFrame()
+    for url, prefix in urls:
+        soup = _get_soup(url, **kwargs)
+        if soup is not None:
+            link_dict.update(_excel_link_capture(soup, prefix))
 
-        # remove those pesky span tags - probably not necessary
-        page = re.sub(b"<span[^>]*>", b" ", page)
-        page = re.sub(b"</span>", b" ", page)
-        page = re.sub(b"\\s+", b" ", page)  # tidy up white space
-
-        # parse the HTML content
-        soup = BeautifulSoup(page, "html.parser")
-
-        # capture all links (of Microsoft Excel types)
-        for link in soup.findAll("a"):
-
-            url = link.get("href").strip()
-            if not url or url is None:
-                continue
-
-            tail = url.rsplit("/", 1)[-1].lower()
-            if "." not in tail:
-                continue
-            if not tail.endswith(".xls") and not tail.endswith(".xlsx"):
-                continue
-            text, url = link.text, _make_absolute_url(url.strip())
-            text = text.replace("–", "-").strip()
-
-            spudle = text.rsplit(" - ", 1)
-            if len(spudle) != 2:
-                if verbose:
-                    print(f"Note: {text} - {url} did not split into two parts?")
-                continue
-            foretext, moniker = spudle
-
-            if moniker in link_dict:
-                print(f"Warning: {moniker} already exists in the dictionary {tail}")
-                if tail != ".xlsx":
-                    # do not replace a .xlsx link with an .xls link
-                    continue
-            link_dict[moniker] = {"Description": foretext.strip(), "URL": url}
     rba_catalog = DataFrame(link_dict).T.sort_index()
     rba_catalog.index.name = "Table"
     return rba_catalog

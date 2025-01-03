@@ -1,3 +1,12 @@
+Version 0.0.19 released 03-JAN-2025 (Canberra, Australia)
+
+- Major changes
+   * the RBA Historical Data files are now included in the RBA
+     catalogue. The table names all begin with "Z:". I have not
+     fully tested this addition. 
+
+---
+
 Version 0.0.18 released 02-JAN-2025 (Canberra, Australia)
 
 - Minor changes
