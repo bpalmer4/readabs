@@ -1,3 +1,16 @@
+Version 0.0.20 released 04-JAN-2025 (Canberra, Australia)
+
+- Minor changes
+   * read_rba_table() can now read historical tables that use
+     "Mnemonic" rather than "Series-ID" as the name for 
+     the data items in the table. 
+   * Some historical tables are not in a form that can be easily
+     parsed in a manner similar to the current RBA data. These
+     tables have been excluded from the historic catalogue:
+     ("E4", "E5", "E6", "E7", "J1", "J2", "Occassional Papers")
+
+---
+
 Version 0.0.19 released 03-JAN-2025 (Canberra, Australia)
 
 - Major changes

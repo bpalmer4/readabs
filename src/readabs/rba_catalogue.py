@@ -95,12 +95,6 @@ def _historical_name_fix(
 ) -> tuple[str, str]:
     """Fix the historical data names. Returns a tuple of moniker and foretext."""
 
-    if "Occasional Paper" in moniker:
-        moniker, foretext = (
-            f"OP{moniker.rsplit(" ", 1)[-1]}-{foretext.rsplit(' ', 1)[-1]}",
-            f"{foretext} - {moniker}",
-        )
-
     if "Exchange Rates" in foretext:
         foretext = f"{foretext} - {moniker}"
         moniker = "F11.1"
@@ -127,6 +121,10 @@ def _excel_link_capture(
     BeautifulSoup object. Returns a dictionary with the following
     structure: {moniker: {"Description": text, "URL": url}}."""
 
+    # The RBA has a number of historic tables that are not well
+    # formated. We will exclude these from the dictionary.
+    historic_exclusions = ("E4", "E5", "E6", "E7", "J1", "J2")
+
     link_dict = {}
     for link in soup.findAll("a"):
 
@@ -148,6 +146,13 @@ def _excel_link_capture(
         foretext, moniker = pair
 
         if prefix:
+            # Remove historical data that does not easily
+            # parse under the same rules as for the current data.
+            if moniker in historic_exclusions:
+                continue
+            if "Occasional Paper" in moniker:
+                continue
+
             # The historical data is a bit ugly. Let's clean it up.
             moniker, foretext = _historical_name_fix(moniker, foretext, prefix)
 

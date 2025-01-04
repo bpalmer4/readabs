@@ -121,6 +121,10 @@ def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
     # extract the meta data
     meta = raw.iloc[1:11, :].T.copy()
     meta.columns = Index(meta.iloc[0])
+    renamer = {
+        "Mnemonic": rm.id,
+    }  # historical data is inconsistent
+    meta = meta.rename(columns=renamer)
     meta = meta.iloc[1:, :]
     meta.index = Index(meta[rm.id])
     meta[rm.table] = table
