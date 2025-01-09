@@ -72,7 +72,7 @@ def read_abs_series(
     for identifier in series_id:
 
         # confirm that the series ID is in the catalogue
-        if not identifier in cat_meta.index:
+        if identifier not in cat_meta.index:
             if args["verbose"]:
                 print(f"Series ID {identifier} not found in ABS catalogue ID {cat}")
             if args["ignore_errors"]:
