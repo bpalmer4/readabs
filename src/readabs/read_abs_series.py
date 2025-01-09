@@ -31,7 +31,7 @@ def read_abs_series(
 
     **kwargs : Any
         Keyword arguments for the read_abs_series function,
-        which are the same as the keyword arguments for the r
+        which are the same as the keyword arguments for the
         read_abs_cat function.
 
     Returns

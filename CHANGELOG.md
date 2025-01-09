@@ -1,3 +1,14 @@
+Version 0.0.21 released 09-JAN-2025 (Canberra, Australia)
+
+- Major changes
+   * Added a new function to get ABS series by seraching for 
+     data item descriptions: read_abs_by_desc(). 
+
+- Minor changes
+   * Updated the README.md file
+
+---
+
 Version 0.0.20 released 04-JAN-2025 (Canberra, Australia)
 
 - Minor changes
