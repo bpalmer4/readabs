@@ -14,10 +14,10 @@ ABS
    Note: typically, an ABS Catalogue item comprises multiple data tables.
 - read_abs_cat() - returns a tuple containing the complete ABS Catalogue
     information as a python dictionary of pandas DataFrames (one for each 
-    table in the catalogie), as well as the associated metadata in a
+    table in the catalogue), as well as the associated metadata in a
     separate DataFrame.
 - read_abs_series() - get one or more series for a specified catalogue
-    number and the specified series identifier(s). Returns a tuple of 
+    and the specified series identifier(s). Returns a tuple of 
     two DataFrames, one for the primary data and one for the metadata.
 - read_abs_by_desc() - get one or more series, for a specified catalogue
     number, based on searching for matching data item descriptions. Returns
@@ -26,10 +26,11 @@ ABS
 - search_abs_meta() - searchs the abs meta data for 1 or more rows that 
     match the desired search-terms. Returns the matching rows from the 
     meta data
-- find_abs_id() - search the abs metadata for the one specific series
-    that matches the search terms. Returns a tuple of the table name, 
-    series_id and units for the unique series_id that matches the search-
-    terms.
+- find_abs_id() - search the abs metadata for the unique series
+    that matches the search terms. Returns a tuple of the table name,
+    series_id and units for the series_id that matches the search-
+    terms. Raises an exception if no items, or more than one item in
+    the metadata matches the search terms.
 
 RBA
 ---
@@ -40,6 +41,15 @@ RBA
 - read_rba_table() - read a table from the RBA website and return the 
     actual data and the meta data in a tuple of two DataFrames.
 
+Utilities
+---------
+- recalibrate() - returns a pandas Series/DataFrame where the units have
+    been scaled to be less than 1,000. Also adjusts the units label. 
+- percent_change()
+- annualise_rates()
+- annualise_percentages()
+- qtly_to_monthly()
+- monthly_to_qtly()
 
 For more information
 --------------------
