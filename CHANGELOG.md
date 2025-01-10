@@ -1,3 +1,11 @@
+Version 0.0.24 released 10-JAN-2025
+
+- Minor Updates
+   * Updates to the README.md file
+   * Updates to the pdoc build_docs.sh file
+
+---
+
 Vwesion 0.0.23 released 10-JAN-2025 (Canberra, Australia)
 
 - Minor changes

@@ -2,7 +2,7 @@
 the Australian Bureau of Statistics (ABS) 
 and the Reserve Bank of Australia (RBA)."""
 
-__version__ = "0.0.23"
+__version__ = "0.0.24"
 __author__ = "Bryan Palmer"
 __all__ = (
     # -- abs -- related
@@ -35,9 +35,7 @@ __pdoc__ = {
     "download_cache": False,
     "get_abs_links": False,
     "read_support": False,
-    "abs_meta_data": False,
-    "rba_meta_data": False,
-    "datatype": False,
+    "grab_abs_url": False,
 }  # hide submodules from documentation
 
 

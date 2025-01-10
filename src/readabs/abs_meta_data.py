@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class _Metacol:
+class Metacol:
     """A dataclass to hold the names of the columns in the ABS meta data."""
 
     # pylint: disable=too-many-instance-attributes
@@ -23,7 +23,11 @@ class _Metacol:
     cat: str = "Catalogue number"
 
 
-metacol = _Metacol()
+metacol = Metacol()
+"""An instance of the Metacol dataclass. metacol is a 
+frozen dataclass, so its attributes cannot be changed. 
+It is used to hold the names of the columns for the 
+DataFrame of the ABS meta data."""
 
 
 # --- testing

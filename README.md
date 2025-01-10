@@ -1,4 +1,5 @@
-# readabs
+readabs
+=======
 
 Description
 -----------
@@ -6,10 +7,15 @@ Readabs is an open-source python package to download and work with
 timeseries data from the Australian Bureau of Statistics (ABS) and
 the Reserve Bank of Australia (RBA), using pandas DataFrames. 
 
-Quick overview of the key functions:
+Import
+------
+```
+import readabs as ra
+from readabs import metacol as mc  # column names for ABS metadata
+```
 
-ABS
----
+ABS Functions
+-------------
 - abs_catalogue() - returns a pandas DataFrame of ABS catalogue numbers.
    Note: typically, an ABS Catalogue item comprises multiple data tables.
 - read_abs_cat() - returns a tuple containing the complete ABS Catalogue
@@ -32,8 +38,8 @@ ABS
     terms. Raises an exception if no items, or more than one item in
     the metadata matches the search terms.
 
-RBA
----
+RBA Functions
+-------------
 - rba_catalogue - returns a pandas DataFrame of RBA catalogue numbers.
     Note: whereas multiple data tables are associated with an ABS 
     catalogue number, onle a single table is associated with an RBA 
@@ -41,8 +47,8 @@ RBA
 - read_rba_table() - read a table from the RBA website and return the 
     actual data and the meta data in a tuple of two DataFrames.
 
-Utilities
----------
+Utility Functions
+-----------------
 - recalibrate() - returns a pandas Series/DataFrame where the units have
     been scaled to be less than 1,000. Also adjusts the units label. 
 - percent_change()
