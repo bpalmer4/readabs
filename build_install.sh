@@ -4,6 +4,8 @@
 
 cd ~/readabs
 
+~/readabs/build_docs.sh
+
 if [ ! -d ./dist ]; then
     mkdir dist
 fi

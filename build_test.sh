@@ -4,6 +4,8 @@
 
 cd ~/readabs
 
+~/readabs/build_docs.sh
+
 if [ ! -d ./dist ]; then
     mkdir dist
 fi
@@ -20,4 +22,3 @@ python -m build
 cd dist
 
 pip install readabs*.tar.gz
-

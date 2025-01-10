@@ -1,3 +1,11 @@
+Vwesion 0.0.23 released 10-JAN-2025 (Canberra, Australia)
+
+- Minor changes
+   * updated scripts so that the pdoc system updates the
+     documentation 
+
+---
+
 Version 0.0.22 released 10-JAN-2025 (Canberra, Australia)
 
 - Minor changes

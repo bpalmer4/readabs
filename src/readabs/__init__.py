@@ -2,7 +2,7 @@
 the Australian Bureau of Statistics (ABS) 
 and the Reserve Bank of Australia (RBA)."""
 
-__version__ = "0.0.22"
+__version__ = "0.0.23"
 __author__ = "Bryan Palmer"
 __all__ = (
     # -- abs -- related

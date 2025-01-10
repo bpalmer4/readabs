@@ -1,3 +1,6 @@
+echo " "
+echo "About to build the documentation ..."
+cd ~/readabs
 rm -rf ./docs
-pdoc --html ./src/readabs --output-dir ./docs --force
+pdoc ./src/readabs -o ./docs
 
