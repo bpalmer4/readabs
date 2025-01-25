@@ -51,8 +51,8 @@ def grab_abs_url(
         (see below).
 
     cat : str = ""
-        An ABS Catalogue number. If provided, the URL will be ignored,
-        and the Catalogue number will be used to get the URL.
+        An ABS Catalogue number. If provided, and the URL is not
+        provided, then the Catalogue number will be used to get the URL.
 
     Returns
     -------
@@ -60,9 +60,11 @@ def grab_abs_url(
         A dictionary of DataFrames."""
 
     # check/get the keyword arguments
-    url = _get_url(url, kwargs)  # removes "cat" from kwargs
-    check_kwargs(kwargs, "grab_abs_url")
-    args = get_args(kwargs, "grab_abs_url")
+    url = _get_url(url, kwargs)  # note: removes "cat" from kwargs
+    check_kwargs(kwargs, "grab_abs_url")  # warn if invalid kwargs
+    args = get_args(kwargs, "grab_abs_url")  # get the valid kwargs
+    if verbose := args["verbose"]:
+        print(f"grab_abs_url(): {url=}, {args=}")
 
     # get the URL links to the relevant ABS data files on that webpage
     links = get_abs_links(url, **args)
@@ -73,25 +75,14 @@ def grab_abs_url(
     # read the data files into a dictionary of DataFrames
     abs_dict: dict[str, DataFrame] = {}
 
-    def find(targ_type: str, target: str) -> str:
-        """Find the URL for a target file type."""
-        targ_list = links.get(targ_type, [])
-        if not targ_list:
-            return ""
-        for link in targ_list:
-            name = get_table_name(link)
-            if name == target:
-                return link
-        return ""
-
     # use the args, and the found links to get the data ...
     if args["single_excel_only"]:
-        link = find(".xlsx", args["single_excel_only"])
+        link = _find_url(links, ".xlsx", args["single_excel_only"], verbose)
         if link:
             abs_dict = _add_excel(abs_dict, link, **args)
 
-    elif args["single_zip_only"]:
-        link = find(".zip", args["single_zip_only"])
+    if args["single_zip_only"]:
+        link = _find_url(links, ".zip", args["single_zip_only"], verbose)
         if link:
             abs_dict = _add_zip(abs_dict, link, **args)
 
@@ -114,15 +105,34 @@ def grab_abs_url(
 
 
 # --- private
+def _find_url(
+    links: dict[str, list[str]], targ_type: str, target: str, verbose=False
+) -> str:
+    """Find the URL for a target file type.
+    Returns the URL if found, otherwise an empty string."""
+
+    targ_list = links.get(targ_type, [])
+    if not targ_list:
+        return ""
+    goal = f"{target}{targ_type}"
+    if verbose:
+        print(f"_find_url(): looking for {goal} in {targ_list}.")
+    for link in targ_list:
+        if link.endswith(goal):
+            return link
+    return ""
+
+
 def _get_url(url: str, kwargs: dict) -> str:
-    """If an ABS 'cat' is provided, get the URL for the ABS data
-    files on the ABS webpage. Otherwise, return the URL provided.
-    Either the 'url' or 'cat' argument must be provided.
+    """If an ABS 'cat' is provided and url is not provided,
+    get the URL for the ABS data files on the ABS webpage.
+    Otherwise, return the URL provided. Either the 'url' or
+    'cat' argument must be provided.
 
     Note: kwargs is passed as a dictionary, so that it can be
     modified in place. This is a common Python idiom."""
 
-    cat: str = kwargs.pop("cat", "")  # this gets cat out of kwargs
+    cat: str = kwargs.pop("cat", "")  # this takes cat out of kwargs
     cat_map = abs_catalogue()
     if not url and cat and cat in cat_map.index:
         url = str(cat_map.loc[cat, "URL"])
@@ -226,24 +236,42 @@ if __name__ == "__main__":
     def simple_test() -> None:
         """Simple test of the grab_abs_url function."""
 
-        # grab a single Excel file
-        test_dict = grab_abs_url(
-            cat="6202.0", get_excel=True, single_excel_only="6202001"
-        )
-        print(test_dict.keys())
-        print(f"Done.\n{'=' * 20}\n")
+        def test(name: str, **kwargs: Any) -> None:
+            print(f"TEST -- {name}")
+            data_dict = grab_abs_url(**kwargs)
+            print("---")
+            if not data_dict:
+                print("PROBLEM -- No data found.")
+            print(data_dict.keys())
+            print(f"Done.\n{'=' * 20}\n")
 
-        # grab the whole shebang
+        name = "1 -- grab a single zip file"
+        test(
+            name,
+            cat="6291.0.55.001",
+            single_zip_only="p6291_all_quartely_spreadsheets",
+            get_zip=True,
+            verbose=True,
+        )
+
+        name = "2 -- grab a single Excel file"
+        test(
+            name,
+            cat="6202.0",
+            get_excel=True,
+            single_excel_only="6202001",
+            verbose=False,
+        )
+
+        # 3 -- grab the whole shebang
         urls = [
             "https://www.abs.gov.au/statistics/labour/jobs/"
             + "weekly-payroll-jobs/latest-release",
             "https://www.abs.gov.au/statistics/people/population/"
             + "national-state-and-territory-population/dec-2023",
         ]
-        for url_ in urls:
-            print(f"Grabbing data from: {url_}")
-            data_dict = grab_abs_url(url_, verbose=True)
-            print(data_dict.keys())
-            print(f"Done.\n{'=' * 20}\n")
+        for i, url_ in enumerate(urls):
+            name = f"3.{i} -- grab the whole shebang {url_}"
+            test(name, url=url_, verbose=True)
 
     simple_test()

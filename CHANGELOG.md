@@ -1,6 +1,14 @@
+Version 0.0.25 released 25-JAN-2025
+
+- Minor changes
+   * updates to grab_abs_url - additional print statements
+     if in verbose mode.
+
+---
+
 Version 0.0.24 released 10-JAN-2025
 
-- Minor Updates
+- Minor changes
    * Updates to the README.md file
    * Updates to the pdoc build_docs.sh file
 
