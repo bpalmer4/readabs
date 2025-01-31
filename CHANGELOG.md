@@ -1,4 +1,11 @@
-Version 0.0.25 released 25-JAN-2025
+Version 0.0.26 released 31-Jan-2025 (Canberra, Australia)
+
+- Minor changes
+   * updates to getting a single excel file only
+
+---
+
+Version 0.0.25 released 25-JAN-2025 (Canberra, Australia)
 
 - Minor changes
    * updates to grab_abs_url - additional print statements

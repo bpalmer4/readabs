@@ -80,26 +80,27 @@ def grab_abs_url(
         link = _find_url(links, ".xlsx", args["single_excel_only"], verbose)
         if link:
             abs_dict = _add_excel(abs_dict, link, **args)
+            return abs_dict
 
     if args["single_zip_only"]:
         link = _find_url(links, ".zip", args["single_zip_only"], verbose)
         if link:
             abs_dict = _add_zip(abs_dict, link, **args)
+            return abs_dict
 
-    else:
-        for link_type in ".zip", ".xlsx":  # .zip must come first
-            for link in links.get(link_type, []):
+    for link_type in ".zip", ".xlsx":  # .zip must come first
+        for link in links.get(link_type, []):
 
-                if link_type == ".zip" and args["get_zip"]:
-                    abs_dict = _add_zip(abs_dict, link, **args)
+            if link_type == ".zip" and args["get_zip"]:
+                abs_dict = _add_zip(abs_dict, link, **args)
 
-                elif link_type == ".xlsx":
-                    if (
-                        args["get_excel"]
-                        or (args["get_excel_if_no_zip"] and not args["get_zip"])
-                        or (args["get_excel_if_no_zip"] and not links.get(".zip", []))
-                    ):
-                        abs_dict = _add_excel(abs_dict, link, **args)
+            elif link_type == ".xlsx":
+                if (
+                    args["get_excel"]
+                    or (args["get_excel_if_no_zip"] and not args["get_zip"])
+                    or (args["get_excel_if_no_zip"] and not links.get(".zip", []))
+                ):
+                    abs_dict = _add_excel(abs_dict, link, **args)
 
     return abs_dict
 

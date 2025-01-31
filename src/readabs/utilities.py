@@ -172,7 +172,7 @@ def _monthly_to_qtly_series(data: Series, q_ending="DEC", f: str = "mean") -> Se
     """Convert a monthly Series to a quarterly Series."""
 
     return (
-        data.groupby(PeriodIndex(data.index, freq=f"Q-{q_ending}"))
+        data.groupby(PeriodIndex(data.index, freq=f"Q-{q_ending.upper()}"))
         .agg([f, "count"])
         .apply(lambda x: x[f] if x["count"] == 3 else nan, axis=1)
         .dropna()
