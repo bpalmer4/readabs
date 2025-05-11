@@ -1,6 +1,7 @@
 #!/bin/zsh
 # make sure the version number is correct in:
-# ./readabs/src/readabs/__init__.py
+# (1) ~/readabs/src/readabs/__init__.py
+# (2) ~/readabs/pyproject.toml
 
 cd ~/readabs
 
@@ -13,12 +14,12 @@ if [ -n "$(ls -A ./dist 2>/dev/null)" ]; then
   rm ./dist/*
 fi
 
-pip uninstall readabs
+uv sync
 
-pip install -q build
+uv build
 
-python -m build
+uv pip install dist/readabs*gz
 
-cd dist
+echo "And if everything is okay ..."
+echo "uv publish --token MY_TOKEN_HERE"
 
-pip install readabs*.tar.gz

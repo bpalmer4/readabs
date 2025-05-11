@@ -1,3 +1,10 @@
+Version 0.0.27 released 10-May-2025 (Canberra Australia)
+
+- Minor changes
+  * using uv to build the package
+
+---
+
 Version 0.0.26 released 31-Jan-2025 (Canberra, Australia)
 
 - Minor changes

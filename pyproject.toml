@@ -1,37 +1,38 @@
 [project]
 name = "readabs"
-dynamic = ["version",]
-authors = [
-  {name = "Bryan Palmer", email = "palmer.bryan@gmail.com"},
-]
-maintainers = [
-  {name = "Bryan Palmer", email = "palmer.bryan@gmail.com"},
-]
+# Also change in __init__.py
+version = "0.0.27"
 description = "Get ABS timeseries data in pandas DataFrames"
 readme = "README.md"
 requires-python = ">=3.9"
+
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 
+dependencies = [
+    # -- for readabs
+    "typing",
+    "numpy",
+    "pandas",
+    "lxml",
+    "openpyxl",
+    "pdoc",
+    "requests",
+    "bs4",
+
+    # ---
+    "black",
+    "pylint",
+    "ruff",
+    "mypy",
+]
+
 [project.urls]
 Homepage = "https://github.com/bpalmer4/readabs"
 
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.dynamic]
-version = {attr = "readabs.__init__.__version__"}
-
-[tool.setuptools.packages.find]
-where = ["src"]  # list of folders that contain the packages (["."] by default)
-include = ["readabs"]  # package names should match these glob patterns (["*"] by default)
-exclude = ["test", "tests", "test_*"]
-namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
-
-[tool.setuptools.package-data]
-"pkgname" = ["py.typed"]
+[project.optional-dependencies]
+build = ["setuptools", "cython"]
 
