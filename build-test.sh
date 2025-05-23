@@ -5,7 +5,7 @@
 
 cd ~/readabs
 
-~/readabs/build_docs.sh
+~/readabs/build-docs.sh
 
 if [ ! -d ./dist ]; then
     mkdir dist

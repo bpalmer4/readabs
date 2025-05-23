@@ -1,3 +1,10 @@
+Version 0.0.28 released 24-May-2025 (Canberra Australia)
+
+- Minor changes
+  * added tabulate to the package requirements
+
+---
+
 Version 0.0.27 released 10-May-2025 (Canberra Australia)
 
 - Minor changes

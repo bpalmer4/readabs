@@ -1,7 +1,7 @@
 [project]
 name = "readabs"
 # Also change in __init__.py
-version = "0.0.27"
+version = "0.0.28"
 description = "Get ABS timeseries data in pandas DataFrames"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -22,6 +22,7 @@ dependencies = [
     "pdoc",
     "requests",
     "bs4",
+    "tabulate",
 
     # ---
     "black",
