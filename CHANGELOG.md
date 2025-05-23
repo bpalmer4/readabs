@@ -1,3 +1,10 @@
+Version 0.0.29 released 24-May-2025 (Canberra Australia)
+
+- Minor changes
+  * glitch with previous upload
+
+---
+
 Version 0.0.28 released 24-May-2025 (Canberra Australia)
 
 - Minor changes
