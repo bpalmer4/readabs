@@ -2,8 +2,46 @@
 the Australian Bureau of Statistics (ABS) 
 and the Reserve Bank of Australia (RBA)."""
 
-__version__ = "0.0.29"
+# --- imports
+import importlib.metadata
+
+# --- local imports
+# - ABS related -
+from readabs.abs_catalogue import abs_catalogue
+from readabs.print_abs_catalogue import print_abs_catalogue
+from readabs.search_abs_meta import search_abs_meta, find_abs_id
+from readabs.read_abs_cat import read_abs_cat
+from readabs.read_abs_series import read_abs_series
+from readabs.read_abs_by_desc import read_abs_by_desc
+from readabs.grab_abs_url import grab_abs_url
+from readabs.abs_meta_data import metacol
+
+# - RBA related -
+from readabs.rba_catalogue import print_rba_catalogue, rba_catalogue
+from readabs.read_rba_table import read_rba_table, read_rba_ocr
+from readabs.rba_meta_data import rba_metacol
+
+# - Utilities -
+from readabs.datatype import Datatype
+from readabs.recalibrate import recalibrate, recalibrate_value
+from readabs.utilities import (
+    percent_change,
+    annualise_rates,
+    annualise_percentages,
+    qtly_to_monthly,
+    monthly_to_qtly,
+)
+
+
+# --- version and author
+try:
+    __version__ = importlib.metadata.version(__name__)
+except importlib.metadata.PackageNotFoundError:
+    __version__ = "0.0.0"  # Fallback for development mode
 __author__ = "Bryan Palmer"
+
+
+# --- exposed functions and classes
 __all__ = (
     # -- abs -- related
     "metacol",
@@ -37,31 +75,3 @@ __pdoc__ = {
     "read_support": False,
     "grab_abs_url": False,
 }  # hide submodules from documentation
-
-
-# --- local imports
-# - ABS related -
-from readabs.abs_catalogue import abs_catalogue
-from readabs.print_abs_catalogue import print_abs_catalogue
-from readabs.search_abs_meta import search_abs_meta, find_abs_id
-from readabs.read_abs_cat import read_abs_cat
-from readabs.read_abs_series import read_abs_series
-from readabs.read_abs_by_desc import read_abs_by_desc
-from readabs.grab_abs_url import grab_abs_url
-from readabs.abs_meta_data import metacol
-
-# - RBA related -
-from readabs.rba_catalogue import print_rba_catalogue, rba_catalogue
-from readabs.read_rba_table import read_rba_table, read_rba_ocr
-from readabs.rba_meta_data import rba_metacol
-
-# - Utilities -
-from readabs.datatype import Datatype
-from readabs.recalibrate import recalibrate, recalibrate_value
-from readabs.utilities import (
-    percent_change,
-    annualise_rates,
-    annualise_percentages,
-    qtly_to_monthly,
-    monthly_to_qtly,
-)

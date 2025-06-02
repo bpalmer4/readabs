@@ -1,39 +1,47 @@
 [project]
 name = "readabs"
-# Also change in __init__.py
-version = "0.0.29"
+version = "0.0.30"
 description = "Get ABS timeseries data in pandas DataFrames"
 readme = "README.md"
-requires-python = ">=3.9"
-
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
+requires-python = ">=3.11"
 
 dependencies = [
-    # -- for readabs
+    # - system
     "typing",
+    "pathlib",
+
+    # - data science 
+    "matplotlib",
     "numpy",
     "pandas",
-    "lxml",
+    "tabulate",
     "openpyxl",
-    "pdoc",
+
+    # - web
     "requests",
     "bs4",
-    "tabulate",
+    "lxml",
+]
 
-    # ---
+[dependency-groups]
+dev = [
+    # - tools
     "black",
+    "mypy",
+    "pdoc",
     "pylint",
     "ruff",
-    "mypy",
+    
+    # - typing
+    "pandas-stubs",
+    "numpy-typing",
+    "types-tabulate",
 ]
 
 [project.urls]
+Repository = "https://github.com/bpalmer4/readabs"
 Homepage = "https://github.com/bpalmer4/readabs"
 
-[project.optional-dependencies]
-build = ["setuptools", "cython"]
-
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

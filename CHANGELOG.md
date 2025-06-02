@@ -1,3 +1,11 @@
+Version 0.0.30 released 02-Jun-2025 (Canberra Australia)
+
+- Minor changes
+  * updated build-test.sh, pyproject.toml and __init__.py,
+    to further integrate the use of uv
+
+---
+
 Version 0.0.29 released 24-May-2025 (Canberra Australia)
 
 - Minor changes
