@@ -96,6 +96,8 @@ def get_abs_links(
         if url is None or not url:
             # ignore silly cases
             continue
+        if "Mock-up" in url:
+            continue  # issue on 4 June 2025 with National Accounts
         for link_type in link_types:
             if url.lower().endswith(link_type):
                 if link_type not in link_dict:

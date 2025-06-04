@@ -1,3 +1,11 @@
+Version 0.0.31 released 04-Jun-2025 (Canberra Australia)
+
+- Minor changes
+  * Today's national accounts included a bunch of 
+    "Mock-up" links and zipfiles. As a tempory fix, I ignore
+    URLs with the string "Mock-up" in them.
+
+---
 Version 0.0.30 released 02-Jun-2025 (Canberra Australia)
 
 - Minor changes
