@@ -33,12 +33,9 @@ def abs_catalogue(cache_only=False, verbose=False) -> DataFrame:
     # get ABS web page of catalogue numbers
     url = "https://www.abs.gov.au/about/data-services/help/abs-time-series-directory"
     abs_bytes = get_file(url, cache_only=cache_only, verbose=verbose)
-    links = read_html(StringIO(abs_bytes.decode("utf-8")), extract_links="body")[
-        1
-    ]  # second table on the page
+    links = read_html(StringIO(abs_bytes.decode("utf-8")), extract_links="body")[-1]
 
-    # extract catalogue numbers
-    cats = links["Catalogue Number"].apply(Series)[0]
+    cats = links["Catalogue number"].apply(Series)[0]
     urls = links["Topic"].apply(Series)[1]
     root = "https://www.abs.gov.au/statistics/"
     snip = urls.str.replace(root, "")

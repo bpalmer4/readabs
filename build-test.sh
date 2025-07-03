@@ -22,9 +22,9 @@ uv build
 
 # --- install new readabs locally
 uv sync  # install with the development dependencies
-uv pip install dist/readabs*gz  # add in the new package
 
 # --- build documentation
+source .venv/bin/activate  # we need an environment to get pdoc 
 ~/readabs/build-docs.sh
 
 # --- if everything is good publish and git

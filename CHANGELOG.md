@@ -1,3 +1,12 @@
+Version 0.0.32 released 03-Jul-2025 (Canberra Australia)
+
+- minor changes
+    * ABS has changed a column label from "Catalogue Number"
+      to "Catalogue number"
+    * minor clean up.
+
+---
+
 Version 0.0.31 released 04-Jun-2025 (Canberra Australia)
 
 - Minor changes
@@ -6,6 +15,7 @@ Version 0.0.31 released 04-Jun-2025 (Canberra Australia)
     URLs with the string "Mock-up" in them.
 
 ---
+
 Version 0.0.30 released 02-Jun-2025 (Canberra Australia)
 
 - Minor changes
