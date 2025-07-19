@@ -1,3 +1,19 @@
+Version 0.1.1 released 19-Jul-2025 (Canberra Australia)
+
+- Code quality improvements
+    * Comprehensive code review and linting improvements across all files
+    * Fixed type annotations and docstring formatting throughout the package
+    * Added per-file exclusions in pyproject.toml for legitimate ANN401 cases
+    * Improved error handling and constants for magic numbers
+    * Fixed pandas regex warning in abs_catalogue.py by removing parentheses from CEASED_MARKER
+
+- Documentation updates
+    * Updated README.md to accurately reflect all available functions and improved formatting
+    * Added missing functions (print_abs_catalogue, print_rba_catalogue, read_rba_ocr, etc.)
+    * Improved code examples and formatting
+
+---
+
 Version 0.0.32 released 03-Jul-2025 (Canberra Australia)
 
 - minor changes

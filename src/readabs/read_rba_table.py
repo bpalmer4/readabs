@@ -1,36 +1,48 @@
 """Read a table from the RBA website and store it in a pandas DataFrame."""
 
-from typing import Any, cast
-from io import BytesIO
 import re
+from io import BytesIO
+from typing import Any, cast
+
 from pandas import (
     DataFrame,
     DatetimeIndex,
-    PeriodIndex,
-    Period,
     Index,
-    read_excel,
+    Period,
+    PeriodIndex,
     Series,
     Timestamp,
     period_range,
+    read_excel,
 )
+
+from readabs.download_cache import CacheError, HttpError, get_file
 
 # local imports
 from readabs.rba_catalogue import rba_catalogue
-from readabs.download_cache import get_file, HttpError, CacheError
 from readabs.rba_meta_data import rba_metacol as rm
+
+# Constants for frequency detection
+MONTHLY_MIN_DAYS = 28
+MONTHLY_MAX_DAYS = 31
+QUARTERLY_MIN_DAYS = 90
+QUARTERLY_MAX_DAYS = 92
+YEARLY_MIN_DAYS = 365
+YEARLY_MAX_DAYS = 366
 
 
 # --- PRIVATE ---
 def _get_excel_file(
     table: str,
+    *,
     ignore_errors: bool,
-    **kwargs: Any,
+    **kwargs: Any,  # cache args
 ) -> bytes | None:
     """Get the Excel file from the RBA website for the given table.
-    Return bytes if successful, otherwise return None.
-    Raises an exception if ignore_errors is False."""
 
+    Return bytes if successful, otherwise return None.
+    Raises an exception if ignore_errors is False.
+    """
     # get the relevant URL for a table moniker
     cat_map = rba_catalogue()
     if table not in cat_map.index:
@@ -57,25 +69,26 @@ def _get_excel_file(
             urls += [new_url]
 
     # try to get the Excel file - including with different exensions
+    excel = None
     for this_url in urls:
         try:
             excel = get_file(this_url, **kwargs)
+            break  # Success, exit loop
         except (HttpError, CacheError) as e:
             if this_url == urls[-1]:
                 if ignore_errors:
                     print(f"Ignoring error: {e}")
                     return None
                 raise
-        else:
-            break
 
     return excel
 
 
 # --- PUBLIC ---
-def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
-    """Read a table from the RBA website and return the actual data
-    and the meta data in a tuple of two DataFrames.
+def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:  # ignore_errors
+    """Read a table from the RBA website and return the actual data and meta data.
+
+    Returns the actual data and the meta data in a tuple of two DataFrames.
 
     Parameters
     ----------
@@ -98,14 +111,15 @@ def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
     --------
     ```python
     data, meta = read_rba_table("C1")
-    ```"""
+    ```
 
+    """
     # set-up
     ignore_errors = kwargs.get("ignore_errors", False)
     data, meta = DataFrame(), DataFrame()
 
     # get the Excel file
-    excel = _get_excel_file(table, ignore_errors, **kwargs)
+    excel = _get_excel_file(table, ignore_errors=ignore_errors, **kwargs)
     if excel is None:
         return data, meta
 
@@ -141,11 +155,11 @@ def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
 
     # can we make the index into a PeriodIndex?
     days = data.index.to_series().diff(1).dropna().dt.days
-    if days.min() >= 28 and days.max() <= 31:
+    if days.min() >= MONTHLY_MIN_DAYS and days.max() <= MONTHLY_MAX_DAYS:
         data.index = PeriodIndex(data.index, freq="M")
-    elif days.min() >= 90 and days.max() <= 92:
+    elif days.min() >= QUARTERLY_MIN_DAYS and days.max() <= QUARTERLY_MAX_DAYS:
         data.index = PeriodIndex(data.index, freq="Q")
-    elif days.min() >= 365 and days.max() <= 366:
+    elif days.min() >= YEARLY_MIN_DAYS and days.max() <= YEARLY_MAX_DAYS:
         data.index = PeriodIndex(data.index, freq="Y")
     else:
         data.index = PeriodIndex(data.index, freq="D")
@@ -153,9 +167,10 @@ def read_rba_table(table: str, **kwargs: Any) -> tuple[DataFrame, DataFrame]:
     return data, meta
 
 
-def read_rba_ocr(monthly: bool = True, **kwargs: Any) -> Series:
-    """Read the Official Cash Rate (OCR) from the RBA website and return it
-    in a pandas Series, with either a daily or monthly PeriodIndex,
+def read_rba_ocr(*, monthly: bool = True, **kwargs: Any) -> Series:  # ignore_errors
+    """Read the Official Cash Rate (OCR) from the RBA website.
+
+    Return it in a pandas Series, with either a daily or monthly PeriodIndex,
     depending on the value of the monthly parameter. The default is monthly.
 
     Parameters
@@ -179,43 +194,39 @@ def read_rba_ocr(monthly: bool = True, **kwargs: Any) -> Series:
     --------
     ```python
     ocr = read_rba_ocr(monthly=True)
-    ```"""
+    ```
 
+    """
     # read the OCR table from the RBA website, make float and sort, name the series
     rba, _rba_meta = read_rba_table("A2", **kwargs)  # should have a daily PeriodIndex
-    ocr = (
-        rba.loc[lambda x: x.index >= "1990-08-02", "ARBAMPCNCRT"]
-        .astype(float)
-        .sort_index()
-    )
+    ocr_series = rba.loc[lambda x: x.index >= "1990-08-02", "ARBAMPCNCRT"]
+    ocr = cast("Series", ocr_series).astype(float).sort_index()
     ocr.name = "RBA Official Cash Rate"
 
     # bring up to date
-    today = Period(Timestamp.today(), freq=cast(PeriodIndex, ocr.index).freqstr)
-    if ocr.index[-1] < today:
+    today = Period(Timestamp.today(), freq=cast("PeriodIndex", ocr.index).freqstr)
+    last_period = cast("Period", ocr.index[-1])
+    if last_period < today:
         ocr[today] = ocr.iloc[-1]
 
     if not monthly:
         # fill in missing days and return daily data
         daily_index = period_range(start=ocr.index.min(), end=ocr.index.max(), freq="D")
-        ocr = ocr.reindex(daily_index).ffill()
-        return ocr
+        return ocr.reindex(daily_index).ffill()
 
     # convert to monthly data, keeping last value if duplicates in month
     # fill in missing months
     ocr.index = PeriodIndex(ocr.index, freq="M")
     ocr = ocr[~ocr.index.duplicated(keep="last")]
     monthly_index = period_range(start=ocr.index.min(), end=ocr.index.max(), freq="M")
-    ocr = ocr.reindex(monthly_index, method="ffill")
-    return ocr
+    return ocr.reindex(monthly_index, method="ffill")
 
 
 # --- TESTING ---
 if __name__ == "__main__":
 
-    def test_read_rba_table():
+    def test_read_rba_table() -> None:
         """Test the read_rba_table function."""
-
         # test with a known table
         d, m = read_rba_table("C1")
         print(m)
@@ -232,9 +243,8 @@ if __name__ == "__main__":
 
     test_read_rba_table()
 
-    def test_read_rba_ocr():
+    def test_read_rba_ocr() -> None:
         """Test the read_rba_ocr function."""
-
         # test with monthly data
         ocr = read_rba_ocr(monthly=True)
         print(ocr.head())

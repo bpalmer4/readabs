@@ -1,29 +1,40 @@
 """download_cache.py - a module for downloading and caching data from the web.
 
-The default cache directory can be specified by setting the environment 
-variable READABS_CACHE_DIR."""
+The default cache directory can be specified by setting the environment
+variable READABS_CACHE_DIR.
+"""
 
-# --- imports
 # system imports
-from hashlib import md5
 import re
-from datetime import datetime, timezone
-from os import utime, getenv
+from datetime import UTC, datetime
+from hashlib import sha256
+from os import getenv, utime
 from pathlib import Path
-from typing import Any
+from typing import NotRequired, TypedDict, Unpack
 
 # data imports
 import pandas as pd
 import requests
-
 
 # --- constants
 # define the default cache directory
 DEFAULT_CACHE_DIR = "./.readabs_cache"
 READABS_CACHE_DIR = getenv("READABS_CACHE_DIR", DEFAULT_CACHE_DIR)
 READABS_CACHE_PATH = Path(READABS_CACHE_DIR)
+GOOD_HTTP_CODES = {200, 201, 202, 204}  # HTTP codes considered successful
 
 DOWNLOAD_TIMEOUT = 60  # seconds
+HEAD_REQUEST_TIMEOUT = 20  # seconds
+NANOSECONDS_PER_SECOND = 1_000_000_000  # conversion factor
+BAD_CACHE_PATTERN = r'[~"#%&*:<>?\\{|}]+'  # chars to remove from cache filenames
+
+
+class FileKwargs(TypedDict):
+    """TypedDict for file-related keyword arguments."""
+
+    verbose: NotRequired[bool]
+    ignore_errors: NotRequired[bool]
+    cache_only: NotRequired[bool]
 
 
 # --- Exception classes
@@ -39,15 +50,25 @@ class CacheError(Exception):
 def check_for_bad_response(
     url: str,
     response: requests.Response,
-    **kwargs: Any,
+    **kwargs: Unpack[FileKwargs],
 ) -> bool:
-    """Raise an Exception if we could not retrieve the URL.
-    If "ignore_errors" is True, return True if there is a problem,
-    otherwise raise an exception if there is a problem."""
+    """Check HTTP response for errors and handle accordingly.
 
+    Args:
+        url: The URL that was requested
+        response: The HTTP response object
+        **kwargs: Optional parameters including 'ignore_errors' (bool)
+
+    Returns:
+        bool: True if there was a problem, False if response is OK
+
+    Raises:
+        HttpError: If there's a problem and ignore_errors is False
+
+    """
     ignore_errors = kwargs.get("ignore_errors", False)
     code = response.status_code
-    if code != 200 or response.headers is None:
+    if code not in GOOD_HTTP_CODES:
         problem = f"Problem {code} accessing: {url}."
         if not ignore_errors:
             raise HttpError(problem)
@@ -59,12 +80,21 @@ def check_for_bad_response(
 
 def request_get(
     url: str,
-    **kwargs: Any,
+    **kwargs: Unpack[FileKwargs],
 ) -> bytes:
-    """Use python requests to get the contents of the specified URL.
-    Depending on "ignore_errors", if something goes wrong, we either
-    raise an exception or return an empty bytes object."""
+    """Download content from a URL using HTTP GET.
 
+    Args:
+        url: The URL to download from
+        **kwargs: Optional parameters including 'verbose' and 'ignore_errors'
+
+    Returns:
+        bytes: The downloaded content, or empty bytes if error ignored
+
+    Raises:
+        HttpError: If download fails and ignore_errors is False
+
+    """
     # Initialise variables
     verbose = kwargs.get("verbose", False)
     ignore_errors = kwargs.get("ignore_errors", False)
@@ -93,13 +123,19 @@ def request_get(
 def save_to_cache(
     file: Path,
     contents: bytes,
-    **kwargs: Any,
+    **kwargs: Unpack[FileKwargs],
 ) -> None:
-    """Save bytes to the file-system."""
+    """Save bytes to the file-system cache.
 
+    Args:
+        file: Path object for the cache file location
+        contents: Bytes content to save
+        **kwargs: Optional parameters including 'verbose' (bool)
+
+    """
     verbose = kwargs.get("verbose", False)
     if len(contents) == 0:
-        # dont save empty files (probably caused by ignoring errors)
+        # don't save empty files (probably caused by ignoring errors)
         return
     if file.exists():
         if verbose:
@@ -107,13 +143,23 @@ def save_to_cache(
         file.unlink()
     if verbose:
         print(f"About to save to cache: {file}")
-    file.open(mode="w", buffering=-1, encoding=None, errors=None, newline=None)
     file.write_bytes(contents)
 
 
-def retrieve_from_cache(file: Path, **kwargs: Any) -> bytes:
-    """Retrieve bytes from file-system."""
+def retrieve_from_cache(file: Path, **kwargs: Unpack[FileKwargs]) -> bytes:
+    """Retrieve bytes from file-system cache.
 
+    Args:
+        file: Path object for the cache file location
+        **kwargs: Optional parameters including 'verbose' and 'ignore_errors'
+
+    Returns:
+        bytes: The cached content, or empty bytes if error ignored
+
+    Raises:
+        CacheError: If file doesn't exist and ignore_errors is False
+
+    """
     verbose = kwargs.get("verbose", False)
     ignore_errors = kwargs.get("ignore_errors", False)
 
@@ -132,21 +178,33 @@ def get_file(
     url: str,
     cache_dir: Path = READABS_CACHE_PATH,
     cache_prefix: str = "cache",
-    **kwargs: Any,
+    **kwargs: Unpack[FileKwargs],
 ) -> bytes:
     """Get a file from URL or local file-system cache, depending on freshness.
-    Note: we create the cache_dir if it does not exist.
-    Returns: the contents of the file as bytes."""
+
+    Downloads from URL if cached version doesn't exist or is stale based on
+    HTTP Last-Modified headers. Creates cache_dir if it doesn't exist.
+
+    Args:
+        url: The URL to download from
+        cache_dir: Directory path for cache storage
+        cache_prefix: Prefix for cache filenames
+        **kwargs: Optional parameters including 'verbose', 'ignore_errors', 'cache_only'
+
+    Returns:
+        bytes: The file contents
+
+    Raises:
+        CacheError: If cache directory cannot be created or accessed
+        HttpError: If download fails and ignore_errors is False
+
+    """
 
     def get_fpath() -> Path:
-        """Convert URL string into a cache file name,
-        then return as a Path object."""
-        bad_cache_pattern = r'[~"#%&*:<>?\\{|}]+'  # chars to remove from name
-        hash_name = md5(url.encode("utf-8")).hexdigest()
+        """Convert URL string into a cache file name and return as Path object."""
+        hash_name = sha256(url.encode("utf-8")).hexdigest()
         tail_name = url.split("/")[-1].split("?")[0]
-        file_name = re.sub(
-            bad_cache_pattern, "", f"{cache_prefix}--{hash_name}--{tail_name}"
-        )
+        file_name = re.sub(BAD_CACHE_PATTERN, "", f"{cache_prefix}--{hash_name}--{tail_name}")
         return Path(cache_dir / file_name)
 
     # create and check cache_dir is a directory
@@ -158,27 +216,24 @@ def get_file(
     file_path = get_fpath()  # the cache file path
     if not kwargs.get("cache_only", False):
         # download from url if it is fresher than the cache version
-        response = requests.head(url, allow_redirects=True, timeout=20)
+        response = requests.head(url, allow_redirects=True, timeout=HEAD_REQUEST_TIMEOUT)
         if not check_for_bad_response(url, response, **kwargs):
             source_time = response.headers.get("Last-Modified", None)
         else:
             source_time = None
-        source_mtime = (
-            None if source_time is None else pd.to_datetime(source_time, utc=True)
-        )
+        source_mtime = None if source_time is None else pd.to_datetime(source_time, utc=True)
 
         # get cache modification time in UTC
         target_mtime: datetime | None = None
         if file_path.exists() and file_path.is_file():
             target_mtime = pd.to_datetime(
-                datetime.fromtimestamp(file_path.stat().st_mtime, tz=timezone.utc),
+                datetime.fromtimestamp(file_path.stat().st_mtime, tz=UTC),
                 utc=True,
             )
 
         # get and save URL source data
         if target_mtime is None or (  # cache is empty, or
-            source_mtime is not None
-            and source_mtime > target_mtime  # URL is fresher than cache
+            source_mtime is not None and source_mtime > target_mtime  # URL is fresher than cache
         ):
             if kwargs.get("verbose", False):
                 print(f"Retrieving from URL: {url}")
@@ -186,9 +241,9 @@ def get_file(
             if kwargs.get("verbose", False):
                 print(f"Saving to cache: {file_path}")
             save_to_cache(file_path, url_bytes, **kwargs)
-            # - change file mod time to reflect mtime at URL
+            # change file mod time to reflect mtime at URL
             if source_mtime is not None and len(url_bytes) > 0:
-                unixtime = source_mtime.value / 1_000_000_000  # convert to seconds
+                unixtime = source_mtime.value / NANOSECONDS_PER_SECOND
                 utime(file_path, (unixtime, unixtime))
             return url_bytes
 
@@ -200,14 +255,15 @@ def get_file(
 if __name__ == "__main__":
 
     def cache_test() -> None:
-        """This function provides a quick test of the retrieval
-        and caching system.  You may need to first clear the
-        cache directory to see the effect of the cache."""
+        """Test the retrieval and caching system.
 
+        Downloads a file twice to demonstrate caching behavior.
+        Clear the cache directory first to see the full effect.
+        """
         # prepare the test case
         url1 = (
             "https://www.abs.gov.au/statistics/labour/employment-and-"
-            + "unemployment/labour-force-australia/nov-2023/6202001.xlsx"
+            "unemployment/labour-force-australia/nov-2023/6202001.xlsx"
         )
 
         # implement - first retrieval is from the web, second from the cache

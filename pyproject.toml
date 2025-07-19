@@ -1,6 +1,6 @@
 [project]
 name = "readabs"
-version = "0.0.32"
+version = "0.1.1"
 description = "Get ABS timeseries data in pandas DataFrames"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -26,16 +26,16 @@ dependencies = [
 [dependency-groups]
 dev = [
     # - tools
-    "black",
-    "mypy",
     "pdoc",
-    "pylint",
     "ruff",
+    "mypy",
+    "pyright",
     
     # - typing
     "pandas-stubs",
     "numpy-typing",
     "types-tabulate",
+    "types-requests",
 ]
 
 [project.urls]
@@ -45,3 +45,28 @@ Homepage = "https://github.com/bpalmer4/readabs"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length=115
+lint.select = [ "ALL" ]  # Aggresively select all rules
+lint.ignore = [
+    # --- specific rules to ignore
+    "COM812",  # missing or trailing comma - recommended by ruff format
+    "D203",    # Incorrect blank line before class - recommended by ruff check
+    "D213",    # Multi-line docstring summary should start at the first line - recommended by ruff
+    "EM101",   # Exception must not use a string literal
+    "EM102",   # Exception must not use an f-string literal
+    "T201",    # Remove `print` --> But I use print to alert the user
+    "TRY003",  # Long exception messages.
+]
+
+# Per-file exclusions for files using **kwargs: Any for dynamic argument handling
+[tool.ruff.lint.per-file-ignores]
+"src/readabs/read_abs_cat.py" = ["ANN401"]
+"src/readabs/read_abs_series.py" = ["ANN401"]
+"src/readabs/search_abs_meta.py" = ["ANN401"]
+"src/readabs/read_abs_by_desc.py" = ["ANN401"]
+"src/readabs/rba_catalogue.py" = ["ANN401", "C901"]  # Complex function for web scraping
+"src/readabs/read_rba_table.py" = ["ANN401"]
+"src/readabs/grab_abs_url.py" = ["ANN401", "BLE001"]  # Dynamic args and broad exception handling needed
+

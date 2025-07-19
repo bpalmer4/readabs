@@ -1,23 +1,24 @@
 """Extract links to RBA data files from the RBA website."""
 
-# system imports
 import re
-from typing import Any
 from functools import cache
+from typing import Any
 
-# analutic imports
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from pandas import DataFrame
 
-# local imports
-from readabs.download_cache import get_file, HttpError, CacheError
+from readabs.download_cache import CacheError, HttpError, get_file
+
+# Constants
+EXPECTED_PAIR_LENGTH = 2
 
 
-# --- public functions ---
 @cache
-def rba_catalogue(cache_only=False, verbose=False) -> DataFrame:
-    """Return a DataFrame of RBA Catalogue numbers. In the first instance,
-    this is downloaded from the RBA website, and cached for future use.
+def rba_catalogue(*, cache_only: bool = False, verbose: bool = False) -> DataFrame:
+    """Return a DataFrame of RBA Catalogue numbers.
+
+    In the first instance, this is downloaded from the RBA website, and
+    cached for future use.
 
     Parameters
     ----------
@@ -36,14 +37,17 @@ def rba_catalogue(cache_only=False, verbose=False) -> DataFrame:
     ```python
     import readabs as ra
     catalogue = ra.rba_catalogue()
-    ```"""
+    ```
 
+    """
     return _get_rba_links(cache_only=cache_only, verbose=verbose)
 
 
-def print_rba_catalogue(cache_only=False, verbose=False) -> None:
-    """This function prints to standard output a table of the RBA
-    Catalogue Numbers.
+def print_rba_catalogue(*, cache_only: bool = False, verbose: bool = False) -> None:
+    """Print to standard output a table of the RBA Catalogue Numbers.
+
+    This function prints a formatted table of RBA catalogue numbers
+    to standard output.
 
     Parameters
     ----------
@@ -52,10 +56,10 @@ def print_rba_catalogue(cache_only=False, verbose=False) -> None:
     verbose : bool = False
         If True, print progress messages.
 
-    Return values
-    -------------
-
-    The function does not return anything.
+    Returns
+    -------
+    None
+        This function does not return anything.
 
     Example
     -------
@@ -63,17 +67,18 @@ def print_rba_catalogue(cache_only=False, verbose=False) -> None:
     ```python
     import readabs as ra
     ra.print_rba_catalogue()
-    ```"""
+    ```
 
+    """
     rba_catalog = rba_catalogue(cache_only=cache_only, verbose=verbose)
     print(rba_catalog.loc[:, rba_catalog.columns != "URL"].to_markdown())
 
 
-# --- private functions ---
-def _get_soup(url: str, **kwargs: Any) -> BeautifulSoup | None:
+def _get_soup(url: str, **kwargs: Any) -> BeautifulSoup | None:  # cache args
     """Return a BeautifulSoup object from a URL.
-    Returns None on error."""
 
+    Returns None on error.
+    """
     try:
         page = get_file(url, **kwargs)
     except (HttpError, CacheError) as e:
@@ -94,7 +99,6 @@ def _historical_name_fix(
     prefix: str,
 ) -> tuple[str, str]:
     """Fix the historical data names. Returns a tuple of moniker and foretext."""
-
     if "Exchange Rates" in foretext:
         foretext = f"{foretext} - {moniker}"
         moniker = "F11.1"
@@ -117,19 +121,25 @@ def _excel_link_capture(
     soup: BeautifulSoup,
     prefix: str,
 ) -> dict[str, dict[str, str]]:
-    """Capture all links (of Microsoft Excel types) from the
-    BeautifulSoup object. Returns a dictionary with the following
-    structure: {moniker: {"Description": text, "URL": url}}."""
+    """Capture all links (of Microsoft Excel types) from the BeautifulSoup object.
 
+    Returns a dictionary with the following structure:
+    {moniker: {"Description": text, "URL": url}}.
+    """
     # The RBA has a number of historic tables that are not well
     # formated. We will exclude these from the dictionary.
     historic_exclusions = ("E4", "E5", "E6", "E7", "J1", "J2")
 
     link_dict = {}
-    for link in soup.findAll("a"):
-
-        url = link.get("href").strip()
-        if not url or url is None:
+    for link in soup.find_all("a"):
+        # Ensure we have a Tag object with href attribute
+        if not isinstance(link, Tag):
+            continue
+        href = link.get("href")
+        if not href or not isinstance(href, str):
+            continue
+        url = href.strip()
+        if not url:
             continue
 
         tail = url.rsplit("/", 1)[-1].lower()
@@ -138,10 +148,10 @@ def _excel_link_capture(
         if not tail.endswith(".xls") and not tail.endswith(".xlsx"):
             continue
         text, url = link.text, _make_absolute_url(url.strip())
-        text = text.replace("–", "-").strip()
+        text = text.replace("\u2013", "-").strip()  # Replace EN DASH with HYPHEN
 
         pair = text.rsplit(" - ", 1)
-        if len(pair) != 2:
+        if len(pair) != EXPECTED_PAIR_LENGTH:
             continue
         foretext, moniker = pair
 
@@ -167,14 +177,13 @@ def _excel_link_capture(
 
 
 @cache
-def _get_rba_links(**kwargs: Any) -> DataFrame:
-    """Extract links to RBA data files in Excel format
-    from the RBA website.  Returns a DataFrame with the
-    following columns: 'Description' and 'URL'. The index
-    is the 'Table' number. Returns an empty DataFrame on error."""
+def _get_rba_links(**kwargs: Any) -> DataFrame:  # cache args
+    """Extract links to RBA data files in Excel format from the RBA website.
 
+    Returns a DataFrame with the following columns: 'Description' and 'URL'.
+    The index is the 'Table' number. Returns an empty DataFrame on error.
+    """
     urls = [
-        # (url, prefix)
         ("https://www.rba.gov.au/statistics/tables/", ""),  # current
         ("https://www.rba.gov.au/statistics/historical-data.html", "Z:"),  # history
     ]
@@ -192,9 +201,10 @@ def _get_rba_links(**kwargs: Any) -> DataFrame:
 
 # private
 def _make_absolute_url(url: str, prefix: str = "https://www.rba.gov.au") -> str:
-    """Convert a relative URL address found on the RBA site to
-    an absolute URL address."""
+    """Convert a relative URL address found on the RBA site to an absolute URL.
 
+    Takes a relative URL and converts it to an absolute URL address.
+    """
     # remove a prefix if it already exists (just to be sure)
     url = url.replace(prefix, "")
     url = url.replace(prefix.replace("https://", "http://"), "")

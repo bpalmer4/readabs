@@ -1,23 +1,20 @@
 """Get specific ABS data series by their ABS series identifiers."""
 
-# --- imports
-# system imports
-from typing import Any, Sequence, cast
+from collections.abc import Sequence
+from typing import Any, cast
 
-# analytic imports
 from pandas import DataFrame, Index, PeriodIndex, concat
 
-# local imports
+from readabs.abs_meta_data import metacol
 from readabs.read_abs_cat import read_abs_cat
 from readabs.read_support import check_kwargs, get_args
-from readabs.abs_meta_data import metacol
 
 
 # --- functions
 def read_abs_series(
     cat: str,
     series_id: str | Sequence[str],
-    **kwargs: Any,
+    **kwargs: Any,  # ReadArgs compatible
 ) -> tuple[DataFrame, DataFrame]:
     """Get specific ABS data series by their ABS catalogue and series identifiers.
 
@@ -51,8 +48,9 @@ def read_abs_series(
     data, meta = ra.read_abs_series(
         cat=cat_num, series_id=unemployment_rate, single_excel_only=seo
     )
-    ```"""
+    ```
 
+    """
     # check for unexpected keyword arguments/get defaults
     check_kwargs(kwargs, "read_abs_series")
     args = get_args(kwargs, "read_abs_series")
@@ -70,7 +68,6 @@ def read_abs_series(
         series_id = [series_id]
     return_data, return_meta = DataFrame(), DataFrame()
     for identifier in series_id:
-
         # confirm that the series ID is in the catalogue
         if identifier not in cat_meta.index:
             if args["verbose"]:
@@ -84,8 +81,7 @@ def read_abs_series(
         data_series = cat_data[table][identifier]
         if (
             len(return_data) > 0
-            and cast(PeriodIndex, return_data.index).freq
-            != cast(PeriodIndex, data_series.index).freq
+            and cast("PeriodIndex", return_data.index).freq != cast("PeriodIndex", data_series.index).freq
         ):
             if args["verbose"]:
                 print(f"Frequency mismatch for series ID {identifier}")
@@ -95,9 +91,7 @@ def read_abs_series(
 
         # add the series data and meta data to the return values
         if len(return_data) > 0:
-            return_data = return_data.reindex(
-                return_data.index.union(data_series.index)
-            )
+            return_data = return_data.reindex(return_data.index.union(data_series.index))
         return_data[identifier] = data_series
         return_meta = concat([return_meta, cat_meta.loc[identifier]], axis=1)
 
@@ -107,7 +101,7 @@ def read_abs_series(
 if __name__ == "__main__":
 
     def simple_test() -> None:
-        """Simple test of the read_abs_series function."""
+        """Test the read_abs_series function."""
         # simple test
         # Trimmed Mean - through the year CPI growth - seasonally adjusted
         data, meta = read_abs_series("6401.0", "A3604511X", single_excel_only="640106")

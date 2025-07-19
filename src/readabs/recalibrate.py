@@ -1,13 +1,22 @@
 """Recalibrate a Series or DataFrame so the data is in the range -1000 to 1000."""
 
-# --- imports
 import sys
+from collections.abc import Callable
 from operator import mul, truediv
+from typing import Any
 
-from pandas import Series, DataFrame
 import numpy as np
+from pandas import DataFrame, Series
 
 from readabs.datatype import Datatype as DataT
+
+# Constants
+NDIM_SERIES = 1
+NDIM_DATAFRAME = 2
+MAX_VALUE_THRESHOLD = 1000
+MIN_VALUE_THRESHOLD = 1
+STEP_SIZE = 3
+DIVISOR = 1000
 
 
 # --- public
@@ -15,7 +24,8 @@ def recalibrate(
     data: DataT,
     units: str,
 ) -> tuple[DataT, str]:
-    """Recalibrate a Series or DataFrame so the data in in the range -1000 to 1000.
+    """Recalibrate a Series or DataFrame so the data is in the range -1000 to 1000.
+
     Change the name of the units to reflect the recalibration.
 
     Note, DataT = TypeVar("DataT", Series, DataFrame). DataT is a constrained typevar.
@@ -45,8 +55,9 @@ def recalibrate(
     s = Series([1_000, 10_000, 100_000, 1_000_000])
     recalibrated, units = recalibrate(s, "$")
     print(f"{recalibrated=}, {units=}")
-    ```"""
+    ```
 
+    """
     if not isinstance(data, (Series, DataFrame)):
         raise TypeError("data must be a Series or DataFrame")
     units, restore_name = _prepare_units(units)
@@ -61,20 +72,21 @@ def recalibrate(
                 break
     units = units.title()
 
-    restore_pandas = DataFrame if len(data.shape) == 2 else Series
+    restore_pandas = DataFrame if len(data.shape) == NDIM_DATAFRAME else Series
     result = restore_pandas(flat_data.reshape(data.shape))
     result.index = data.index
-    if len(data.shape) == 2:
-        result.columns = data.columns
-    if len(data.shape) == 1:
-        result.name = data.name
-    return result, units
+    if len(data.shape) == NDIM_DATAFRAME:
+        result.columns = data.columns  # type: ignore[assignment]
+    if len(data.shape) == NDIM_SERIES:
+        result.name = data.name  # type: ignore[assignment]
+    return result, units  # type: ignore[return-value]
 
 
 def recalibrate_value(value: float, units: str) -> tuple[float, str]:
-    """Recalibrate a floating point value. The value will be recalibrated
-    so it is in the range -1000 to 1000. The units will be changed to reflect
-    the recalibration.
+    """Recalibrate a floating point value.
+
+    The value will be recalibrated so it is in the range -1000 to 1000.
+    The units will be changed to reflect the recalibration.
 
     Parameters
     ----------
@@ -96,11 +108,12 @@ def recalibrate_value(value: float, units: str) -> tuple[float, str]:
     from readabs import recalibrate_value
     recalibrated, units = recalibrate_value(10_000_000, "Thousand")
     print(recalibrated, units)
-    ```"""
+    ```
 
+    """
     series = Series([value])
     output, units = recalibrate(series, units)
-    return output.values[0], units
+    return output.to_numpy()[0], units
 
 
 # --- private
@@ -125,7 +138,6 @@ _r_keywords = {v: k for k, v in _keywords.items()}
 
 def _prepare_units(units: str) -> tuple[str, str]:
     """Prepare the units for recalibration."""
-
     substitutions = [
         ("000 Hours", "Thousand Hours"),
         ("$'000,000", "$ Million"),
@@ -141,16 +153,16 @@ def _prepare_units(units: str) -> tuple[str, str]:
 
     # manage the names for some gnarly units
     possible_units = ("$", "Tonnes")  # there may be more possible units
-    found = False
+    found_unit = ""
     for pu in possible_units:
         if pu.lower() in units.lower():
             units = units.lower().replace(pu.lower(), "").strip()
             if units == "":
                 units = "number"
-            found = True
+            found_unit = pu
             break
 
-    return units, pu if found else ""
+    return units, found_unit
 
 
 def _find_calibration(units: str) -> str | None:
@@ -166,7 +178,7 @@ def _find_calibration(units: str) -> str | None:
 def _perfect_already(data: np.ndarray) -> bool:
     """No need to recalibrate if the data is already perfect."""
     check_max = np.nanmax(np.abs(data))
-    return 1 <= check_max < 1000
+    return MIN_VALUE_THRESHOLD <= check_max < MAX_VALUE_THRESHOLD
 
 
 def _all_zero(data: np.ndarray) -> bool:
@@ -179,11 +191,7 @@ def _all_zero(data: np.ndarray) -> bool:
 
 def _not_numbers(data: np.ndarray) -> bool:
     """Cannot recalibrate if the data is not numeric."""
-    if (
-        (not np.issubdtype(data.dtype, np.number))
-        or np.isinf(data).any()
-        or np.isnan(data).all()
-    ):
+    if (not np.issubdtype(data.dtype, np.number)) or np.isinf(data).any() or np.isnan(data).all():
         print("recalibrate(): Data is partly or completely non-numeric.")
         return True
     return False
@@ -191,43 +199,43 @@ def _not_numbers(data: np.ndarray) -> bool:
 
 def _can_recalibrate(flat_data: np.ndarray, units: str) -> bool:
     """Check if the data can be recalibrated."""
-
     if _find_calibration(units) is None:
         print(f"recalibrate(): Units not appropriately calibrated: {units}")
         return False
 
-    for f in (_not_numbers, _all_zero, _perfect_already):
-        if f(flat_data):
-            return False
-
-    return True
+    return all(not f(flat_data) for f in (_not_numbers, _all_zero, _perfect_already))
 
 
 def _recalibrate(flat_data: np.ndarray, units: str) -> tuple[np.ndarray, str]:
-    """Recalibrate the data.  Loop over the data until
-    its maximum value is between -1000 and 1000."""
+    """Recalibrate the data.
 
+    Loop over the data until its maximum value is between -1000 and 1000.
+    """
     if _can_recalibrate(flat_data, units):
         while True:
             maximum = np.nanmax(np.abs(flat_data))
-            if maximum >= 1000:
+            if maximum >= MAX_VALUE_THRESHOLD:
                 if _MAX_RECALIBRATE in units.lower():
                     print("recalibrate() is not designed for very big units")
                     break
-                flat_data, units = _do_recal(flat_data, units, 3, truediv)
+                flat_data, units = _do_recal(flat_data, units, STEP_SIZE, truediv)
                 continue
             if maximum < 1:
                 if _MIN_RECALIBRATE in units.lower():
                     print("recalibrate() is not designed for very small units")
                     break
-                flat_data, units = _do_recal(flat_data, units, -3, mul)
+                flat_data, units = _do_recal(flat_data, units, -STEP_SIZE, mul)
                 continue
             break
     return flat_data, units
 
 
-def _do_recal(flat_data, units, step, operator):
+def _do_recal(
+    flat_data: np.ndarray, units: str, step: int, operator: Callable[[np.ndarray, int], np.ndarray]
+) -> tuple[np.ndarray, str]:
     calibration = _find_calibration(units)
+    if calibration is None:
+        raise ValueError(f"No calibration found for units: {units}")
     factor = _keywords[calibration]
     if factor + step not in _r_keywords:
         print(f"Unexpected factor: {factor + step}")
@@ -235,34 +243,33 @@ def _do_recal(flat_data, units, step, operator):
     replacement = _r_keywords[factor + step]
     units = units.replace(calibration, replacement)
     units = units.replace(calibration.lower(), replacement)
-    flat_data = operator(flat_data, 1000)
+    flat_data = operator(flat_data, DIVISOR)
     return flat_data, units
 
 
 # --- test
 if __name__ == "__main__":
 
-    def test_example():
+    def test_example() -> None:
         """Test the example in the docstring."""
-
         s = Series([1_000, 10_000, 100_000, 1_000_000])
         recalibrated, units = recalibrate(s, "$")
         print(f"{recalibrated=}, {units=}")
 
-        recalibrated, units = recalibrate_value(10_000_000, "Thousand")
-        print(f"{recalibrated=}, {units=}")
+        recalibrated_val, units_val = recalibrate_value(10_000_000, "Thousand")
+        print(f"{recalibrated_val=}, {units_val=}")
         print("=" * 40)
 
     test_example()
 
-    def test_recalibrate():
+    def test_recalibrate() -> None:
         """Test the recalibrate() function."""
 
-        def run_test(dataset: tuple[tuple[list[str], str]]) -> None:
+        def run_test(dataset: tuple[tuple[list[Any], str], ...]) -> None:
             for d, u in dataset:
-                data = Series(d)
+                data: Series[Any] = Series(d)
                 recalibrated, units = recalibrate(data, u)
-                print(f"{data.values}, {u} ==> {recalibrated.values}, {units}")
+                print(f"{data.to_numpy()}, {u} ==> {recalibrated.to_numpy()}, {units}")
                 print("=" * 40)
 
         # good examples
@@ -288,9 +295,8 @@ if __name__ == "__main__":
 
     test_recalibrate()
 
-    def test_recalibrate_value():
+    def test_recalibrate_value() -> None:
         """Test the recalibrate_value() function."""
-
         # good example
         recalibrated, units = recalibrate_value(10_000_000, "Thousand")
         print(recalibrated, units)

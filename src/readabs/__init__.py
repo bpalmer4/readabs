@@ -1,39 +1,38 @@
-"""Package to download timeseries data from 
-the Australian Bureau of Statistics (ABS) 
-and the Reserve Bank of Australia (RBA)."""
+"""Package to download timeseries data from the Australian Bureau of Statistics and RBA.
 
-# --- imports
+This package provides functions to download and process timeseries data from
+the Australian Bureau of Statistics (ABS) and the Reserve Bank of Australia (RBA).
+"""
+
 import importlib.metadata
 
-# --- local imports
-# - ABS related -
+# ABS related imports
 from readabs.abs_catalogue import abs_catalogue
-from readabs.print_abs_catalogue import print_abs_catalogue
-from readabs.search_abs_meta import search_abs_meta, find_abs_id
-from readabs.read_abs_cat import read_abs_cat
-from readabs.read_abs_series import read_abs_series
-from readabs.read_abs_by_desc import read_abs_by_desc
-from readabs.grab_abs_url import grab_abs_url
 from readabs.abs_meta_data import metacol
 
-# - RBA related -
-from readabs.rba_catalogue import print_rba_catalogue, rba_catalogue
-from readabs.read_rba_table import read_rba_table, read_rba_ocr
-from readabs.rba_meta_data import rba_metacol
-
-# - Utilities -
+# Utility imports
 from readabs.datatype import Datatype
+from readabs.grab_abs_url import grab_abs_url
+from readabs.print_abs_catalogue import print_abs_catalogue
+
+# RBA related imports
+from readabs.rba_catalogue import print_rba_catalogue, rba_catalogue
+from readabs.rba_meta_data import rba_metacol
+from readabs.read_abs_by_desc import read_abs_by_desc
+from readabs.read_abs_cat import read_abs_cat
+from readabs.read_abs_series import read_abs_series
+from readabs.read_rba_table import read_rba_ocr, read_rba_table
 from readabs.recalibrate import recalibrate, recalibrate_value
+from readabs.search_abs_meta import find_abs_id, search_abs_meta
 from readabs.utilities import (
-    percent_change,
-    annualise_rates,
     annualise_percentages,
-    qtly_to_monthly,
+    annualise_rates,
     monthly_to_qtly,
+    percent_change,
+    qtly_to_monthly,
 )
 
-
-# --- version and author
+# Version and author information
 try:
     __version__ = importlib.metadata.version(__name__)
 except importlib.metadata.PackageNotFoundError:
@@ -41,33 +40,30 @@ except importlib.metadata.PackageNotFoundError:
 __author__ = "Bryan Palmer"
 
 
-# --- exposed functions and classes
+# Exposed functions and classes
 __all__ = (
-    # -- abs -- related
-    "metacol",
-    "read_abs_cat",
-    "read_abs_series",
-    "read_abs_by_desc",
-    "search_abs_meta",
+    "Datatype",
+    "abs_catalogue",
+    "annualise_percentages",
+    "annualise_rates",
     "find_abs_id",
     "grab_abs_url",
-    "print_abs_catalogue",
-    "abs_catalogue",
-    # -- rba -- related
-    "print_rba_catalogue",
-    "rba_catalogue",
-    "read_rba_table",
-    "rba_metacol",
-    "read_rba_ocr",
-    # -- utilities --
-    "Datatype",
-    "percent_change",
-    "annualise_rates",
-    "annualise_percentages",
-    "qtly_to_monthly",
+    "metacol",
     "monthly_to_qtly",
+    "percent_change",
+    "print_abs_catalogue",
+    "print_rba_catalogue",
+    "qtly_to_monthly",
+    "rba_catalogue",
+    "rba_metacol",
+    "read_abs_by_desc",
+    "read_abs_cat",
+    "read_abs_series",
+    "read_rba_ocr",
+    "read_rba_table",
     "recalibrate",
     "recalibrate_value",
+    "search_abs_meta",
 )
 __pdoc__ = {
     "download_cache": False,

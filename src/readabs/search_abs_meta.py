@@ -1,7 +1,11 @@
-"""Search a DataFrame of ABS meta data, using a dictionary of search terms,
-to identify the row or rows that match all of the search terms."""
+"""Search a DataFrame of ABS meta data using search terms.
+
+Using a dictionary of search terms, identify the row or rows that match
+all of the search terms.
+"""
 
 from typing import Any
+
 from pandas import DataFrame, Index
 
 # local imports
@@ -12,14 +16,15 @@ from readabs.read_abs_cat import read_abs_cat
 def search_abs_meta(
     meta: DataFrame,  # sourced from read_abs_series() or read_abs_cat()
     search_terms: dict[str, str],  # {search_term: meta_data_column_name, ...}
+    *,
     exact_match: bool = False,
     regex: bool = False,
-    validate_unique=False,  # useful safety-net if you expect only one match
-    **kwargs: Any,
+    validate_unique: bool = False,  # useful safety-net if you expect only one match
+    **kwargs: Any,  # verbose flag
 ) -> DataFrame:
-    """Extract from the ABS meta data those rows that match the
-    search_terms, by iteratively searching the meta data one
-    search_term at a time.
+    """Extract from the ABS meta data those rows that match the search_terms.
+
+    Iteratively search the meta data one search_term at a time.
 
     Parameters
     ----------
@@ -75,8 +80,9 @@ def search_abs_meta(
     }
     rows = search_abs_meta(meta, search_terms, verbose=True)
     print(rows)  # should have three rows : FT/PT/All Unemployment rates
-    ```"""
+    ```
 
+    """
     # get the verbose-flag from kwargs
     verbose = kwargs.get("verbose", False)
 
@@ -84,9 +90,7 @@ def search_abs_meta(
     meta_select = meta.copy()  # preserve the original meta data
     if verbose:
         print(f"In search_abs_meta() {exact_match=} {regex=} {verbose=}")
-        print(
-            f"In search_abs_meta() starting with {len(meta_select)} rows in the meta_data."
-        )
+        print(f"In search_abs_meta() starting with {len(meta_select)} rows in the meta_data.")
 
     # iteratively search
     for phrase, column in search_terms.items():
@@ -169,12 +173,11 @@ def find_abs_id(
     table, series_id, units = find_abs_id(meta, search_terms)
     print(f"Table: {table} Series ID: {series_id} Units: {units}")
     recal_series, recal_units = recalibrate(data[table][series_id], units)
-    ```"""
+    ```
 
+    """
     validate_unique = kwargs.pop("validate_unique", True)
-    found = search_abs_meta(
-        meta, search_terms, validate_unique=validate_unique, **kwargs
-    ).iloc[0]
+    found = search_abs_meta(meta, search_terms, validate_unique=validate_unique, **kwargs).iloc[0]
     table, series_id, units = (
         found[mc.table],
         found[mc.id],
@@ -186,9 +189,8 @@ def find_abs_id(
 
 if __name__ == "__main__":
 
-    def test_search_abs_meta():
+    def test_search_abs_meta() -> None:
         """Test the search_abs_meta() function."""
-
         cat_num = "6202.0"  # The ABS labour force survey
         _data, meta = read_abs_cat(cat_num)
         search_terms = {
@@ -203,9 +205,8 @@ if __name__ == "__main__":
 
     test_search_abs_meta()
 
-    def test_find_abs_id():
+    def test_find_abs_id() -> None:
         """Test the find_abs_id() function."""
-
         cat_num = "6202.0"  # The ABS labour force survey
         _data, meta = read_abs_cat(cat_num)
         search_terms = {

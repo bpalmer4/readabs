@@ -1,20 +1,24 @@
-"""Download *timeseries* data from the Australian Bureau 
-of Statistics (ABS) for a specified ABS catalogue identifier."""
+"""Download *timeseries* data from the Australian Bureau of Statistics.
 
-# --- imports ---
-# standard library imports
+Download timeseries data from the Australian Bureau of Statistics (ABS)
+for a specified ABS catalogue identifier.
+"""
+
+import calendar
 from functools import cache
 from typing import Any
-import calendar
 
-# analytic imports
 import pandas as pd
 from pandas import DataFrame
 
-# local imports
 from readabs.abs_meta_data import metacol
-from readabs.read_support import HYPHEN
 from readabs.grab_abs_url import grab_abs_url
+from readabs.read_support import HYPHEN
+
+# Constants
+MAX_DATETIME_CHARS = 20
+TABLE_DESC_ROW = 4
+TABLE_DESC_COL = 1
 
 
 # --- functions ---
@@ -22,10 +26,13 @@ from readabs.grab_abs_url import grab_abs_url
 @cache  # minimise slowness for any repeat business
 def read_abs_cat(
     cat: str,
+    *,
     keep_non_ts: bool = False,
-    **kwargs: Any,
+    **kwargs: Any,  # ReadArgs compatible
 ) -> tuple[dict[str, DataFrame], DataFrame]:
-    """This function returns the complete ABS Catalogue information as a
+    """Return the complete ABS Catalogue information as DataFrames.
+
+    This function returns the complete ABS Catalogue information as a
     python dictionary of pandas DataFrames, as well as the associated metadata
     in a separate DataFrame. The function automates the collection of zip and
     excel files from the ABS website. If necessary, these files are downloaded,
@@ -38,7 +45,6 @@ def read_abs_cat(
 
     Parameters
     ----------
-
     cat : str
         The ABS Catalogue Number for the data to be downloaded and made
         available by this function. This argument must be specified in the
@@ -110,7 +116,7 @@ def read_abs_cat(
         data that needs to be downloaded to the cache.
 
     Returns
-    -------------
+    -------
     tuple[dict[str, DataFrame], DataFrame]
         The function returns a tuple of two items. The first item is a
         python dictionary of pandas DataFrames (which is the primary data
@@ -126,13 +132,12 @@ def read_abs_cat(
     cat_num = "6202.0"  # The ABS labour force survey
     data: tuple[dict[str, DataFrame], DataFrame] = ra.read_abs_cat(cat=cat_num)
     abs_dict, meta = data
-    ```"""
+    ```
 
+    """
     # --- get the time series data ---
     raw_abs_dict = grab_abs_url(cat=cat, **kwargs)
-    abs_dict, abs_meta = _get_time_series_data(
-        cat, raw_abs_dict, keep_non_ts=keep_non_ts, **kwargs
-    )
+    abs_dict, abs_meta = _get_time_series_data(cat, raw_abs_dict, keep_non_ts=keep_non_ts, **kwargs)
 
     return abs_dict, abs_meta
 
@@ -141,14 +146,16 @@ def read_abs_cat(
 def _get_time_series_data(
     cat: str,
     abs_dict: dict[str, DataFrame],
-    **kwargs: Any,
+    **kwargs: Any,  # keep_non_ts, verbose, ignore_errors
 ) -> tuple[dict[str, DataFrame], DataFrame]:
-    """Using the raw DataFrames from the ABS website, extract the time series
+    """Extract the time series data for a specific ABS catalogue identifier.
+
+    Using the raw DataFrames from the ABS website, extract the time series
     data for a specific ABS catalogue identifier. The data is returned in a
     tuple. The first element is a dictionary of DataFrames, where each
     DataFrame contains the time series data. The second element is a DataFrame
-    of meta data, which describes each data item in the dictionary"""
-
+    of meta data, which describes each data item in the dictionary.
+    """
     # --- set up ---
     new_dict: dict[str, DataFrame] = {}
     meta_data = DataFrame()
@@ -170,13 +177,14 @@ def _copy_raw_sheets(
     from_dict: dict[str, DataFrame],
     long_sheets: list[str],
     to_dict: dict[str, DataFrame],
-    keep_non_ts,
+    *,
+    keep_non_ts: bool,
 ) -> dict[str, DataFrame]:
-    """A utility function to copy the raw sheets across to
-    the final dictionary. Used if the data is not in a
-    timeseries format, and keep_non_ts flag is set to True.
-    Returns an updated final dictionary."""
+    """Copy the raw sheets across to the final dictionary.
 
+    Used if the data is not in a timeseries format, and keep_non_ts
+    flag is set to True. Returns an updated final dictionary.
+    """
     if not keep_non_ts:
         return to_dict
 
@@ -193,13 +201,15 @@ def _capture(
     to_dict: dict[str, DataFrame],
     meta_data: DataFrame,
     args: dict[str, Any],
-    **kwargs: Any,
+    **kwargs: Any,  # keep_non_ts, ignore_errors
 ) -> tuple[dict[str, DataFrame], DataFrame]:
-    """For a specific Excel file, capture *both* the time series data
-    from the ABS data files as well as the meta data. These data are
-    added to the input 'to_dict" and 'meta_data' respectively, and
-    the combined results are returned as a tuple."""
+    """Capture the time series data and meta data from an Excel file.
 
+    For a specific Excel file, capture *both* the time series data
+    from the ABS data files as well as the meta data. These data are
+    added to the input 'to_dict' and 'meta_data' respectively, and
+    the combined results are returned as a tuple.
+    """
     # --- step 0: set up ---
     keep_non_ts: bool = kwargs.get("keep_non_ts", False)
     ignore_errors: bool = kwargs.get("ignore_errors", False)
@@ -207,19 +217,15 @@ def _capture(
     # --- step 1: capture the meta data ---
     short_names = [x.split(HYPHEN, 1)[1] for x in args["long_sheets"]]
     if "Index" not in short_names:
-        print(f"Table {args["table"]} has no 'Index' sheet.")
-        to_dict = _copy_raw_sheets(
-            args["from_dict"], args["long_sheets"], to_dict, keep_non_ts
-        )
+        print(f"Table {args['table']} has no 'Index' sheet.")
+        to_dict = _copy_raw_sheets(args["from_dict"], args["long_sheets"], to_dict, keep_non_ts=keep_non_ts)
         return to_dict, meta_data
     index = short_names.index("Index")
 
     index_sheet = args["long_sheets"][index]
     this_meta = _capture_meta(args["cat"], args["from_dict"], index_sheet)
     if this_meta.empty:
-        to_dict = _copy_raw_sheets(
-            args["from_dict"], args["long_sheets"], to_dict, keep_non_ts
-        )
+        to_dict = _copy_raw_sheets(args["from_dict"], args["long_sheets"], to_dict, keep_non_ts=keep_non_ts)
         return to_dict, meta_data
 
     meta_data = pd.concat([meta_data, this_meta], axis=0)
@@ -230,13 +236,11 @@ def _capture(
         to_dict[args["table"]] = data
     else:
         # a glitch: we have the metadata but not the actual data
-        error = f"Unexpected: {args["table"]} has no actual data."
+        error = f"Unexpected: {args['table']} has no actual data."
         if not ignore_errors:
             raise ValueError(error)
         print(error)
-        to_dict = _copy_raw_sheets(
-            args["from_dict"], args["long_sheets"], to_dict, keep_non_ts
-        )
+        to_dict = _copy_raw_sheets(args["from_dict"], args["long_sheets"], to_dict, keep_non_ts=keep_non_ts)
 
     return to_dict, meta_data
 
@@ -245,12 +249,13 @@ def _capture_data(
     abs_meta: DataFrame,
     from_dict: dict[str, DataFrame],
     long_sheets: list[str],
-    **kwargs: Any,
+    **kwargs: Any,  # verbose
 ) -> DataFrame:
-    """Take a list of ABS data sheets, find the DataFrames for those sheets in the
-    from_dict, and stitch them into a single DataFrame with an appropriate
-    PeriodIndex."""
+    """Take a list of ABS data sheets and stitch them into a DataFrame.
 
+    Find the DataFrames for those sheets in the from_dict, and stitch them
+    into a single DataFrame with an appropriate PeriodIndex.
+    """
     # --- step 0: set up ---
     verbose: bool = kwargs.get("verbose", False)
     merged_data = DataFrame()
@@ -273,14 +278,13 @@ def _capture_data(
         sheet_data = sheet_data[(header_row + 1) :]
 
         # get the row indexes
-        sheet_data = _index_to_period(sheet_data, sheet_name, abs_meta, verbose)
+        sheet_data = _index_to_period(sheet_data, sheet_name, abs_meta, verbose=verbose)
 
         # --- merge data into a single dataframe
         if len(merged_data) == 0:
             merged_data = sheet_data
         else:
-            merged_data = pd.merge(
-                left=merged_data,
+            merged_data = merged_data.merge(
                 right=sheet_data,
                 how="outer",
                 left_index=True,
@@ -296,10 +300,7 @@ def _capture_data(
     # but it is useful to know they are there
     if merged_data.isna().all().any() and verbose:
         cols = merged_data.columns[merged_data.isna().all()]
-        print(
-            "Caution: these columns are all NA in "
-            + f"{merged_data[metacol.table].iloc[0]}: {cols}"
-        )
+        print("Caution: these columns are all NA in " + f"{merged_data[metacol.table].iloc[0]}: {cols}")
 
     # check for duplicate columns - should not happen
     # Note: these duplicate columns are removed
@@ -307,42 +308,30 @@ def _capture_data(
     if duplicates.any():
         if verbose:
             dup_table = abs_meta[metacol.table].iloc[0]
-            print(
-                f"Note: duplicates removed from {dup_table}: "
-                + f"{merged_data.columns[duplicates]}"
-            )
+            print(f"Note: duplicates removed from {dup_table}: " + f"{merged_data.columns[duplicates]}")
         merged_data = merged_data.loc[:, ~duplicates].copy()
 
     # make the data all floats.
-    merged_data = merged_data.astype(float).sort_index()
-
-    return merged_data
+    return merged_data.astype(float).sort_index()
 
 
-def _index_to_period(
-    sheet_data: DataFrame, sheet_name: str, abs_meta: DataFrame, verbose: bool
-) -> DataFrame:
+def _index_to_period(sheet_data: DataFrame, sheet_name: str, abs_meta: DataFrame, *, verbose: bool) -> DataFrame:
     """Convert the index of a DataFrame to a PeriodIndex."""
-
     index_column = sheet_data[sheet_data.columns[0]].astype(str)
     sheet_data = sheet_data.drop(sheet_data.columns[0], axis=1)
-    long_row_names = index_column.str.len() > 20  # 19 chars in datetime str
+    long_row_names = index_column.str.len() > MAX_DATETIME_CHARS  # 19 chars in datetime str
     if verbose and long_row_names.any():
         print(f"You may need to check index column for {sheet_name}")
     index_column = index_column.loc[~long_row_names]
     sheet_data = sheet_data.loc[~long_row_names]
 
-    proposed_index = pd.to_datetime(index_column)  #
+    proposed_index = pd.to_datetime(index_column)
 
     # get the correct period index
     short_name = sheet_name.split(HYPHEN, 1)[0]
     series_id = sheet_data.columns[0]
-    freq = (
-        abs_meta[abs_meta[metacol.table] == short_name]
-        .at[series_id, metacol.freq]
-        .upper()
-        .strip()[0]
-    )
+    freq_value = abs_meta[abs_meta[metacol.table] == short_name].loc[series_id, metacol.freq]
+    freq = str(freq_value).upper().strip()[0]
     freq = "Y" if freq == "A" else freq  # pandas prefers yearly
     freq = "Q" if freq == "B" else freq  # treat Biannual as quarterly
     if freq not in ("Y", "Q", "M", "D"):
@@ -366,10 +355,11 @@ def _capture_meta(
     index_sheet: str,
 ) -> DataFrame:
     """Capture the metadata from the Index sheet of an ABS excel file.
+
     Returns a DataFrame specific to the current excel file.
     Returning an empty DataFrame, means that the meta data could not
-    be identified. Meta data for each ABS data item is organised by row."""
-
+    be identified. Meta data for each ABS data item is organised by row.
+    """
     # --- step 0: set up ---
     frame = from_dict[index_sheet]
 
@@ -379,14 +369,17 @@ def _capture_meta(
     starting_rows = 8, 9, 10
     required = metacol.did, metacol.id, metacol.stype, metacol.unit
     required_set = set(required)
-    all_good = False
-    for header_row in starting_rows:
-        header_columns = frame.iloc[header_row]
-        if required_set.issubset(set(header_columns)):
-            all_good = True
+
+    header_row = None
+    header_columns = None
+    for row in starting_rows:
+        columns = frame.iloc[row]
+        if required_set.issubset(set(columns)):
+            header_row = row
+            header_columns = columns
             break
 
-    if not all_good:
+    if header_row is None or header_columns is None:
         print(f"Table has no metadata in sheet {index_sheet}.")
         return DataFrame()
 
@@ -403,7 +396,8 @@ def _capture_meta(
 
     # populate the metadata
     file_meta[metacol.table] = index_sheet.split(HYPHEN, 1)[0]
-    tab_desc = frame.iat[4, 1].split(".", 1)[-1].strip()
+    tab_desc_value = frame.iloc[TABLE_DESC_ROW, TABLE_DESC_COL]
+    tab_desc = str(tab_desc_value).split(".", 1)[-1].strip()
     file_meta[metacol.tdesc] = tab_desc
     file_meta[metacol.cat] = cat
 
@@ -420,7 +414,6 @@ def _group_sheets(
     abs_dict: dict[str, DataFrame],
 ) -> dict[str, list[str]]:
     """Group the sheets from an Excel file."""
-
     keys = list(abs_dict.keys())
     long_pairs = [(x.split(HYPHEN, 1)[0], x) for x in keys]
 
@@ -438,9 +431,8 @@ def _group_sheets(
 # --- initial testing ---
 if __name__ == "__main__":
 
-    def simple_test():
-        """A simple test of the read_abs_cat function."""
-
+    def simple_test() -> None:
+        """Test the read_abs_cat function."""
         # ABS Catalogue ID 8731.0 has a mix of time
         # series and non-time series data. Also,
         # it has unusually structured Excel files. So, a good test.
@@ -450,8 +442,9 @@ if __name__ == "__main__":
         d, _m = read_abs_cat("8731.0", keep_non_ts=False, verbose=False)
         print(f"--- {len(d)=} ---")
         print(f"--- {d.keys()=} ---")
-        for table in d.keys():
-            print(f"{table=} {d[table].shape=} {d[table].index.freqstr=}")
+        for table in d:
+            freq_str = getattr(d[table].index, "freqstr", "Unknown")
+            print(f"{table=} {d[table].shape=} {freq_str=}")
 
         print("Test complete.")
 

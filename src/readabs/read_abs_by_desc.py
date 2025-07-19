@@ -1,22 +1,23 @@
-"""Get specific ABS data series by searching for the ABS 
-data item descriptions."""
+"""Get specific ABS data series by searching for the ABS data item descriptions.
 
-# --- imports
-# system imports
-from typing import Any
+This module provides functionality to search and retrieve ABS data series
+by their descriptions rather than series IDs.
+"""
+
 import inspect
+from typing import Any
 
 # Analytic imports
 import pandas as pd
 
 # local imports
 from readabs.abs_meta_data import metacol as mc
-from readabs.search_abs_meta import find_abs_id
 from readabs.read_abs_cat import read_abs_cat
+from readabs.search_abs_meta import find_abs_id
 
 
 # --- private functions
-def _work_to_do(wanted: Any) -> bool:
+def _work_to_do(wanted: list[str] | dict[str, str] | dict[str, dict[str, Any]] | None) -> bool:
     """Check if there is any work to do."""
     if wanted is None or len(wanted) == 0:
         print("No data requested.")
@@ -26,16 +27,16 @@ def _work_to_do(wanted: Any) -> bool:
 
 def _wlist_to_wdict(wanted: list[str]) -> dict[str, str]:
     """Convert a list of strings to a dictionary of strings:strings.
+
     Note: the keys and values are the same.
-    Note: any duplicate elements in the list will be lost."""
+    Note: any duplicate elements in the list will be lost.
+    """
     return {k: k for k in wanted}
 
 
-def _get_search_terms(input_dict, output_dict) -> dict[str, str]:
+def _get_search_terms(input_dict: dict[str, Any], output_dict: dict[str, str]) -> dict[str, str]:
     """Build a selector dictionary from the input dictionary."""
-    search_names = {
-        abbr: term for abbr, term in inspect.getmembers(mc) if not abbr.startswith("_")
-    }
+    search_names = {abbr: term for abbr, term in inspect.getmembers(mc) if not abbr.startswith("_")}
     for mc_abbr, meta_column in search_names.items():
         if mc_abbr in input_dict:
             # the selector dictionary is back-to_front
@@ -44,7 +45,7 @@ def _get_search_terms(input_dict, output_dict) -> dict[str, str]:
     return output_dict
 
 
-def _get_args(keys: list[str], input_dict, output_dict) -> dict[str, Any]:
+def _get_args(keys: list[str], input_dict: dict[str, Any], output_dict: dict[str, Any]) -> dict[str, Any]:
     """Build a retrieval dictionary from the input dictionary."""
     for key in keys:
         if key in input_dict:
@@ -75,18 +76,18 @@ def _get_retrieval_args(input_dict: dict, output_dict: dict) -> dict[str, Any]:
 
 def _get_item_from_str(
     item: str,
-    data_dict,
-    data_meta,
-    item_selector,
-    search_args,
+    data_dict: dict[str, pd.DataFrame],
+    data_meta: pd.DataFrame,
+    item_selector: dict[str, str],
+    search_args: dict[str, Any],
 ) -> tuple[pd.Series, pd.DataFrame]:
     """Get a data series from the data dictionary and metadata.
-    Give the series its series-id as a name."""
 
+    Give the series its series-id as a name.
+    """
     if not data_dict or data_meta.empty:
         raise ValueError(
-            "If the wanted data is a string, a populated abs_dict "
-            + "and abs_meta must be provided."
+            "If the wanted data is a string, a populated abs_dict " + "and abs_meta must be provided."
         )
     item_selector[item] = mc.did  # back_to_front
     table, series_id, units = find_abs_id(data_meta, item_selector, **search_args)
@@ -94,9 +95,7 @@ def _get_item_from_str(
     series = data_dict[table][series_id]
     series.name = series_id
     series_meta = data_meta.loc[
-        (data_meta[mc.table] == table)
-        & (data_meta[mc.id] == series_id)
-        & (data_meta[mc.unit] == units)
+        (data_meta[mc.table] == table) & (data_meta[mc.id] == series_id) & (data_meta[mc.unit] == units)
     ]
     return series, series_meta
 
@@ -107,9 +106,8 @@ def _get_item_from_dict(
     data_meta: pd.DataFrame,
     item_selector: dict[str, str],
     search_args: dict[str, Any],
-    **kwargs,
+    **kwargs: Any,
 ) -> tuple[pd.Series, pd.DataFrame]:
-
     # preparation
     if "did" not in item_dict:
         raise ValueError("Each inner dictionary must contain a 'did' key.")
@@ -122,8 +120,8 @@ def _get_item_from_dict(
         if "cat" not in item_dict:
             raise ValueError(
                 "Each inner dictionary must contain a 'cat' key, "
-                + "if an abs_dict is not provided/empty or the "
-                + "abs_meta is not provided/empty."
+                "if an abs_dict is not provided/empty or the "
+                "abs_meta is not provided/empty."
             )
         ret_args = _get_retrieval_args(kwargs, {})
         ret_args = _get_retrieval_args(item_dict, ret_args)
@@ -149,13 +147,15 @@ def read_abs_by_desc(
 
     Parameters
     ----------
-    - wanted : list of str, dict of str:str, or dict of str:dict - the data
+    wanted : list of str, dict of str:str, or dict of str:dict
+        The data
         item descriptions to search for. If a list, it will be a list of
         descriptions to search for. If a dictionary, the keys will a name.
-        The dixtionary values can be either a string (the data item
+        The dictionary values can be either a string (the data item
         description to search for) or a dictionary of keyword arguments, one of
         which would be the data item description to search for.
-    - kwargs : Any - keyword arguments to control the data retrieval.
+    **kwargs : Any
+        Keyword arguments to control the data retrieval.
         The keyword arguments can include the following:
         - abs_dict : dict - the dictionary of ABS data to search (from
             read_abs_cat()).
@@ -174,7 +174,8 @@ def read_abs_by_desc(
             and search_abs_meta() functions: ["validate_unique", "exact_match",
             "regex", "verbose"].
 
-    Notes:
+    Notes
+    -----
     - if "wanted" is of type list[str] or dict[str, str], the kwargs should
         include sufficient keys from the metacol dataclass to get the data.
         Typically, the "cat" key, the "table" key, and the "stype" key would
@@ -214,8 +215,9 @@ def read_abs_by_desc(
     selected, selected_meta = ra.read_abs_by_desc(
         wanted=wanted, abs_dict=data, abs_meta=meta, table="5206001_Key_Aggregates"
     )
-    ```"""
+    ```
 
+    """
     # - preparation
     if not _work_to_do(wanted):
         return {}, pd.DataFrame()
@@ -229,7 +231,6 @@ def read_abs_by_desc(
     return_dict = {}
     return_meta = pd.DataFrame()
     for key, value in wanted.items():
-
         item_selector = kwarg_selector.copy()
         item_search_args = search_args.copy()
         if isinstance(value, str):
@@ -252,8 +253,7 @@ def read_abs_by_desc(
             )
         else:
             raise TypeError(
-                "Each value in the wanted list/dictionary must be either a string "
-                + "or a dictionary."
+                "Each value in the wanted list/dictionary must be either a string " + "or a dictionary."
             )
 
         # save search results
@@ -266,14 +266,11 @@ def read_abs_by_desc(
 # --- testing ---
 if __name__ == "__main__":
     # --- test 1: get a list of dids
-    def test1():
+    def test1() -> None:
         """Test case: get a list of dids."""
-
         cat = "5206.0"
         table = "5206001_Key_Aggregates"
-        data_dict, data_meta = read_abs_cat(
-            cat=cat, single_excel_only=table, verbose=False
-        )
+        data_dict, data_meta = read_abs_cat(cat=cat, single_excel_only=table, verbose=False)
         stype = "Seasonally Adjusted"
         get_these = data_meta.loc[
             (data_meta[mc.table] == table)
@@ -296,9 +293,8 @@ if __name__ == "__main__":
     test1()
 
     # --- test 2: get a dictionary of dids
-    def test2():
+    def test2() -> None:
         """Test case: get a dictionary of dids."""
-
         gdp_table = "5206001_Key_Aggregates"
         uer_table = "6202001"
         sa = "Seasonally Adjusted"
