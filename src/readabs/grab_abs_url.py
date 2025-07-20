@@ -257,7 +257,7 @@ def _add_excel_bytes(
     # convert the raw bytes into a pandas ExcelFile
     try:
         excel = pd.ExcelFile(BytesIO(raw_bytes))
-    except ValueError as e:
+    except (ValueError, TypeError) as e:
         message = f"With {name}: could not convert raw bytes to ExcelFile.\n{e}"
         print(message)
         return abs_dict

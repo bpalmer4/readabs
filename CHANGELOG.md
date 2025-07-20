@@ -1,3 +1,18 @@
+Version 0.1.2 released 20-Jul-2025 (Canberra Australia)
+
+- Bug fixes and improvements
+    * Enhanced exception handling in grab_abs_url.py when converting raw bytes to ExcelFile
+    * Added pyxlsb dependency to support reading xlsb format Excel files
+
+- Development improvements
+    * Added .pylintrc configuration file with max-line-length set to 120
+    * Added uv-upgrade.sh script for upgrading dependencies
+
+- Version updates
+    * Bumped version to 0.1.2 in pyproject.toml
+
+---
+
 Version 0.1.1 released 19-Jul-2025 (Canberra Australia)
 
 - Code quality improvements
