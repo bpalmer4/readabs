@@ -1,20 +1,20 @@
 """Get specific ABS data series by their ABS series identifiers."""
 
 from collections.abc import Sequence
-from typing import Any, cast
+from typing import Unpack, cast
 
 from pandas import DataFrame, Index, PeriodIndex, concat
 
 from readabs.abs_meta_data import metacol
 from readabs.read_abs_cat import read_abs_cat
-from readabs.read_support import check_kwargs, get_args
+from readabs.read_support import ReadArgs, check_kwargs, get_args
 
 
 # --- functions
 def read_abs_series(
     cat: str,
     series_id: str | Sequence[str],
-    **kwargs: Any,  # ReadArgs compatible
+    **kwargs: Unpack[ReadArgs],
 ) -> tuple[DataFrame, DataFrame]:
     """Get specific ABS data series by their ABS catalogue and series identifiers.
 

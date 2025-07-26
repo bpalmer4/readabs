@@ -66,6 +66,7 @@ Utility Functions
 Data Types and Metadata
 -----------------------
 - `Datatype` - enumeration for ABS data types.
+- `ReadArgs` - TypedDict for keyword arguments used by ABS reading functions.
 - `metacol` - column names for ABS metadata.
 - `rba_metacol` - column names for RBA metadata.
 

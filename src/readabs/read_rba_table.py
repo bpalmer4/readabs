@@ -200,7 +200,7 @@ def read_rba_ocr(*, monthly: bool = True, **kwargs: Any) -> Series:  # ignore_er
     # read the OCR table from the RBA website, make float and sort, name the series
     rba, _rba_meta = read_rba_table("A2", **kwargs)  # should have a daily PeriodIndex
     ocr_series = rba.loc[lambda x: x.index >= "1990-08-02", "ARBAMPCNCRT"]
-    ocr = cast("Series", ocr_series).astype(float).sort_index()
+    ocr = ocr_series.astype(float).sort_index()  # pyright: ignore[reportAttributeAccessIssue]
     ocr.name = "RBA Official Cash Rate"
 
     # bring up to date

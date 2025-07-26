@@ -5,7 +5,7 @@
 import zipfile
 from functools import cache
 from io import BytesIO
-from typing import Any
+from typing import Any, Unpack
 
 # analytic imports
 import pandas as pd
@@ -16,7 +16,7 @@ from readabs.download_cache import get_file
 
 # local imports
 from readabs.get_abs_links import get_abs_links, get_table_name
-from readabs.read_support import HYPHEN, check_kwargs, get_args
+from readabs.read_support import HYPHEN, ReadArgs, check_kwargs, get_args
 
 # --- constants ---
 # File extensions for ABS data files
@@ -34,8 +34,9 @@ EMPTY_BYTES_LENGTH = 0
 # --- public - primary entry point for this module
 @cache  # minimise slowness with repeat business
 def grab_abs_url(
+    cat: str = "",
     url: str = "",
-    **kwargs: Any,  # ReadArgs compatible but processed dynamically
+    **kwargs: Unpack[ReadArgs],
 ) -> dict[str, DataFrame]:
     """For a given URL, extract the data from the Excel and ZIP file links found on that page.
 
@@ -58,14 +59,12 @@ def grab_abs_url(
         a catalogue number must be provided. If both are provided, the
         URL will be used.
 
-    **kwargs : Any
-        Accepts the same keyword arguments as `read_abs_cat()`. Additionally,
-        a cat argument can be provided, which will be used to get the URL
-        (see below).
-
     cat : str = ""
         An ABS Catalogue number. If provided, and the URL is not
         provided, then the Catalogue number will be used to get the URL.
+
+    **kwargs : Unpack[ReadArgs]
+        Accepts the same keyword arguments as `read_abs_cat()`.
 
     Returns
     -------
@@ -74,7 +73,7 @@ def grab_abs_url(
 
     """
     # check/get the keyword arguments
-    url = _get_url(url, kwargs)  # note: removes "cat" from kwargs
+    url = _get_url(url, cat)
     check_kwargs(kwargs, "grab_abs_url")  # warn if invalid kwargs
     args = get_args(kwargs, "grab_abs_url")  # get the valid kwargs
     if verbose := args["verbose"]:
@@ -190,7 +189,7 @@ def _find_url(links: dict[str, list[str]], targ_type: str, target: str, *, verbo
     return ""
 
 
-def _get_url(url: str, kwargs: dict[str, Any]) -> str:
+def _get_url(url: str, cat: str) -> str:
     """Get URL from provided URL or catalogue number.
 
     If an ABS catalogue number is provided and URL is not provided,
@@ -200,7 +199,7 @@ def _get_url(url: str, kwargs: dict[str, Any]) -> str:
 
     Args:
         url: The URL to use if provided
-        kwargs: Keyword arguments dictionary (modified in place to remove 'cat')
+        cat: The catalogue number to use if URL is not provided
 
     Returns:
         str: The URL to use for data retrieval
@@ -208,13 +207,7 @@ def _get_url(url: str, kwargs: dict[str, Any]) -> str:
     Raises:
         ValueError: If neither URL nor valid catalogue number is provided
 
-    Note:
-        kwargs is passed as a dictionary and modified in place to remove
-        the 'cat' argument after processing.
-
     """
-    cat: str = kwargs.pop("cat", "")  # this takes cat out of kwargs
-
     if not url and cat:
         try:
             cat_map = abs_catalogue()

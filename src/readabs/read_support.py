@@ -23,6 +23,7 @@ class ReadArgs(TypedDict):
     single_excel_only: NotRequired[str]
     history: NotRequired[str]
     cache_only: NotRequired[bool]
+    keep_non_ts: NotRequired[bool]
 
 
 # Default values for all supported arguments
@@ -36,24 +37,21 @@ DEFAULTS: ReadArgs = {
     "single_excel_only": "",
     "history": "",
     "cache_only": False,
+    "keep_non_ts": False,
 }
 
 # Arguments that enable data retrieval (at least one must be True/non-empty)
 _DATA_SOURCE_ARGS = ["get_zip", "get_excel", "get_excel_if_no_zip", "single_zip_only", "single_excel_only"]
 
 
-def check_kwargs(kwargs: dict[str, Any], name: str) -> None:
+def check_kwargs(kwargs: ReadArgs, name: str) -> None:
     """Warn if there are any invalid keyword arguments.
 
     Args:
-        kwargs: Dictionary of keyword arguments to validate
+        kwargs: ReadArgs keyword arguments to validate
         name: Name of the calling function for error messages
 
     """
-    if not isinstance(kwargs, dict):
-        print(f"{name}(): kwargs must be a dictionary")
-        return
-
     if not isinstance(name, str):
         print("Function name must be a string")
         return
@@ -65,7 +63,7 @@ def check_kwargs(kwargs: dict[str, Any], name: str) -> None:
             )
 
 
-def get_args(kwargs: dict[str, Any], name: str) -> dict[str, Any]:
+def get_args(kwargs: ReadArgs, name: str) -> dict[str, Any]:
     """Return a dictionary with validated arguments and defaults applied.
 
     Creates a dictionary containing only valid keyword arguments, with default
@@ -73,7 +71,7 @@ def get_args(kwargs: dict[str, Any], name: str) -> dict[str, Any]:
     option is enabled.
 
     Args:
-        kwargs: Dictionary of keyword arguments from calling function
+        kwargs: ReadArgs keyword arguments from calling function
         name: Name of the calling function for error messages
 
     Returns:
@@ -85,9 +83,6 @@ def get_args(kwargs: dict[str, Any], name: str) -> dict[str, Any]:
 
     """
     # Input validation
-    if not isinstance(kwargs, dict):
-        raise TypeError(f"{name}(): kwargs must be a dictionary")
-
     if not isinstance(name, str):
         raise TypeError("Function name must be a string")
 

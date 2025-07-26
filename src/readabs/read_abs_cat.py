@@ -6,14 +6,14 @@ for a specified ABS catalogue identifier.
 
 import calendar
 from functools import cache
-from typing import Any
+from typing import Any, Unpack
 
 import pandas as pd
 from pandas import DataFrame
 
 from readabs.abs_meta_data import metacol
 from readabs.grab_abs_url import grab_abs_url
-from readabs.read_support import HYPHEN
+from readabs.read_support import HYPHEN, ReadArgs
 
 # Constants
 MAX_DATETIME_CHARS = 20
@@ -26,11 +26,9 @@ TABLE_DESC_COL = 1
 @cache  # minimise slowness for any repeat business
 def read_abs_cat(
     cat: str,
-    *,
-    keep_non_ts: bool = False,
-    **kwargs: Any,  # ReadArgs compatible
+    **kwargs: Unpack[ReadArgs],
 ) -> tuple[dict[str, DataFrame], DataFrame]:
-    """Return the complete ABS Catalogue information as DataFrames.
+    """For a specific catalogue identifier, return the complete ABS Catalogue information as DataFrames.
 
     This function returns the complete ABS Catalogue information as a
     python dictionary of pandas DataFrames, as well as the associated metadata
@@ -50,17 +48,17 @@ def read_abs_cat(
         available by this function. This argument must be specified in the
         function call.
 
+    **kwargs : Unpack[ReadArgs]
+        The following parameters may be passed as optional keyword arguments.
+
     keep_non_ts : bool = False
         A flag for whether to keep the non-time-series tables
         that might form part of an ABS catalogue item. Normally, the
         non-time-series information is ignored, and not made available to
         the user.
 
-    **kwargs : Any
-        The following parameters may be passed as optional keyword arguments.
-
     history : str = ""
-        Orovide a month-year string to extract historical ABS data.
+        Provide a month-year string to extract historical ABS data.
         For example, you can set history="dec-2023" to the get the ABS data
         for a catalogue identifier that was originally published in respect
         of Q4 of 2023. Note: not all ABS data sources are structured so that
@@ -123,6 +121,13 @@ def read_abs_cat(
         associated with the ABS catalogue item). The second item is a
         DataFrame of ABS metadata for the ABS collection.
 
+        Note:
+        You can retrieve non-timeseries data using the grab_abs_url()
+        function. That takes the URL for the ABS landing page for the ABS
+        collection you are interested in. The read_abs_cat function is for
+        ABS catalogue identifiers which are timeseries data, for which the
+        metadata can be extracted.
+
     Example
     -------
 
@@ -137,9 +142,12 @@ def read_abs_cat(
     """
     # --- get the time series data ---
     raw_abs_dict = grab_abs_url(cat=cat, **kwargs)
-    abs_dict, abs_meta = _get_time_series_data(cat, raw_abs_dict, keep_non_ts=keep_non_ts, **kwargs)
+    response = _get_time_series_data(cat, raw_abs_dict, **kwargs)
 
-    return abs_dict, abs_meta
+    if not response:
+        response = {}, DataFrame()
+
+    return response  # dictionary of DataFrames, and a DataFrame of metadata
 
 
 # - private -
@@ -148,15 +156,9 @@ def _get_time_series_data(
     abs_dict: dict[str, DataFrame],
     **kwargs: Any,  # keep_non_ts, verbose, ignore_errors
 ) -> tuple[dict[str, DataFrame], DataFrame]:
-    """Extract the time series data for a specific ABS catalogue identifier.
-
-    Using the raw DataFrames from the ABS website, extract the time series
-    data for a specific ABS catalogue identifier. The data is returned in a
-    tuple. The first element is a dictionary of DataFrames, where each
-    DataFrame contains the time series data. The second element is a DataFrame
-    of meta data, which describes each data item in the dictionary.
-    """
+    """Extract the time series data for a specific ABS catalogue identifier."""
     # --- set up ---
+    cat = "<catalogue number missing>" if not cat.strip() else cat.strip()
     new_dict: dict[str, DataFrame] = {}
     meta_data = DataFrame()
 
@@ -340,7 +342,7 @@ def _index_to_period(sheet_data: DataFrame, sheet_name: str, abs_meta: DataFrame
     # create an appropriate period index
     if freq:
         if freq in ("Q", "Y"):
-            month = calendar.month_abbr[proposed_index.dt.month.max()].upper()
+            month = str(calendar.month_abbr[proposed_index.dt.month.max()]).upper()
             freq = f"{freq}-{month}"
         sheet_data.index = pd.PeriodIndex(proposed_index, freq=freq)
     else:

@@ -234,12 +234,13 @@ def monthly_to_qtly(data: DataT, q_ending: str = "DEC", f: str = "mean") -> Data
     try:
         if isinstance(data, Series):
             return _monthly_to_qtly_series(data, q_ending, f)
-
         if isinstance(data, DataFrame):
             result_dict = {}
             for col in data.columns:
                 result_dict[col] = _monthly_to_qtly_series(data[col], q_ending, f)
-            return cast("DataT", DataFrame(result_dict))
+            return data.__class__(result_dict)
+        # This should never be reached due to validation above
+        raise InvalidDataError("Unexpected data type")  # noqa: TRY301
     except Exception as e:
         raise InvalidDataError(f"Error converting monthly to quarterly data: {e}") from e
 

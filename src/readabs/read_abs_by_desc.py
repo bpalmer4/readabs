@@ -53,13 +53,13 @@ def _get_args(keys: list[str], input_dict: dict[str, Any], output_dict: dict[str
     return output_dict
 
 
-def _get_search_args(input_dict: dict, output_dict: dict) -> dict[str, Any]:
+def _get_search_args(input_dict: dict[str, Any], output_dict: dict[str, Any]) -> dict[str, Any]:
     """Extract the search arguments from the input dictionary."""
     keys = ["validate_unique", "exact_match", "regex", "verbose"]
     return _get_args(keys, input_dict, output_dict)
 
 
-def _get_retrieval_args(input_dict: dict, output_dict: dict) -> dict[str, Any]:
+def _get_retrieval_args(input_dict: dict[str, Any], output_dict: dict[str, Any]) -> dict[str, Any]:
     """Extract the retrieval arguments from the input dictionary."""
     keys = [
         "ignore_errors",

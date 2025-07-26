@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
         # Test attribute deletion (should fail)
         try:
-            del metacol.did  # type: ignore[misc] # should raise AttributeError
+            del metacol.did  # pyright: ignore[reportAttributeAccessIssue]  # should raise AttributeError
         except AttributeError as e:
             print(f"  ✓ Attribute deletion failed appropriately: {e}")
 

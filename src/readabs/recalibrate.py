@@ -72,14 +72,13 @@ def recalibrate(
                 break
     units = units.title()
 
-    restore_pandas = DataFrame if len(data.shape) == NDIM_DATAFRAME else Series
-    result = restore_pandas(flat_data.reshape(data.shape))
+    result = data.__class__(flat_data.reshape(data.shape))
     result.index = data.index
     if len(data.shape) == NDIM_DATAFRAME:
-        result.columns = data.columns  # type: ignore[assignment]
+        result.columns = data.columns
     if len(data.shape) == NDIM_SERIES:
-        result.name = data.name  # type: ignore[assignment]
-    return result, units  # type: ignore[return-value]
+        result.name = data.name  # pyright: ignore[reportAttributeAccessIssue]
+    return result, units
 
 
 def recalibrate_value(value: float, units: str) -> tuple[float, str]:
@@ -178,7 +177,7 @@ def _find_calibration(units: str) -> str | None:
 def _perfect_already(data: np.ndarray) -> bool:
     """No need to recalibrate if the data is already perfect."""
     check_max = np.nanmax(np.abs(data))
-    return MIN_VALUE_THRESHOLD <= check_max < MAX_VALUE_THRESHOLD
+    return bool(MIN_VALUE_THRESHOLD <= check_max < MAX_VALUE_THRESHOLD)
 
 
 def _all_zero(data: np.ndarray) -> bool:

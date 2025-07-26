@@ -1,3 +1,12 @@
+Version 0.1.4 released 26-Jul-2025 (Canberra Australia)
+
+- Improved type hints with `ReadArgs` TypedDict for better IDE support
+- Added `keep_non_ts` parameter to type definitions
+- Exposed `ReadArgs` in public API
+- Fixed all mypy/pyright type checking errors
+
+---
+
 Version 0.1.3 released 25-Jul-2025 (Canberra Australia)
 
 - Atomic cache file replacement, better exception handling, code cleanup

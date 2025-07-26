@@ -22,6 +22,7 @@ from readabs.read_abs_by_desc import read_abs_by_desc
 from readabs.read_abs_cat import read_abs_cat
 from readabs.read_abs_series import read_abs_series
 from readabs.read_rba_table import read_rba_ocr, read_rba_table
+from readabs.read_support import ReadArgs
 from readabs.recalibrate import recalibrate, recalibrate_value
 from readabs.search_abs_meta import find_abs_id, search_abs_meta
 from readabs.utilities import (
@@ -43,6 +44,7 @@ __author__ = "Bryan Palmer"
 # Exposed functions and classes
 __all__ = (
     "Datatype",
+    "ReadArgs",
     "abs_catalogue",
     "annualise_percentages",
     "annualise_rates",
