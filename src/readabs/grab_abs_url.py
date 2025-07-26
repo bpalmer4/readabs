@@ -18,6 +18,18 @@ from readabs.download_cache import get_file
 from readabs.get_abs_links import get_abs_links, get_table_name
 from readabs.read_support import HYPHEN, check_kwargs, get_args
 
+# --- constants ---
+# File extensions for ABS data files
+ZIP_EXTENSION = ".zip"
+EXCEL_EXTENSION = ".xlsx"
+
+# Processing order: ZIP files must be processed before Excel files
+# This prevents duplicate data when ZIP files contain Excel files
+FILE_EXTENSIONS_PROCESSING_ORDER = (ZIP_EXTENSION, EXCEL_EXTENSION)
+
+# Default values and limits
+EMPTY_BYTES_LENGTH = 0
+
 
 # --- public - primary entry point for this module
 @cache  # minimise slowness with repeat business
@@ -86,6 +98,7 @@ def grab_abs_url(
     return _process_all_files(abs_dict, links, args)
 
 
+# --- private
 def _process_single_files(
     abs_dict: dict[str, DataFrame],
     links: dict[str, list[str]],
@@ -95,12 +108,12 @@ def _process_single_files(
 ) -> dict[str, DataFrame]:
     """Process single file requests (single_excel_only or single_zip_only)."""
     if args["single_excel_only"]:
-        link = _find_url(links, ".xlsx", args["single_excel_only"], verbose=verbose)
+        link = _find_url(links, EXCEL_EXTENSION, args["single_excel_only"], verbose=verbose)
         if link:
             return _add_excel(abs_dict, link, **args)
 
     if args["single_zip_only"]:
-        link = _find_url(links, ".zip", args["single_zip_only"], verbose=verbose)
+        link = _find_url(links, ZIP_EXTENSION, args["single_zip_only"], verbose=verbose)
         if link:
             return _add_zip(abs_dict, link, **args)
 
@@ -113,21 +126,45 @@ def _process_all_files(
     args: dict[str, Any],  # ReadArgs after processing
 ) -> dict[str, DataFrame]:
     """Process all files based on configuration (get_zip, get_excel, etc.)."""
-    for link_type in ".zip", ".xlsx":  # .zip must come first
+    for link_type in FILE_EXTENSIONS_PROCESSING_ORDER:
         for link in links.get(link_type, []):
-            if link_type == ".zip" and args["get_zip"]:
+            if link_type == ZIP_EXTENSION and args["get_zip"]:
                 abs_dict = _add_zip(abs_dict, link, **args)
-            elif link_type == ".xlsx":
-                # Process Excel files based on configuration
-                should_get_excel = args["get_excel"] or (
-                    args["get_excel_if_no_zip"] and (not args["get_zip"] or not links.get(".zip", []))
-                )
-                if should_get_excel:
-                    abs_dict = _add_excel(abs_dict, link, **args)
+            elif link_type == EXCEL_EXTENSION and _should_process_excel_file(args, links):
+                abs_dict = _add_excel(abs_dict, link, **args)
     return abs_dict
 
 
-# --- private
+def _should_process_excel_file(args: dict[str, Any], links: dict[str, list[str]]) -> bool:
+    """Determine if Excel files should be processed based on configuration.
+
+    Excel files are processed if:
+    1. get_excel is explicitly True, or
+    2. get_excel_if_no_zip is True AND (get_zip is False OR no ZIP files are available)
+
+    Args:
+        args: Configuration arguments from user
+        links: Dictionary of available file links by type
+
+    Returns:
+        bool: True if Excel files should be processed
+
+    """
+    # Always process if explicitly requested
+    if args["get_excel"]:
+        return True
+
+    # Process Excel if requested when no ZIP files, and either:
+    # - ZIP processing is disabled, or
+    # - No ZIP files are available
+    if args["get_excel_if_no_zip"]:
+        zip_processing_disabled = not args["get_zip"]
+        no_zip_files_available = not links.get(ZIP_EXTENSION, [])
+        return zip_processing_disabled or no_zip_files_available
+
+    return False
+
+
 def _find_url(links: dict[str, list[str]], targ_type: str, target: str, *, verbose: bool = False) -> str:
     """Find the URL for a target file type.
 
@@ -183,8 +220,12 @@ def _get_url(url: str, kwargs: dict[str, Any]) -> str:
             cat_map = abs_catalogue()
             if cat in cat_map.index:
                 url = str(cat_map.loc[cat, "URL"])
-        except Exception as e:
-            raise ValueError(f"Error retrieving catalogue URL for {cat}: {e}") from e
+        except (KeyError, IndexError) as e:
+            raise ValueError(f"Catalogue number '{cat}' not found in ABS catalogue: {e}") from e
+        except (ConnectionError, TimeoutError) as e:
+            raise ValueError(f"Network error retrieving catalogue for '{cat}': {e}") from e
+        except (ValueError, TypeError) as e:
+            raise ValueError(f"Invalid catalogue data for '{cat}': {e}") from e
 
     if not url:
         raise ValueError("_get_url(): no URL or valid catalogue number provided.")
@@ -213,7 +254,7 @@ def _add_zip(
 
     """
     zip_contents = get_file(link, **args)
-    if len(zip_contents) == 0:
+    if len(zip_contents) == EMPTY_BYTES_LENGTH:
         return abs_dict
 
     with zipfile.ZipFile(BytesIO(zip_contents)) as zipped:
@@ -249,7 +290,7 @@ def _add_excel_bytes(
     """
     verbose = args.get("verbose", False)
 
-    if len(raw_bytes) == 0:
+    if len(raw_bytes) == EMPTY_BYTES_LENGTH:
         if verbose:
             print("_add_excel_bytes(): the raw bytes are empty.")
         return abs_dict
@@ -268,7 +309,7 @@ def _add_excel_bytes(
         sheet_data = excel.parse(
             sheet_name,
         )
-        if len(sheet_data) == 0:
+        if len(sheet_data) == EMPTY_BYTES_LENGTH:
             if verbose:
                 print(f"_add_excel_bytes(): sheet {sheet_name} in {name} is empty.")
             continue
@@ -315,7 +356,7 @@ if __name__ == "__main__":
                     print("PROBLEM -- No data found.")
                 else:
                     print(f"SUCCESS -- Found {len(data_dict)} datasets: {list(data_dict.keys())}")
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 print(f"ERROR -- Test failed with exception: {e}")
             print(f"Done.\n{'=' * 20}\n")
 

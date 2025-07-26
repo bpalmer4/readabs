@@ -125,25 +125,48 @@ def save_to_cache(
     contents: bytes,
     **kwargs: Unpack[FileKwargs],
 ) -> None:
-    """Save bytes to the file-system cache.
+    """Save bytes to the file-system cache using atomic replacement.
+
+    Uses atomic file replacement to ensure cache integrity. The file is written
+    to a temporary location first, then atomically moved to the final location.
+    This prevents corruption from interrupted writes and race conditions.
 
     Args:
         file: Path object for the cache file location
         contents: Bytes content to save
         **kwargs: Optional parameters including 'verbose' (bool)
 
+    Raises:
+        OSError: If file operations fail (disk full, permissions, etc.)
+
     """
     verbose = kwargs.get("verbose", False)
     if len(contents) == 0:
         # don't save empty files (probably caused by ignoring errors)
         return
-    if file.exists():
-        if verbose:
-            print("Removing old cache file.")
-        file.unlink()
+
     if verbose:
         print(f"About to save to cache: {file}")
-    file.write_bytes(contents)
+
+    # Create temporary file with .tmp suffix in same directory
+    temp_file = file.with_suffix(file.suffix + ".tmp")
+
+    try:
+        # Write content to temporary file first
+        temp_file.write_bytes(contents)
+
+        # Atomic move - this is the critical operation
+        # On Unix/Linux, this is a single syscall and truly atomic
+        temp_file.replace(file)
+
+        if verbose:
+            print(f"Successfully saved to cache: {file}")
+
+    except OSError:
+        # Clean up temp file if something went wrong
+        if temp_file.exists():
+            temp_file.unlink()
+        raise
 
 
 def retrieve_from_cache(file: Path, **kwargs: Unpack[FileKwargs]) -> bytes:

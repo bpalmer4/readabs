@@ -1,3 +1,10 @@
+Version 0.1.3 released 25-Jul-2025 (Canberra Australia)
+
+- Atomic cache file replacement, better exception handling, code cleanup
+- Python requirement: >=3.12 → >=3.11
+
+---
+
 Version 0.1.2 released 20-Jul-2025 (Canberra Australia)
 
 - Bug fixes and improvements
