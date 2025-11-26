@@ -12,7 +12,7 @@ import pandas as pd
 from pandas import DataFrame
 
 from readabs.abs_meta_data import metacol
-from readabs.grab_abs_url import grab_abs_url
+from readabs.grab_abs_url import grab_abs_url, grab_abs_zip
 from readabs.read_support import HYPHEN, ReadArgs
 
 # Constants
@@ -113,6 +113,11 @@ def read_abs_cat(
         on the ABS website, before deciding whether the ABS has fresher
         data that needs to be downloaded to the cache.
 
+    zip_file: str | Path = ""
+        If set to a specific zip file name (with or without the .zip
+        extension), this function will only extract data from that zip file
+        on the local file system. This may be useful for debugging purposes.
+
     Returns
     -------
     tuple[dict[str, DataFrame], DataFrame]
@@ -141,7 +146,10 @@ def read_abs_cat(
 
     """
     # --- get the time series data ---
-    raw_abs_dict = grab_abs_url(cat=cat, **kwargs)
+    if "zip_file" in kwargs and kwargs["zip_file"]:
+        raw_abs_dict = grab_abs_zip(kwargs["zip_file"], **kwargs)
+    else:
+        raw_abs_dict = grab_abs_url(cat=cat, **kwargs)
     response = _get_time_series_data(cat, raw_abs_dict, **kwargs)
 
     if not response:
@@ -442,6 +450,15 @@ if __name__ == "__main__":
         print("Starting test.")
 
         d, _m = read_abs_cat("8731.0", keep_non_ts=False, verbose=False)
+        print(f"--- {len(d)=} ---")
+        print(f"--- {d.keys()=} ---")
+        for table in d:
+            freq_str = getattr(d[table].index, "freqstr", "Unknown")
+            print(f"{table=} {d[table].shape=} {freq_str=}")
+
+        print ("=" * 20)
+
+        d, _m = read_abs_cat("", zip_file=".test-data/Qrtly-CPI-Time-series-spreadsheets-all.zip", verbose=False)
         print(f"--- {len(d)=} ---")
         print(f"--- {d.keys()=} ---")
         for table in d:

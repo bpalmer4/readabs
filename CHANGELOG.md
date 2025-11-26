@@ -1,3 +1,14 @@
+Version 0.1.5 released 26-Nov-2025 (Canberra Australia)
+
+ - exploring the ability to load ABS zip files on the local file system directly
+ - one new API function: grab_abs_zip() - a primative, which most wont use
+ - new argument to read_abs_cat(): zip_file: str | Path = "" - if this is set to a 
+   file name then this function will extract data from that zip file on the local 
+   file system. This may be useful for debugging purposes.
+ - this should be treated as test code (use at your own risk)
+
+---
+
 Version 0.1.4 released 26-Jul-2025 (Canberra Australia)
 
 - Improved type hints with `ReadArgs` TypedDict for better IDE support

@@ -6,6 +6,7 @@ import zipfile
 from functools import cache
 from io import BytesIO
 from typing import Any, Unpack
+from pathlib import Path
 
 # analytic imports
 import pandas as pd
@@ -95,6 +96,38 @@ def grab_abs_url(
 
     # Process all files based on configuration
     return _process_all_files(abs_dict, links, args)
+
+
+def grab_abs_zip(
+    zip_path: Path | str,
+    **kwargs: Unpack[ReadArgs]
+) -> dict[str, DataFrame]:
+    """Grab and process a single ABS ZIP file from a file system location.
+
+    This is a convenience function that opens an ABS ZIP file from a local
+    filesystem path. Expect to be used rarely.
+
+    Parameters
+    ----------
+    zip_path : Path | str
+        The local filesystem path of the ABS ZIP file to open and process.
+
+    **kwargs : Unpack[ReadArgs]
+        Additional keyword arguments for file retrieval and processing.
+
+    Returns
+    -------
+    dict[str, DataFrame]
+        A dictionary of DataFrames extracted from the ZIP file.
+
+    """
+    check_kwargs(kwargs, "grab_abs_zip")  # warn if invalid kwargs
+    args = get_args(kwargs, "grab_abs_zip")  # get the valid kwargs
+
+    zp: Path = zip_path if isinstance(zip_path, Path) else Path(zip_path)
+    zip_bytes = zp.read_bytes()
+    abs_dict: dict[str, DataFrame] = {}
+    return _process_zip(abs_dict, zip_bytes, **args)
 
 
 # --- private
@@ -226,6 +259,26 @@ def _get_url(url: str, cat: str) -> str:
     return url
 
 
+def _process_zip(
+    abs_dict: dict[str, DataFrame],
+    zip_contents: bytes,
+    **args: Any,  # ReadArgs compatible
+) -> dict[str, DataFrame]:
+    """Read and process a ZIP file's contents from bytes."""
+
+    if len(zip_contents) == EMPTY_BYTES_LENGTH:
+        return abs_dict
+
+    with zipfile.ZipFile(BytesIO(zip_contents)) as zipped:
+        for element in zipped.infolist():
+            # get the zipfile into pandas
+            table_name = get_table_name(url=element.filename)
+            raw_bytes = zipped.read(element.filename)
+            abs_dict = _add_excel_bytes(abs_dict, raw_bytes, table_name, args)
+
+    return abs_dict
+
+
 def _add_zip(
     abs_dict: dict[str, DataFrame],
     link: str,
@@ -247,17 +300,7 @@ def _add_zip(
 
     """
     zip_contents = get_file(link, **args)
-    if len(zip_contents) == EMPTY_BYTES_LENGTH:
-        return abs_dict
-
-    with zipfile.ZipFile(BytesIO(zip_contents)) as zipped:
-        for element in zipped.infolist():
-            # get the zipfile into pandas
-            table_name = get_table_name(url=element.filename)
-            raw_bytes = zipped.read(element.filename)
-            abs_dict = _add_excel_bytes(abs_dict, raw_bytes, table_name, args)
-
-    return abs_dict
+    return _process_zip(abs_dict, zip_contents, **args)
 
 
 def _add_excel_bytes(
@@ -338,7 +381,7 @@ def _add_excel(
 if __name__ == "__main__":
 
     def simple_test() -> None:
-        """Test the grab_abs_url function."""
+        """Test the grab_abs_url and grab_abs_zip functions."""
 
         def test(name: str, **kwargs: Any) -> None:  # ReadArgs compatible
             print(f"TEST -- {name}")
@@ -352,6 +395,26 @@ if __name__ == "__main__":
             except Exception as e:  # pylint: disable=broad-except
                 print(f"ERROR -- Test failed with exception: {e}")
             print(f"Done.\n{'=' * 20}\n")
+
+        def test_zip(zip_path: Path, **kwargs: Any) -> None:  # ReadArgs compatible
+            print(f"TEST -- grab_abs_zip() with {zip_path}")
+            try:
+                data_dict = grab_abs_zip(zip_path, **kwargs)
+                print("---")
+                if not data_dict:
+                    print("PROBLEM -- No data found.")
+                else:
+                    print(f"SUCCESS -- Found {len(data_dict)} datasets: {list(data_dict.keys())}")
+            except Exception as e:  # pylint: disable=broad-except
+                print(f"ERROR -- Test failed with exception: {e}")
+            print(f"Done.\n{'=' * 20}\n")
+
+        # 4 -- grab from url
+        _name = ".test-data/Qrtly-CPI-Time-series-spreadsheets-all.zip"
+        _zip_path = Path(_name)
+        test_zip(_zip_path, verbose=True)
+
+        # --- various grab_abs_url() tests
 
         name = "1 -- grab a single zip file"
         test(
