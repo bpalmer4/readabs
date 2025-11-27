@@ -12,7 +12,7 @@ from readabs.abs_meta_data import metacol
 
 # Utility imports
 from readabs.datatype import Datatype
-from readabs.grab_abs_url import grab_abs_url
+from readabs.grab_abs_url import grab_abs_url, grab_abs_zip
 from readabs.print_abs_catalogue import print_abs_catalogue
 
 # RBA related imports
@@ -50,6 +50,7 @@ __all__ = (
     "annualise_rates",
     "find_abs_id",
     "grab_abs_url",
+    "grab_abs_zip",
     "metacol",
     "monthly_to_qtly",
     "percent_change",

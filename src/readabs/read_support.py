@@ -24,6 +24,7 @@ class ReadArgs(TypedDict):
     history: NotRequired[str]
     cache_only: NotRequired[bool]
     keep_non_ts: NotRequired[bool]
+    zip_file: NotRequired[str]
 
 
 # Default values for all supported arguments
@@ -38,6 +39,7 @@ DEFAULTS: ReadArgs = {
     "history": "",
     "cache_only": False,
     "keep_non_ts": False,
+    "zip_file": "",
 }
 
 # Arguments that enable data retrieval (at least one must be True/non-empty)

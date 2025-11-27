@@ -1,3 +1,8 @@
+Version 0.1.6 released 27-Nov-2025 (Canberra Australia)
+
+ - fixed a glitch in 0.1.5 - grab_abs_zip() was not properly exposed
+
+---
 Version 0.1.5 released 26-Nov-2025 (Canberra Australia)
 
  - exploring the ability to load ABS zip files on the local file system directly

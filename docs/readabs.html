@@ -71,6 +71,9 @@
                         <li>
                                 <a class="variable" href="#ReadArgs.keep_non_ts">keep_non_ts</a>
                         </li>
+                        <li>
+                                <a class="variable" href="#ReadArgs.zip_file">zip_file</a>
+                        </li>
                 </ul>
 
             </li>
@@ -88,6 +91,9 @@
             </li>
             <li>
                     <a class="function" href="#grab_abs_url">grab_abs_url</a>
+            </li>
+            <li>
+                    <a class="function" href="#grab_abs_zip">grab_abs_zip</a>
             </li>
             <li>
                     <a class="variable" href="#metacol">metacol</a>
@@ -177,7 +183,7 @@ the Australian Bureau of Statistics (ABS) and the Reserve Bank of Australia (RBA
 </span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a>
 </span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="c1"># Utility imports</span>
 </span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">readabs.datatype</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datatype</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">readabs.grab_abs_url</span><span class="w"> </span><span class="kn">import</span> <span class="n">grab_abs_url</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">readabs.grab_abs_url</span><span class="w"> </span><span class="kn">import</span> <span class="n">grab_abs_url</span><span class="p">,</span> <span class="n">grab_abs_zip</span>
 </span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">readabs.print_abs_catalogue</span><span class="w"> </span><span class="kn">import</span> <span class="n">print_abs_catalogue</span>
 </span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>
 </span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="c1"># RBA related imports</span>
@@ -215,29 +221,30 @@ the Australian Bureau of Statistics (ABS) and the Reserve Bank of Australia (RBA
 </span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a>    <span class="s2">&quot;annualise_rates&quot;</span><span class="p">,</span>
 </span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a>    <span class="s2">&quot;find_abs_id&quot;</span><span class="p">,</span>
 </span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a>    <span class="s2">&quot;grab_abs_url&quot;</span><span class="p">,</span>
-</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a>    <span class="s2">&quot;metacol&quot;</span><span class="p">,</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a>    <span class="s2">&quot;monthly_to_qtly&quot;</span><span class="p">,</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>    <span class="s2">&quot;percent_change&quot;</span><span class="p">,</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a>    <span class="s2">&quot;print_abs_catalogue&quot;</span><span class="p">,</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>    <span class="s2">&quot;print_rba_catalogue&quot;</span><span class="p">,</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a>    <span class="s2">&quot;qtly_to_monthly&quot;</span><span class="p">,</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a>    <span class="s2">&quot;rba_catalogue&quot;</span><span class="p">,</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a>    <span class="s2">&quot;rba_metacol&quot;</span><span class="p">,</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a>    <span class="s2">&quot;read_abs_by_desc&quot;</span><span class="p">,</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a>    <span class="s2">&quot;read_abs_cat&quot;</span><span class="p">,</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a>    <span class="s2">&quot;read_abs_series&quot;</span><span class="p">,</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a>    <span class="s2">&quot;read_rba_ocr&quot;</span><span class="p">,</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a>    <span class="s2">&quot;read_rba_table&quot;</span><span class="p">,</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a>    <span class="s2">&quot;recalibrate&quot;</span><span class="p">,</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a>    <span class="s2">&quot;recalibrate_value&quot;</span><span class="p">,</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a>    <span class="s2">&quot;search_abs_meta&quot;</span><span class="p">,</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a><span class="p">)</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a><span class="n">__pdoc__</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a>    <span class="s2">&quot;download_cache&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>    <span class="s2">&quot;get_abs_links&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a>    <span class="s2">&quot;read_support&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos">74</span></a>    <span class="s2">&quot;grab_abs_url&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos">75</span></a><span class="p">}</span>  <span class="c1"># hide submodules from documentation</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a>    <span class="s2">&quot;grab_abs_zip&quot;</span><span class="p">,</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a>    <span class="s2">&quot;metacol&quot;</span><span class="p">,</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>    <span class="s2">&quot;monthly_to_qtly&quot;</span><span class="p">,</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a>    <span class="s2">&quot;percent_change&quot;</span><span class="p">,</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>    <span class="s2">&quot;print_abs_catalogue&quot;</span><span class="p">,</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a>    <span class="s2">&quot;print_rba_catalogue&quot;</span><span class="p">,</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a>    <span class="s2">&quot;qtly_to_monthly&quot;</span><span class="p">,</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a>    <span class="s2">&quot;rba_catalogue&quot;</span><span class="p">,</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a>    <span class="s2">&quot;rba_metacol&quot;</span><span class="p">,</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a>    <span class="s2">&quot;read_abs_by_desc&quot;</span><span class="p">,</span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a>    <span class="s2">&quot;read_abs_cat&quot;</span><span class="p">,</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a>    <span class="s2">&quot;read_abs_series&quot;</span><span class="p">,</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a>    <span class="s2">&quot;read_rba_ocr&quot;</span><span class="p">,</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a>    <span class="s2">&quot;read_rba_table&quot;</span><span class="p">,</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a>    <span class="s2">&quot;recalibrate&quot;</span><span class="p">,</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a>    <span class="s2">&quot;recalibrate_value&quot;</span><span class="p">,</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a>    <span class="s2">&quot;search_abs_meta&quot;</span><span class="p">,</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a><span class="p">)</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a><span class="n">__pdoc__</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>    <span class="s2">&quot;download_cache&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a>    <span class="s2">&quot;get_abs_links&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos">74</span></a>    <span class="s2">&quot;read_support&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos">75</span></a>    <span class="s2">&quot;grab_abs_url&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos">76</span></a><span class="p">}</span>  <span class="c1"># hide submodules from documentation</span>
 </span></pre></div>
 
 
@@ -266,6 +273,7 @@ the Australian Bureau of Statistics (ABS) and the Reserve Bank of Australia (RBA
 </span><span id="ReadArgs-25"><a href="#ReadArgs-25"><span class="linenos">25</span></a>    <span class="n">history</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 </span><span id="ReadArgs-26"><a href="#ReadArgs-26"><span class="linenos">26</span></a>    <span class="n">cache_only</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
 </span><span id="ReadArgs-27"><a href="#ReadArgs-27"><span class="linenos">27</span></a>    <span class="n">keep_non_ts</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
+</span><span id="ReadArgs-28"><a href="#ReadArgs-28"><span class="linenos">28</span></a>    <span class="n">zip_file</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 </span></pre></div>
 
 
@@ -379,6 +387,17 @@ the Australian Bureau of Statistics (ABS) and the Reserve Bank of Australia (RBA
         
     </div>
     <a class="headerlink" href="#ReadArgs.keep_non_ts"></a>
+    
+    
+
+                            </div>
+                            <div id="ReadArgs.zip_file" class="classattr">
+                                <div class="attr variable">
+            <span class="name">zip_file</span><span class="annotation">: NotRequired[str]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ReadArgs.zip_file"></a>
     
     
 
@@ -901,6 +920,71 @@ a specific ABS landingpage.</p>
 
 <p>dict[str, DataFrame]
     A dictionary of DataFrames.</p>
+</div>
+
+
+                </section>
+                <section id="grab_abs_zip">
+                            <input id="grab_abs_zip-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">grab_abs_zip</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">zip_path</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">_local</span><span class="o">.</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span>,</span><span class="param">	<span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n"><a href="#ReadArgs">ReadArgs</a></span><span class="p">]</span></span><span class="return-annotation">) -> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pandas</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span>:</span></span>
+
+                <label class="view-source-button" for="grab_abs_zip-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#grab_abs_zip"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="grab_abs_zip-102"><a href="#grab_abs_zip-102"><span class="linenos">102</span></a><span class="k">def</span><span class="w"> </span><span class="nf">grab_abs_zip</span><span class="p">(</span>
+</span><span id="grab_abs_zip-103"><a href="#grab_abs_zip-103"><span class="linenos">103</span></a>    <span class="n">zip_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="grab_abs_zip-104"><a href="#grab_abs_zip-104"><span class="linenos">104</span></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">ReadArgs</span><span class="p">]</span>
+</span><span id="grab_abs_zip-105"><a href="#grab_abs_zip-105"><span class="linenos">105</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataFrame</span><span class="p">]:</span>
+</span><span id="grab_abs_zip-106"><a href="#grab_abs_zip-106"><span class="linenos">106</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Grab and process a single ABS ZIP file from a file system location.</span>
+</span><span id="grab_abs_zip-107"><a href="#grab_abs_zip-107"><span class="linenos">107</span></a>
+</span><span id="grab_abs_zip-108"><a href="#grab_abs_zip-108"><span class="linenos">108</span></a><span class="sd">    This is a convenience function that opens an ABS ZIP file from a local</span>
+</span><span id="grab_abs_zip-109"><a href="#grab_abs_zip-109"><span class="linenos">109</span></a><span class="sd">    filesystem path. Expect to be used rarely.</span>
+</span><span id="grab_abs_zip-110"><a href="#grab_abs_zip-110"><span class="linenos">110</span></a>
+</span><span id="grab_abs_zip-111"><a href="#grab_abs_zip-111"><span class="linenos">111</span></a><span class="sd">    Parameters</span>
+</span><span id="grab_abs_zip-112"><a href="#grab_abs_zip-112"><span class="linenos">112</span></a><span class="sd">    ----------</span>
+</span><span id="grab_abs_zip-113"><a href="#grab_abs_zip-113"><span class="linenos">113</span></a><span class="sd">    zip_path : Path | str</span>
+</span><span id="grab_abs_zip-114"><a href="#grab_abs_zip-114"><span class="linenos">114</span></a><span class="sd">        The local filesystem path of the ABS ZIP file to open and process.</span>
+</span><span id="grab_abs_zip-115"><a href="#grab_abs_zip-115"><span class="linenos">115</span></a>
+</span><span id="grab_abs_zip-116"><a href="#grab_abs_zip-116"><span class="linenos">116</span></a><span class="sd">    **kwargs : Unpack[ReadArgs]</span>
+</span><span id="grab_abs_zip-117"><a href="#grab_abs_zip-117"><span class="linenos">117</span></a><span class="sd">        Additional keyword arguments for file retrieval and processing.</span>
+</span><span id="grab_abs_zip-118"><a href="#grab_abs_zip-118"><span class="linenos">118</span></a>
+</span><span id="grab_abs_zip-119"><a href="#grab_abs_zip-119"><span class="linenos">119</span></a><span class="sd">    Returns</span>
+</span><span id="grab_abs_zip-120"><a href="#grab_abs_zip-120"><span class="linenos">120</span></a><span class="sd">    -------</span>
+</span><span id="grab_abs_zip-121"><a href="#grab_abs_zip-121"><span class="linenos">121</span></a><span class="sd">    dict[str, DataFrame]</span>
+</span><span id="grab_abs_zip-122"><a href="#grab_abs_zip-122"><span class="linenos">122</span></a><span class="sd">        A dictionary of DataFrames extracted from the ZIP file.</span>
+</span><span id="grab_abs_zip-123"><a href="#grab_abs_zip-123"><span class="linenos">123</span></a>
+</span><span id="grab_abs_zip-124"><a href="#grab_abs_zip-124"><span class="linenos">124</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="grab_abs_zip-125"><a href="#grab_abs_zip-125"><span class="linenos">125</span></a>    <span class="n">check_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="s2">&quot;grab_abs_zip&quot;</span><span class="p">)</span>  <span class="c1"># warn if invalid kwargs</span>
+</span><span id="grab_abs_zip-126"><a href="#grab_abs_zip-126"><span class="linenos">126</span></a>    <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="s2">&quot;grab_abs_zip&quot;</span><span class="p">)</span>  <span class="c1"># get the valid kwargs</span>
+</span><span id="grab_abs_zip-127"><a href="#grab_abs_zip-127"><span class="linenos">127</span></a>
+</span><span id="grab_abs_zip-128"><a href="#grab_abs_zip-128"><span class="linenos">128</span></a>    <span class="n">zp</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">zip_path</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zip_path</span><span class="p">,</span> <span class="n">Path</span><span class="p">)</span> <span class="k">else</span> <span class="n">Path</span><span class="p">(</span><span class="n">zip_path</span><span class="p">)</span>
+</span><span id="grab_abs_zip-129"><a href="#grab_abs_zip-129"><span class="linenos">129</span></a>    <span class="n">zip_bytes</span> <span class="o">=</span> <span class="n">zp</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
+</span><span id="grab_abs_zip-130"><a href="#grab_abs_zip-130"><span class="linenos">130</span></a>    <span class="n">abs_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="grab_abs_zip-131"><a href="#grab_abs_zip-131"><span class="linenos">131</span></a>    <span class="k">return</span> <span class="n">_process_zip</span><span class="p">(</span><span class="n">abs_dict</span><span class="p">,</span> <span class="n">zip_bytes</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Grab and process a single ABS ZIP file from a file system location.</p>
+
+<p>This is a convenience function that opens an ABS ZIP file from a local
+filesystem path. Expect to be used rarely.</p>
+
+<h2 id="parameters">Parameters</h2>
+
+<p>zip_path : Path | str
+    The local filesystem path of the ABS ZIP file to open and process.</p>
+
+<p>**kwargs : Unpack[ReadArgs]
+    Additional keyword arguments for file retrieval and processing.</p>
+
+<h2 id="returns">Returns</h2>
+
+<p>dict[str, DataFrame]
+    A dictionary of DataFrames extracted from the ZIP file.</p>
 </div>
 
 
