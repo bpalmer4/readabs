@@ -310,7 +310,7 @@ def _capture_data(
     # but it is useful to know they are there
     if merged_data.isna().all().any() and verbose:
         cols = merged_data.columns[merged_data.isna().all()]
-        print("Caution: these columns are all NA in " + f"{merged_data[metacol.table].iloc[0]}: {cols}")
+        print("Caution: All columns are NA")
 
     # check for duplicate columns - should not happen
     # Note: these duplicate columns are removed

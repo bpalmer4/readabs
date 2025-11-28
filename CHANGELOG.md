@@ -1,3 +1,9 @@
+Version 0.1.7 released 28-Nov-2025 (Canberra Australia)
+
+ - fixed a glitch when all columns are NA in a dataframe.
+
+---
+
 Version 0.1.6 released 27-Nov-2025 (Canberra Australia)
 
  - fixed a glitch in 0.1.5 - grab_abs_zip() was not properly exposed
