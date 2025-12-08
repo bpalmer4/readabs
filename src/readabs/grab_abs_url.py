@@ -5,8 +5,8 @@
 import zipfile
 from functools import cache
 from io import BytesIO
-from typing import Any, Unpack
 from pathlib import Path
+from typing import Any, Unpack
 
 # analytic imports
 import pandas as pd
@@ -253,6 +253,13 @@ def _get_url(url: str, cat: str) -> str:
         except (ValueError, TypeError) as e:
             raise ValueError(f"Invalid catalogue data for '{cat}': {e}") from e
 
+    if not url and cat:
+        raise ValueError(
+            f"Catalogue number '{cat}' not found in the ABS Time Series Directory. "
+            f"This may be a discontinued series. If you know the ABS landing page URL, "
+            f"you can use: read_abs_cat(cat='{cat}', url='https://www.abs.gov.au/...')"
+        )
+
     if not url:
         raise ValueError("_get_url(): no URL or valid catalogue number provided.")
 
@@ -265,7 +272,6 @@ def _process_zip(
     **args: Any,  # ReadArgs compatible
 ) -> dict[str, DataFrame]:
     """Read and process a ZIP file's contents from bytes."""
-
     if len(zip_contents) == EMPTY_BYTES_LENGTH:
         return abs_dict
 

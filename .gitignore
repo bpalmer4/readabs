@@ -18,6 +18,11 @@ __pycache__/
 *.readabs_cache/
 tests/test.output
 
+# claude
+.claude
+CLAUDE.md
+
+
 # ignore packaging stuff
 .Python
 env/

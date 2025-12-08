@@ -25,9 +25,12 @@ class ReadArgs(TypedDict):
     cache_only: NotRequired[bool]
     keep_non_ts: NotRequired[bool]
     zip_file: NotRequired[str]
+    url: NotRequired[str]
 
 
 # Default values for all supported arguments
+# Note: 'url' is intentionally excluded - it's handled as a separate parameter
+# in grab_abs_url() and should not be included in the args dict
 DEFAULTS: ReadArgs = {
     "verbose": False,
     "ignore_errors": False,
@@ -45,6 +48,9 @@ DEFAULTS: ReadArgs = {
 # Arguments that enable data retrieval (at least one must be True/non-empty)
 _DATA_SOURCE_ARGS = ["get_zip", "get_excel", "get_excel_if_no_zip", "single_zip_only", "single_excel_only"]
 
+# Valid kwargs includes DEFAULTS plus 'url' (which is handled separately as a parameter)
+_VALID_KWARGS = set(DEFAULTS.keys()) | {"url"}
+
 
 def check_kwargs(kwargs: ReadArgs, name: str) -> None:
     """Warn if there are any invalid keyword arguments.
@@ -59,9 +65,9 @@ def check_kwargs(kwargs: ReadArgs, name: str) -> None:
         return
 
     for arg_name in kwargs:
-        if arg_name not in DEFAULTS:
+        if arg_name not in _VALID_KWARGS:
             print(
-                f"{name}(): Unexpected keyword argument '{arg_name}'. Valid arguments are: {list(DEFAULTS.keys())}"
+                f"{name}(): Unexpected keyword argument '{arg_name}'. Valid arguments are: {list(_VALID_KWARGS)}"
             )
 
 

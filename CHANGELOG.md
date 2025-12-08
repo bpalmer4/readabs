@@ -1,3 +1,14 @@
+Version 0.1.8 released 08-Dec-2025 (Canberra Australia)
+
+ - Added `url` parameter to `read_abs_cat()` for retrieving discontinued ABS series
+   that are no longer in the ABS Time Series Directory. Example usage:
+   `read_abs_cat(cat="8501.0", url="https://www.abs.gov.au/.../jun-2025")`
+ - Improved error message when catalogue number not found - now suggests using
+   the `url` parameter as an alternative
+ - Fixed linter issues (import sorting, unused variable output)
+
+---
+
 Version 0.1.7 released 28-Nov-2025 (Canberra Australia)
 
  - fixed a glitch when all columns are NA in a dataframe.

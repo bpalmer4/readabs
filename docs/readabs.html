@@ -74,6 +74,9 @@
                         <li>
                                 <a class="variable" href="#ReadArgs.zip_file">zip_file</a>
                         </li>
+                        <li>
+                                <a class="variable" href="#ReadArgs.url">url</a>
+                        </li>
                 </ul>
 
             </li>
@@ -274,6 +277,7 @@ the Australian Bureau of Statistics (ABS) and the Reserve Bank of Australia (RBA
 </span><span id="ReadArgs-26"><a href="#ReadArgs-26"><span class="linenos">26</span></a>    <span class="n">cache_only</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
 </span><span id="ReadArgs-27"><a href="#ReadArgs-27"><span class="linenos">27</span></a>    <span class="n">keep_non_ts</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
 </span><span id="ReadArgs-28"><a href="#ReadArgs-28"><span class="linenos">28</span></a>    <span class="n">zip_file</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</span><span id="ReadArgs-29"><a href="#ReadArgs-29"><span class="linenos">29</span></a>    <span class="n">url</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 </span></pre></div>
 
 
@@ -398,6 +402,17 @@ the Australian Bureau of Statistics (ABS) and the Reserve Bank of Australia (RBA
         
     </div>
     <a class="headerlink" href="#ReadArgs.zip_file"></a>
+    
+    
+
+                            </div>
+                            <div id="ReadArgs.url" class="classattr">
+                                <div class="attr variable">
+            <span class="name">url</span><span class="annotation">: NotRequired[str]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ReadArgs.url"></a>
     
     
 
@@ -1784,111 +1799,118 @@ descriptions. The series.name attribute will be the ABS series-id.</li>
 </span><span id="read_abs_cat-52"><a href="#read_abs_cat-52"><span class="linenos"> 52</span></a><span class="sd">    **kwargs : Unpack[ReadArgs]</span>
 </span><span id="read_abs_cat-53"><a href="#read_abs_cat-53"><span class="linenos"> 53</span></a><span class="sd">        The following parameters may be passed as optional keyword arguments.</span>
 </span><span id="read_abs_cat-54"><a href="#read_abs_cat-54"><span class="linenos"> 54</span></a>
-</span><span id="read_abs_cat-55"><a href="#read_abs_cat-55"><span class="linenos"> 55</span></a><span class="sd">    keep_non_ts : bool = False</span>
-</span><span id="read_abs_cat-56"><a href="#read_abs_cat-56"><span class="linenos"> 56</span></a><span class="sd">        A flag for whether to keep the non-time-series tables</span>
-</span><span id="read_abs_cat-57"><a href="#read_abs_cat-57"><span class="linenos"> 57</span></a><span class="sd">        that might form part of an ABS catalogue item. Normally, the</span>
-</span><span id="read_abs_cat-58"><a href="#read_abs_cat-58"><span class="linenos"> 58</span></a><span class="sd">        non-time-series information is ignored, and not made available to</span>
-</span><span id="read_abs_cat-59"><a href="#read_abs_cat-59"><span class="linenos"> 59</span></a><span class="sd">        the user.</span>
-</span><span id="read_abs_cat-60"><a href="#read_abs_cat-60"><span class="linenos"> 60</span></a>
-</span><span id="read_abs_cat-61"><a href="#read_abs_cat-61"><span class="linenos"> 61</span></a><span class="sd">    history : str = &quot;&quot;</span>
-</span><span id="read_abs_cat-62"><a href="#read_abs_cat-62"><span class="linenos"> 62</span></a><span class="sd">        Provide a month-year string to extract historical ABS data.</span>
-</span><span id="read_abs_cat-63"><a href="#read_abs_cat-63"><span class="linenos"> 63</span></a><span class="sd">        For example, you can set history=&quot;dec-2023&quot; to the get the ABS data</span>
-</span><span id="read_abs_cat-64"><a href="#read_abs_cat-64"><span class="linenos"> 64</span></a><span class="sd">        for a catalogue identifier that was originally published in respect</span>
-</span><span id="read_abs_cat-65"><a href="#read_abs_cat-65"><span class="linenos"> 65</span></a><span class="sd">        of Q4 of 2023. Note: not all ABS data sources are structured so that</span>
-</span><span id="read_abs_cat-66"><a href="#read_abs_cat-66"><span class="linenos"> 66</span></a><span class="sd">        this technique works in every case; but most are.</span>
+</span><span id="read_abs_cat-55"><a href="#read_abs_cat-55"><span class="linenos"> 55</span></a><span class="sd">    url : str = &quot;&quot;</span>
+</span><span id="read_abs_cat-56"><a href="#read_abs_cat-56"><span class="linenos"> 56</span></a><span class="sd">        The URL of an ABS landing page. Use this for discontinued series</span>
+</span><span id="read_abs_cat-57"><a href="#read_abs_cat-57"><span class="linenos"> 57</span></a><span class="sd">        that are no longer in the ABS Time Series Directory. If provided,</span>
+</span><span id="read_abs_cat-58"><a href="#read_abs_cat-58"><span class="linenos"> 58</span></a><span class="sd">        data will be retrieved from this URL instead of looking up the</span>
+</span><span id="read_abs_cat-59"><a href="#read_abs_cat-59"><span class="linenos"> 59</span></a><span class="sd">        catalogue number. Example:</span>
+</span><span id="read_abs_cat-60"><a href="#read_abs_cat-60"><span class="linenos"> 60</span></a><span class="sd">        `read_abs_cat(cat=&quot;8501.0&quot;, url=&quot;https://www.abs.gov.au/.../jun-2025&quot;)`</span>
+</span><span id="read_abs_cat-61"><a href="#read_abs_cat-61"><span class="linenos"> 61</span></a>
+</span><span id="read_abs_cat-62"><a href="#read_abs_cat-62"><span class="linenos"> 62</span></a><span class="sd">    keep_non_ts : bool = False</span>
+</span><span id="read_abs_cat-63"><a href="#read_abs_cat-63"><span class="linenos"> 63</span></a><span class="sd">        A flag for whether to keep the non-time-series tables</span>
+</span><span id="read_abs_cat-64"><a href="#read_abs_cat-64"><span class="linenos"> 64</span></a><span class="sd">        that might form part of an ABS catalogue item. Normally, the</span>
+</span><span id="read_abs_cat-65"><a href="#read_abs_cat-65"><span class="linenos"> 65</span></a><span class="sd">        non-time-series information is ignored, and not made available to</span>
+</span><span id="read_abs_cat-66"><a href="#read_abs_cat-66"><span class="linenos"> 66</span></a><span class="sd">        the user.</span>
 </span><span id="read_abs_cat-67"><a href="#read_abs_cat-67"><span class="linenos"> 67</span></a>
-</span><span id="read_abs_cat-68"><a href="#read_abs_cat-68"><span class="linenos"> 68</span></a><span class="sd">    verbose : bool = False</span>
-</span><span id="read_abs_cat-69"><a href="#read_abs_cat-69"><span class="linenos"> 69</span></a><span class="sd">        Setting this to true may help diagnose why something</span>
-</span><span id="read_abs_cat-70"><a href="#read_abs_cat-70"><span class="linenos"> 70</span></a><span class="sd">        might be going wrong with the data retrieval process.</span>
-</span><span id="read_abs_cat-71"><a href="#read_abs_cat-71"><span class="linenos"> 71</span></a>
-</span><span id="read_abs_cat-72"><a href="#read_abs_cat-72"><span class="linenos"> 72</span></a><span class="sd">    ignore_errors : bool = False</span>
-</span><span id="read_abs_cat-73"><a href="#read_abs_cat-73"><span class="linenos"> 73</span></a><span class="sd">        Normally, this function will cease downloading when</span>
-</span><span id="read_abs_cat-74"><a href="#read_abs_cat-74"><span class="linenos"> 74</span></a><span class="sd">        an error in encountered. However, sometimes the ABS website has</span>
-</span><span id="read_abs_cat-75"><a href="#read_abs_cat-75"><span class="linenos"> 75</span></a><span class="sd">        malformed links, and changing this setting is necessitated. (Note:</span>
-</span><span id="read_abs_cat-76"><a href="#read_abs_cat-76"><span class="linenos"> 76</span></a><span class="sd">        if you drop a message to the ABS, they will usually fix broken</span>
-</span><span id="read_abs_cat-77"><a href="#read_abs_cat-77"><span class="linenos"> 77</span></a><span class="sd">        links with a business day).</span>
+</span><span id="read_abs_cat-68"><a href="#read_abs_cat-68"><span class="linenos"> 68</span></a><span class="sd">    history : str = &quot;&quot;</span>
+</span><span id="read_abs_cat-69"><a href="#read_abs_cat-69"><span class="linenos"> 69</span></a><span class="sd">        Provide a month-year string to extract historical ABS data.</span>
+</span><span id="read_abs_cat-70"><a href="#read_abs_cat-70"><span class="linenos"> 70</span></a><span class="sd">        For example, you can set history=&quot;dec-2023&quot; to the get the ABS data</span>
+</span><span id="read_abs_cat-71"><a href="#read_abs_cat-71"><span class="linenos"> 71</span></a><span class="sd">        for a catalogue identifier that was originally published in respect</span>
+</span><span id="read_abs_cat-72"><a href="#read_abs_cat-72"><span class="linenos"> 72</span></a><span class="sd">        of Q4 of 2023. Note: not all ABS data sources are structured so that</span>
+</span><span id="read_abs_cat-73"><a href="#read_abs_cat-73"><span class="linenos"> 73</span></a><span class="sd">        this technique works in every case; but most are.</span>
+</span><span id="read_abs_cat-74"><a href="#read_abs_cat-74"><span class="linenos"> 74</span></a>
+</span><span id="read_abs_cat-75"><a href="#read_abs_cat-75"><span class="linenos"> 75</span></a><span class="sd">    verbose : bool = False</span>
+</span><span id="read_abs_cat-76"><a href="#read_abs_cat-76"><span class="linenos"> 76</span></a><span class="sd">        Setting this to true may help diagnose why something</span>
+</span><span id="read_abs_cat-77"><a href="#read_abs_cat-77"><span class="linenos"> 77</span></a><span class="sd">        might be going wrong with the data retrieval process.</span>
 </span><span id="read_abs_cat-78"><a href="#read_abs_cat-78"><span class="linenos"> 78</span></a>
-</span><span id="read_abs_cat-79"><a href="#read_abs_cat-79"><span class="linenos"> 79</span></a><span class="sd">    get_zip : bool = True</span>
-</span><span id="read_abs_cat-80"><a href="#read_abs_cat-80"><span class="linenos"> 80</span></a><span class="sd">        Download the excel files in .zip files.</span>
-</span><span id="read_abs_cat-81"><a href="#read_abs_cat-81"><span class="linenos"> 81</span></a>
-</span><span id="read_abs_cat-82"><a href="#read_abs_cat-82"><span class="linenos"> 82</span></a><span class="sd">    get_excel_if_no_zip : bool = True</span>
-</span><span id="read_abs_cat-83"><a href="#read_abs_cat-83"><span class="linenos"> 83</span></a><span class="sd">        Only try to download .xlsx files if there are no zip</span>
-</span><span id="read_abs_cat-84"><a href="#read_abs_cat-84"><span class="linenos"> 84</span></a><span class="sd">        files available to be downloaded. Only downloading individual excel</span>
-</span><span id="read_abs_cat-85"><a href="#read_abs_cat-85"><span class="linenos"> 85</span></a><span class="sd">        files when there are no zip files to download can speed up the</span>
-</span><span id="read_abs_cat-86"><a href="#read_abs_cat-86"><span class="linenos"> 86</span></a><span class="sd">        download process.</span>
-</span><span id="read_abs_cat-87"><a href="#read_abs_cat-87"><span class="linenos"> 87</span></a>
-</span><span id="read_abs_cat-88"><a href="#read_abs_cat-88"><span class="linenos"> 88</span></a><span class="sd">    get_excel : bool = False</span>
-</span><span id="read_abs_cat-89"><a href="#read_abs_cat-89"><span class="linenos"> 89</span></a><span class="sd">        The default value means that excel files are not</span>
-</span><span id="read_abs_cat-90"><a href="#read_abs_cat-90"><span class="linenos"> 90</span></a><span class="sd">        automatically download. Note: at least one of `get_zip`,</span>
-</span><span id="read_abs_cat-91"><a href="#read_abs_cat-91"><span class="linenos"> 91</span></a><span class="sd">        `get_excel_if_no_zip`, or `get_excel` must be true. For most ABS</span>
-</span><span id="read_abs_cat-92"><a href="#read_abs_cat-92"><span class="linenos"> 92</span></a><span class="sd">        catalogue items, it is sufficient to just download the one zip</span>
-</span><span id="read_abs_cat-93"><a href="#read_abs_cat-93"><span class="linenos"> 93</span></a><span class="sd">        file. But note, some catalogue items do not have a zip file.</span>
-</span><span id="read_abs_cat-94"><a href="#read_abs_cat-94"><span class="linenos"> 94</span></a><span class="sd">        Others have quite a number of zip files.</span>
-</span><span id="read_abs_cat-95"><a href="#read_abs_cat-95"><span class="linenos"> 95</span></a>
-</span><span id="read_abs_cat-96"><a href="#read_abs_cat-96"><span class="linenos"> 96</span></a><span class="sd">    single_excel_only : str = &quot;&quot;</span>
-</span><span id="read_abs_cat-97"><a href="#read_abs_cat-97"><span class="linenos"> 97</span></a><span class="sd">        If this argument is set to a table name (without the</span>
-</span><span id="read_abs_cat-98"><a href="#read_abs_cat-98"><span class="linenos"> 98</span></a><span class="sd">        .xlsx extension), only that excel file will be downloaded. If</span>
-</span><span id="read_abs_cat-99"><a href="#read_abs_cat-99"><span class="linenos"> 99</span></a><span class="sd">        set, and only a limited subset of available data is needed,</span>
-</span><span id="read_abs_cat-100"><a href="#read_abs_cat-100"><span class="linenos">100</span></a><span class="sd">        this can speed up download times significantly. Note: overrides</span>
-</span><span id="read_abs_cat-101"><a href="#read_abs_cat-101"><span class="linenos">101</span></a><span class="sd">        `get_zip`, `get_excel_if_no_zip`, `get_excel` and `single_zip_only`.</span>
+</span><span id="read_abs_cat-79"><a href="#read_abs_cat-79"><span class="linenos"> 79</span></a><span class="sd">    ignore_errors : bool = False</span>
+</span><span id="read_abs_cat-80"><a href="#read_abs_cat-80"><span class="linenos"> 80</span></a><span class="sd">        Normally, this function will cease downloading when</span>
+</span><span id="read_abs_cat-81"><a href="#read_abs_cat-81"><span class="linenos"> 81</span></a><span class="sd">        an error in encountered. However, sometimes the ABS website has</span>
+</span><span id="read_abs_cat-82"><a href="#read_abs_cat-82"><span class="linenos"> 82</span></a><span class="sd">        malformed links, and changing this setting is necessitated. (Note:</span>
+</span><span id="read_abs_cat-83"><a href="#read_abs_cat-83"><span class="linenos"> 83</span></a><span class="sd">        if you drop a message to the ABS, they will usually fix broken</span>
+</span><span id="read_abs_cat-84"><a href="#read_abs_cat-84"><span class="linenos"> 84</span></a><span class="sd">        links with a business day).</span>
+</span><span id="read_abs_cat-85"><a href="#read_abs_cat-85"><span class="linenos"> 85</span></a>
+</span><span id="read_abs_cat-86"><a href="#read_abs_cat-86"><span class="linenos"> 86</span></a><span class="sd">    get_zip : bool = True</span>
+</span><span id="read_abs_cat-87"><a href="#read_abs_cat-87"><span class="linenos"> 87</span></a><span class="sd">        Download the excel files in .zip files.</span>
+</span><span id="read_abs_cat-88"><a href="#read_abs_cat-88"><span class="linenos"> 88</span></a>
+</span><span id="read_abs_cat-89"><a href="#read_abs_cat-89"><span class="linenos"> 89</span></a><span class="sd">    get_excel_if_no_zip : bool = True</span>
+</span><span id="read_abs_cat-90"><a href="#read_abs_cat-90"><span class="linenos"> 90</span></a><span class="sd">        Only try to download .xlsx files if there are no zip</span>
+</span><span id="read_abs_cat-91"><a href="#read_abs_cat-91"><span class="linenos"> 91</span></a><span class="sd">        files available to be downloaded. Only downloading individual excel</span>
+</span><span id="read_abs_cat-92"><a href="#read_abs_cat-92"><span class="linenos"> 92</span></a><span class="sd">        files when there are no zip files to download can speed up the</span>
+</span><span id="read_abs_cat-93"><a href="#read_abs_cat-93"><span class="linenos"> 93</span></a><span class="sd">        download process.</span>
+</span><span id="read_abs_cat-94"><a href="#read_abs_cat-94"><span class="linenos"> 94</span></a>
+</span><span id="read_abs_cat-95"><a href="#read_abs_cat-95"><span class="linenos"> 95</span></a><span class="sd">    get_excel : bool = False</span>
+</span><span id="read_abs_cat-96"><a href="#read_abs_cat-96"><span class="linenos"> 96</span></a><span class="sd">        The default value means that excel files are not</span>
+</span><span id="read_abs_cat-97"><a href="#read_abs_cat-97"><span class="linenos"> 97</span></a><span class="sd">        automatically download. Note: at least one of `get_zip`,</span>
+</span><span id="read_abs_cat-98"><a href="#read_abs_cat-98"><span class="linenos"> 98</span></a><span class="sd">        `get_excel_if_no_zip`, or `get_excel` must be true. For most ABS</span>
+</span><span id="read_abs_cat-99"><a href="#read_abs_cat-99"><span class="linenos"> 99</span></a><span class="sd">        catalogue items, it is sufficient to just download the one zip</span>
+</span><span id="read_abs_cat-100"><a href="#read_abs_cat-100"><span class="linenos">100</span></a><span class="sd">        file. But note, some catalogue items do not have a zip file.</span>
+</span><span id="read_abs_cat-101"><a href="#read_abs_cat-101"><span class="linenos">101</span></a><span class="sd">        Others have quite a number of zip files.</span>
 </span><span id="read_abs_cat-102"><a href="#read_abs_cat-102"><span class="linenos">102</span></a>
-</span><span id="read_abs_cat-103"><a href="#read_abs_cat-103"><span class="linenos">103</span></a><span class="sd">    single_zip_only : str = &quot;&quot;</span>
-</span><span id="read_abs_cat-104"><a href="#read_abs_cat-104"><span class="linenos">104</span></a><span class="sd">        If this argument is set to a zip file name (without</span>
-</span><span id="read_abs_cat-105"><a href="#read_abs_cat-105"><span class="linenos">105</span></a><span class="sd">        the .zip extension), only that zip file will be downloaded.</span>
-</span><span id="read_abs_cat-106"><a href="#read_abs_cat-106"><span class="linenos">106</span></a><span class="sd">        If set, and only a limited subset of available data is needed,</span>
+</span><span id="read_abs_cat-103"><a href="#read_abs_cat-103"><span class="linenos">103</span></a><span class="sd">    single_excel_only : str = &quot;&quot;</span>
+</span><span id="read_abs_cat-104"><a href="#read_abs_cat-104"><span class="linenos">104</span></a><span class="sd">        If this argument is set to a table name (without the</span>
+</span><span id="read_abs_cat-105"><a href="#read_abs_cat-105"><span class="linenos">105</span></a><span class="sd">        .xlsx extension), only that excel file will be downloaded. If</span>
+</span><span id="read_abs_cat-106"><a href="#read_abs_cat-106"><span class="linenos">106</span></a><span class="sd">        set, and only a limited subset of available data is needed,</span>
 </span><span id="read_abs_cat-107"><a href="#read_abs_cat-107"><span class="linenos">107</span></a><span class="sd">        this can speed up download times significantly. Note: overrides</span>
-</span><span id="read_abs_cat-108"><a href="#read_abs_cat-108"><span class="linenos">108</span></a><span class="sd">        `get_zip`, `get_excel_if_no_zip`, and `get_excel`.</span>
+</span><span id="read_abs_cat-108"><a href="#read_abs_cat-108"><span class="linenos">108</span></a><span class="sd">        `get_zip`, `get_excel_if_no_zip`, `get_excel` and `single_zip_only`.</span>
 </span><span id="read_abs_cat-109"><a href="#read_abs_cat-109"><span class="linenos">109</span></a>
-</span><span id="read_abs_cat-110"><a href="#read_abs_cat-110"><span class="linenos">110</span></a><span class="sd">    cache_only : bool = False</span>
-</span><span id="read_abs_cat-111"><a href="#read_abs_cat-111"><span class="linenos">111</span></a><span class="sd">        If set to True, this function will only access</span>
-</span><span id="read_abs_cat-112"><a href="#read_abs_cat-112"><span class="linenos">112</span></a><span class="sd">        data that has been previously cached. Normally, the function</span>
-</span><span id="read_abs_cat-113"><a href="#read_abs_cat-113"><span class="linenos">113</span></a><span class="sd">        checks the date of the cache data against the date of the data</span>
-</span><span id="read_abs_cat-114"><a href="#read_abs_cat-114"><span class="linenos">114</span></a><span class="sd">        on the ABS website, before deciding whether the ABS has fresher</span>
-</span><span id="read_abs_cat-115"><a href="#read_abs_cat-115"><span class="linenos">115</span></a><span class="sd">        data that needs to be downloaded to the cache.</span>
+</span><span id="read_abs_cat-110"><a href="#read_abs_cat-110"><span class="linenos">110</span></a><span class="sd">    single_zip_only : str = &quot;&quot;</span>
+</span><span id="read_abs_cat-111"><a href="#read_abs_cat-111"><span class="linenos">111</span></a><span class="sd">        If this argument is set to a zip file name (without</span>
+</span><span id="read_abs_cat-112"><a href="#read_abs_cat-112"><span class="linenos">112</span></a><span class="sd">        the .zip extension), only that zip file will be downloaded.</span>
+</span><span id="read_abs_cat-113"><a href="#read_abs_cat-113"><span class="linenos">113</span></a><span class="sd">        If set, and only a limited subset of available data is needed,</span>
+</span><span id="read_abs_cat-114"><a href="#read_abs_cat-114"><span class="linenos">114</span></a><span class="sd">        this can speed up download times significantly. Note: overrides</span>
+</span><span id="read_abs_cat-115"><a href="#read_abs_cat-115"><span class="linenos">115</span></a><span class="sd">        `get_zip`, `get_excel_if_no_zip`, and `get_excel`.</span>
 </span><span id="read_abs_cat-116"><a href="#read_abs_cat-116"><span class="linenos">116</span></a>
-</span><span id="read_abs_cat-117"><a href="#read_abs_cat-117"><span class="linenos">117</span></a><span class="sd">    zip_file: str | Path = &quot;&quot;</span>
-</span><span id="read_abs_cat-118"><a href="#read_abs_cat-118"><span class="linenos">118</span></a><span class="sd">        If set to a specific zip file name (with or without the .zip</span>
-</span><span id="read_abs_cat-119"><a href="#read_abs_cat-119"><span class="linenos">119</span></a><span class="sd">        extension), this function will only extract data from that zip file</span>
-</span><span id="read_abs_cat-120"><a href="#read_abs_cat-120"><span class="linenos">120</span></a><span class="sd">        on the local file system. This may be useful for debugging purposes.</span>
-</span><span id="read_abs_cat-121"><a href="#read_abs_cat-121"><span class="linenos">121</span></a>
-</span><span id="read_abs_cat-122"><a href="#read_abs_cat-122"><span class="linenos">122</span></a><span class="sd">    Returns</span>
-</span><span id="read_abs_cat-123"><a href="#read_abs_cat-123"><span class="linenos">123</span></a><span class="sd">    -------</span>
-</span><span id="read_abs_cat-124"><a href="#read_abs_cat-124"><span class="linenos">124</span></a><span class="sd">    tuple[dict[str, DataFrame], DataFrame]</span>
-</span><span id="read_abs_cat-125"><a href="#read_abs_cat-125"><span class="linenos">125</span></a><span class="sd">        The function returns a tuple of two items. The first item is a</span>
-</span><span id="read_abs_cat-126"><a href="#read_abs_cat-126"><span class="linenos">126</span></a><span class="sd">        python dictionary of pandas DataFrames (which is the primary data</span>
-</span><span id="read_abs_cat-127"><a href="#read_abs_cat-127"><span class="linenos">127</span></a><span class="sd">        associated with the ABS catalogue item). The second item is a</span>
-</span><span id="read_abs_cat-128"><a href="#read_abs_cat-128"><span class="linenos">128</span></a><span class="sd">        DataFrame of ABS metadata for the ABS collection.</span>
-</span><span id="read_abs_cat-129"><a href="#read_abs_cat-129"><span class="linenos">129</span></a>
-</span><span id="read_abs_cat-130"><a href="#read_abs_cat-130"><span class="linenos">130</span></a><span class="sd">        Note:</span>
-</span><span id="read_abs_cat-131"><a href="#read_abs_cat-131"><span class="linenos">131</span></a><span class="sd">        You can retrieve non-timeseries data using the grab_abs_url()</span>
-</span><span id="read_abs_cat-132"><a href="#read_abs_cat-132"><span class="linenos">132</span></a><span class="sd">        function. That takes the URL for the ABS landing page for the ABS</span>
-</span><span id="read_abs_cat-133"><a href="#read_abs_cat-133"><span class="linenos">133</span></a><span class="sd">        collection you are interested in. The read_abs_cat function is for</span>
-</span><span id="read_abs_cat-134"><a href="#read_abs_cat-134"><span class="linenos">134</span></a><span class="sd">        ABS catalogue identifiers which are timeseries data, for which the</span>
-</span><span id="read_abs_cat-135"><a href="#read_abs_cat-135"><span class="linenos">135</span></a><span class="sd">        metadata can be extracted.</span>
+</span><span id="read_abs_cat-117"><a href="#read_abs_cat-117"><span class="linenos">117</span></a><span class="sd">    cache_only : bool = False</span>
+</span><span id="read_abs_cat-118"><a href="#read_abs_cat-118"><span class="linenos">118</span></a><span class="sd">        If set to True, this function will only access</span>
+</span><span id="read_abs_cat-119"><a href="#read_abs_cat-119"><span class="linenos">119</span></a><span class="sd">        data that has been previously cached. Normally, the function</span>
+</span><span id="read_abs_cat-120"><a href="#read_abs_cat-120"><span class="linenos">120</span></a><span class="sd">        checks the date of the cache data against the date of the data</span>
+</span><span id="read_abs_cat-121"><a href="#read_abs_cat-121"><span class="linenos">121</span></a><span class="sd">        on the ABS website, before deciding whether the ABS has fresher</span>
+</span><span id="read_abs_cat-122"><a href="#read_abs_cat-122"><span class="linenos">122</span></a><span class="sd">        data that needs to be downloaded to the cache.</span>
+</span><span id="read_abs_cat-123"><a href="#read_abs_cat-123"><span class="linenos">123</span></a>
+</span><span id="read_abs_cat-124"><a href="#read_abs_cat-124"><span class="linenos">124</span></a><span class="sd">    zip_file: str | Path = &quot;&quot;</span>
+</span><span id="read_abs_cat-125"><a href="#read_abs_cat-125"><span class="linenos">125</span></a><span class="sd">        If set to a specific zip file name (with or without the .zip</span>
+</span><span id="read_abs_cat-126"><a href="#read_abs_cat-126"><span class="linenos">126</span></a><span class="sd">        extension), this function will only extract data from that zip file</span>
+</span><span id="read_abs_cat-127"><a href="#read_abs_cat-127"><span class="linenos">127</span></a><span class="sd">        on the local file system. This may be useful for debugging purposes.</span>
+</span><span id="read_abs_cat-128"><a href="#read_abs_cat-128"><span class="linenos">128</span></a>
+</span><span id="read_abs_cat-129"><a href="#read_abs_cat-129"><span class="linenos">129</span></a><span class="sd">    Returns</span>
+</span><span id="read_abs_cat-130"><a href="#read_abs_cat-130"><span class="linenos">130</span></a><span class="sd">    -------</span>
+</span><span id="read_abs_cat-131"><a href="#read_abs_cat-131"><span class="linenos">131</span></a><span class="sd">    tuple[dict[str, DataFrame], DataFrame]</span>
+</span><span id="read_abs_cat-132"><a href="#read_abs_cat-132"><span class="linenos">132</span></a><span class="sd">        The function returns a tuple of two items. The first item is a</span>
+</span><span id="read_abs_cat-133"><a href="#read_abs_cat-133"><span class="linenos">133</span></a><span class="sd">        python dictionary of pandas DataFrames (which is the primary data</span>
+</span><span id="read_abs_cat-134"><a href="#read_abs_cat-134"><span class="linenos">134</span></a><span class="sd">        associated with the ABS catalogue item). The second item is a</span>
+</span><span id="read_abs_cat-135"><a href="#read_abs_cat-135"><span class="linenos">135</span></a><span class="sd">        DataFrame of ABS metadata for the ABS collection.</span>
 </span><span id="read_abs_cat-136"><a href="#read_abs_cat-136"><span class="linenos">136</span></a>
-</span><span id="read_abs_cat-137"><a href="#read_abs_cat-137"><span class="linenos">137</span></a><span class="sd">    Example</span>
-</span><span id="read_abs_cat-138"><a href="#read_abs_cat-138"><span class="linenos">138</span></a><span class="sd">    -------</span>
-</span><span id="read_abs_cat-139"><a href="#read_abs_cat-139"><span class="linenos">139</span></a>
-</span><span id="read_abs_cat-140"><a href="#read_abs_cat-140"><span class="linenos">140</span></a><span class="sd">    ```python</span>
-</span><span id="read_abs_cat-141"><a href="#read_abs_cat-141"><span class="linenos">141</span></a><span class="sd">    import readabs as ra</span>
-</span><span id="read_abs_cat-142"><a href="#read_abs_cat-142"><span class="linenos">142</span></a><span class="sd">    from pandas import DataFrame</span>
-</span><span id="read_abs_cat-143"><a href="#read_abs_cat-143"><span class="linenos">143</span></a><span class="sd">    cat_num = &quot;6202.0&quot;  # The ABS labour force survey</span>
-</span><span id="read_abs_cat-144"><a href="#read_abs_cat-144"><span class="linenos">144</span></a><span class="sd">    data: tuple[dict[str, DataFrame], DataFrame] = ra.read_abs_cat(cat=cat_num)</span>
-</span><span id="read_abs_cat-145"><a href="#read_abs_cat-145"><span class="linenos">145</span></a><span class="sd">    abs_dict, meta = data</span>
-</span><span id="read_abs_cat-146"><a href="#read_abs_cat-146"><span class="linenos">146</span></a><span class="sd">    ```</span>
-</span><span id="read_abs_cat-147"><a href="#read_abs_cat-147"><span class="linenos">147</span></a>
-</span><span id="read_abs_cat-148"><a href="#read_abs_cat-148"><span class="linenos">148</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="read_abs_cat-149"><a href="#read_abs_cat-149"><span class="linenos">149</span></a>    <span class="c1"># --- get the time series data ---</span>
-</span><span id="read_abs_cat-150"><a href="#read_abs_cat-150"><span class="linenos">150</span></a>    <span class="k">if</span> <span class="s2">&quot;zip_file&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;zip_file&quot;</span><span class="p">]:</span>
-</span><span id="read_abs_cat-151"><a href="#read_abs_cat-151"><span class="linenos">151</span></a>        <span class="n">raw_abs_dict</span> <span class="o">=</span> <span class="n">grab_abs_zip</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;zip_file&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="read_abs_cat-152"><a href="#read_abs_cat-152"><span class="linenos">152</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="read_abs_cat-153"><a href="#read_abs_cat-153"><span class="linenos">153</span></a>        <span class="n">raw_abs_dict</span> <span class="o">=</span> <span class="n">grab_abs_url</span><span class="p">(</span><span class="n">cat</span><span class="o">=</span><span class="n">cat</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="read_abs_cat-154"><a href="#read_abs_cat-154"><span class="linenos">154</span></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">_get_time_series_data</span><span class="p">(</span><span class="n">cat</span><span class="p">,</span> <span class="n">raw_abs_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="read_abs_cat-155"><a href="#read_abs_cat-155"><span class="linenos">155</span></a>
-</span><span id="read_abs_cat-156"><a href="#read_abs_cat-156"><span class="linenos">156</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="p">:</span>
-</span><span id="read_abs_cat-157"><a href="#read_abs_cat-157"><span class="linenos">157</span></a>        <span class="n">response</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">DataFrame</span><span class="p">()</span>
-</span><span id="read_abs_cat-158"><a href="#read_abs_cat-158"><span class="linenos">158</span></a>
-</span><span id="read_abs_cat-159"><a href="#read_abs_cat-159"><span class="linenos">159</span></a>    <span class="k">return</span> <span class="n">response</span>  <span class="c1"># dictionary of DataFrames, and a DataFrame of metadata</span>
+</span><span id="read_abs_cat-137"><a href="#read_abs_cat-137"><span class="linenos">137</span></a><span class="sd">        Note:</span>
+</span><span id="read_abs_cat-138"><a href="#read_abs_cat-138"><span class="linenos">138</span></a><span class="sd">        You can retrieve non-timeseries data using the grab_abs_url()</span>
+</span><span id="read_abs_cat-139"><a href="#read_abs_cat-139"><span class="linenos">139</span></a><span class="sd">        function. That takes the URL for the ABS landing page for the ABS</span>
+</span><span id="read_abs_cat-140"><a href="#read_abs_cat-140"><span class="linenos">140</span></a><span class="sd">        collection you are interested in. The read_abs_cat function is for</span>
+</span><span id="read_abs_cat-141"><a href="#read_abs_cat-141"><span class="linenos">141</span></a><span class="sd">        ABS catalogue identifiers which are timeseries data, for which the</span>
+</span><span id="read_abs_cat-142"><a href="#read_abs_cat-142"><span class="linenos">142</span></a><span class="sd">        metadata can be extracted.</span>
+</span><span id="read_abs_cat-143"><a href="#read_abs_cat-143"><span class="linenos">143</span></a>
+</span><span id="read_abs_cat-144"><a href="#read_abs_cat-144"><span class="linenos">144</span></a><span class="sd">    Example</span>
+</span><span id="read_abs_cat-145"><a href="#read_abs_cat-145"><span class="linenos">145</span></a><span class="sd">    -------</span>
+</span><span id="read_abs_cat-146"><a href="#read_abs_cat-146"><span class="linenos">146</span></a>
+</span><span id="read_abs_cat-147"><a href="#read_abs_cat-147"><span class="linenos">147</span></a><span class="sd">    ```python</span>
+</span><span id="read_abs_cat-148"><a href="#read_abs_cat-148"><span class="linenos">148</span></a><span class="sd">    import readabs as ra</span>
+</span><span id="read_abs_cat-149"><a href="#read_abs_cat-149"><span class="linenos">149</span></a><span class="sd">    from pandas import DataFrame</span>
+</span><span id="read_abs_cat-150"><a href="#read_abs_cat-150"><span class="linenos">150</span></a><span class="sd">    cat_num = &quot;6202.0&quot;  # The ABS labour force survey</span>
+</span><span id="read_abs_cat-151"><a href="#read_abs_cat-151"><span class="linenos">151</span></a><span class="sd">    data: tuple[dict[str, DataFrame], DataFrame] = ra.read_abs_cat(cat=cat_num)</span>
+</span><span id="read_abs_cat-152"><a href="#read_abs_cat-152"><span class="linenos">152</span></a><span class="sd">    abs_dict, meta = data</span>
+</span><span id="read_abs_cat-153"><a href="#read_abs_cat-153"><span class="linenos">153</span></a><span class="sd">    ```</span>
+</span><span id="read_abs_cat-154"><a href="#read_abs_cat-154"><span class="linenos">154</span></a>
+</span><span id="read_abs_cat-155"><a href="#read_abs_cat-155"><span class="linenos">155</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="read_abs_cat-156"><a href="#read_abs_cat-156"><span class="linenos">156</span></a>    <span class="c1"># --- get the time series data ---</span>
+</span><span id="read_abs_cat-157"><a href="#read_abs_cat-157"><span class="linenos">157</span></a>    <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;zip_file&quot;</span><span class="p">):</span>
+</span><span id="read_abs_cat-158"><a href="#read_abs_cat-158"><span class="linenos">158</span></a>        <span class="n">raw_abs_dict</span> <span class="o">=</span> <span class="n">grab_abs_zip</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;zip_file&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="read_abs_cat-159"><a href="#read_abs_cat-159"><span class="linenos">159</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="read_abs_cat-160"><a href="#read_abs_cat-160"><span class="linenos">160</span></a>        <span class="n">raw_abs_dict</span> <span class="o">=</span> <span class="n">grab_abs_url</span><span class="p">(</span><span class="n">cat</span><span class="o">=</span><span class="n">cat</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="read_abs_cat-161"><a href="#read_abs_cat-161"><span class="linenos">161</span></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">_get_time_series_data</span><span class="p">(</span><span class="n">cat</span><span class="p">,</span> <span class="n">raw_abs_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="read_abs_cat-162"><a href="#read_abs_cat-162"><span class="linenos">162</span></a>
+</span><span id="read_abs_cat-163"><a href="#read_abs_cat-163"><span class="linenos">163</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="p">:</span>
+</span><span id="read_abs_cat-164"><a href="#read_abs_cat-164"><span class="linenos">164</span></a>        <span class="n">response</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">DataFrame</span><span class="p">()</span>
+</span><span id="read_abs_cat-165"><a href="#read_abs_cat-165"><span class="linenos">165</span></a>
+</span><span id="read_abs_cat-166"><a href="#read_abs_cat-166"><span class="linenos">166</span></a>    <span class="k">return</span> <span class="n">response</span>  <span class="c1"># dictionary of DataFrames, and a DataFrame of metadata</span>
 </span></pre></div>
 
 
@@ -1914,6 +1936,13 @@ default directory name by setting the shell environment variable
 
 <p>**kwargs : Unpack[ReadArgs]
     The following parameters may be passed as optional keyword arguments.</p>
+
+<p>url : str = ""
+    The URL of an ABS landing page. Use this for discontinued series
+    that are no longer in the ABS Time Series Directory. If provided,
+    data will be retrieved from this URL instead of looking up the
+    catalogue number. Example:
+    <code>read_abs_cat(cat="8501.0", url="https://www.abs.gov.au/.../jun-2025")</code></p>
 
 <p>keep_non_ts : bool = False
     A flag for whether to keep the non-time-series tables

@@ -51,6 +51,13 @@ def read_abs_cat(
     **kwargs : Unpack[ReadArgs]
         The following parameters may be passed as optional keyword arguments.
 
+    url : str = ""
+        The URL of an ABS landing page. Use this for discontinued series
+        that are no longer in the ABS Time Series Directory. If provided,
+        data will be retrieved from this URL instead of looking up the
+        catalogue number. Example:
+        `read_abs_cat(cat="8501.0", url="https://www.abs.gov.au/.../jun-2025")`
+
     keep_non_ts : bool = False
         A flag for whether to keep the non-time-series tables
         that might form part of an ABS catalogue item. Normally, the
@@ -146,7 +153,7 @@ def read_abs_cat(
 
     """
     # --- get the time series data ---
-    if "zip_file" in kwargs and kwargs["zip_file"]:
+    if kwargs.get("zip_file"):
         raw_abs_dict = grab_abs_zip(kwargs["zip_file"], **kwargs)
     else:
         raw_abs_dict = grab_abs_url(cat=cat, **kwargs)
@@ -309,8 +316,8 @@ def _capture_data(
     # Note: these empty columns are not removed,
     # but it is useful to know they are there
     if merged_data.isna().all().any() and verbose:
-        cols = merged_data.columns[merged_data.isna().all()]
-        print("Caution: All columns are NA")
+        na_cols = merged_data.columns[merged_data.isna().all()]
+        print(f"Caution: These columns are all NA: {list(na_cols)}")
 
     # check for duplicate columns - should not happen
     # Note: these duplicate columns are removed
