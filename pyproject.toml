@@ -22,6 +22,7 @@ dependencies = [
     "requests",
     "bs4",
     "lxml",
+    "urllib3>=2.7",
 ]
 
 [dependency-groups]
