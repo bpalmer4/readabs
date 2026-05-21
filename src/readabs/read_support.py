@@ -21,6 +21,7 @@ class ReadArgs(TypedDict):
     get_excel: NotRequired[bool]
     single_zip_only: NotRequired[str]
     single_excel_only: NotRequired[str]
+    selected_excel: NotRequired[tuple[str, ...]]
     history: NotRequired[str]
     cache_only: NotRequired[bool]
     keep_non_ts: NotRequired[bool]
@@ -39,6 +40,7 @@ DEFAULTS: ReadArgs = {
     "get_excel": False,
     "single_zip_only": "",
     "single_excel_only": "",
+    "selected_excel": (),
     "history": "",
     "cache_only": False,
     "keep_non_ts": False,
@@ -46,7 +48,14 @@ DEFAULTS: ReadArgs = {
 }
 
 # Arguments that enable data retrieval (at least one must be True/non-empty)
-_DATA_SOURCE_ARGS = ["get_zip", "get_excel", "get_excel_if_no_zip", "single_zip_only", "single_excel_only"]
+_DATA_SOURCE_ARGS = [
+    "get_zip",
+    "get_excel",
+    "get_excel_if_no_zip",
+    "single_zip_only",
+    "single_excel_only",
+    "selected_excel",
+]
 
 # Valid kwargs includes DEFAULTS plus 'url' (which is handled separately as a parameter)
 _VALID_KWARGS = set(DEFAULTS.keys()) | {"url"}
@@ -103,8 +112,9 @@ def get_args(kwargs: ReadArgs, name: str) -> dict[str, Any]:
     has_excel_if_no_zip = args["get_excel_if_no_zip"]
     has_single_zip = bool(args["single_zip_only"])
     has_single_excel = bool(args["single_excel_only"])
+    has_selected_excel = bool(args["selected_excel"])
 
-    if not any([has_zip, has_excel, has_excel_if_no_zip, has_single_zip, has_single_excel]):
+    if not any([has_zip, has_excel, has_excel_if_no_zip, has_single_zip, has_single_excel, has_selected_excel]):
         raise ValueError(
             f"{name}(): At least one data source option must be enabled. Options are: {_DATA_SOURCE_ARGS}"
         )

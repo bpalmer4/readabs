@@ -140,11 +140,18 @@ data, meta = ra.read_abs_cat(
     ignore_errors=True,           # Continue if some files fail to download
     keep_non_ts=True,             # Include non-timeseries tables in output
 )
+
+# Or download a chosen subset of tables (skips the full-catalogue zip):
+data, meta = ra.read_abs_cat(
+    "6202.0",
+    selected_excel=("62020001", "62020017", "62020X28"),
+)
 ```
 
 | Parameter | Description |
 |-----------|-------------|
 | `single_excel_only` | Download only the specified Excel file (e.g., "6202001") |
+| `selected_excel` | Tuple of Excel file names to download (e.g., `("62020001", "62020017")`). Must be a tuple, not a list. |
 | `single_zip_only` | Download only the specified ZIP file |
 | `cache_only` | Only use locally cached files, don't download |
 | `verbose` | Print progress and diagnostic information |

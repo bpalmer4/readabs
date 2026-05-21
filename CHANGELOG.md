@@ -1,3 +1,17 @@
+Version 0.1.9 released 21-May-2026 (Canberra Australia)
+
+ - Added `selected_excel` parameter to `read_abs_cat()`, `read_abs_series()` and
+   `read_abs_by_desc()`. Takes a tuple of table names (without the .xlsx
+   extension) and downloads only those Excel files, skipping the catalogue zip.
+   Useful when several specific tables are needed and the full bundle would be
+   wasteful (e.g. ABS 6202.0 now ships a ~390 MB combined zip but most users
+   only need a handful of the smaller tables). Example:
+   `read_abs_cat("6202.0", selected_excel=("62020001", "62020017", "62020X28"))`.
+   Must be a tuple (not a list) because `read_abs_cat` is `@functools.cache`-
+   decorated and requires hashable arguments.
+
+---
+
 Version 0.1.8 released 08-Dec-2025 (Canberra Australia)
 
  - Added `url` parameter to `read_abs_cat()` for retrieving discontinued ABS series

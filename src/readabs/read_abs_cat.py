@@ -106,6 +106,17 @@ def read_abs_cat(
         this can speed up download times significantly. Note: overrides
         `get_zip`, `get_excel_if_no_zip`, `get_excel` and `single_zip_only`.
 
+    selected_excel : tuple[str, ...] = ()
+        If set to a tuple of table names (without the .xlsx extension),
+        only those excel files will be downloaded. Useful when several
+        specific tables are needed and downloading the full zip would
+        be wasteful. Example:
+        `selected_excel=("62020001", "62020017", "62020X28")`.
+        Must be a tuple (not a list) because `read_abs_cat` uses an
+        internal cache that requires hashable arguments. Note: overrides
+        `get_zip`, `get_excel_if_no_zip`, `get_excel` and `single_zip_only`
+        when at least one matching file is found.
+
     single_zip_only : str = ""
         If this argument is set to a zip file name (without
         the .zip extension), only that zip file will be downloaded.

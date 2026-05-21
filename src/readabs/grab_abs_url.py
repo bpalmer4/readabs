@@ -138,11 +138,19 @@ def _process_single_files(
     *,
     verbose: bool,
 ) -> dict[str, DataFrame]:
-    """Process single file requests (single_excel_only or single_zip_only)."""
+    """Process single file requests (single_excel_only, selected_excel, or single_zip_only)."""
     if args["single_excel_only"]:
         link = _find_url(links, EXCEL_EXTENSION, args["single_excel_only"], verbose=verbose)
         if link:
             return _add_excel(abs_dict, link, **args)
+
+    if args["selected_excel"]:
+        for target in args["selected_excel"]:
+            link = _find_url(links, EXCEL_EXTENSION, target, verbose=verbose)
+            if link:
+                abs_dict = _add_excel(abs_dict, link, **args)
+        if abs_dict:
+            return abs_dict
 
     if args["single_zip_only"]:
         link = _find_url(links, ZIP_EXTENSION, args["single_zip_only"], verbose=verbose)

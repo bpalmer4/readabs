@@ -68,6 +68,7 @@ def _get_retrieval_args(input_dict: dict[str, Any], output_dict: dict[str, Any])
         "get_excel",
         "cache_only",
         "single_excel_only",
+        "selected_excel",
         "single_zip_only",
         "verbose",
     ]
@@ -165,7 +166,8 @@ def read_abs_by_desc(
             The following arguments, if present, will also be used (ie.
             passed to read_abs_cat()): ["ignore_errors", "get_zip",
             "get_excel_if_no_zip", "get_excel", "cache_only",
-            "single_excel_only", "single_zip_only", "verbose"].
+            "single_excel_only", "selected_excel", "single_zip_only",
+            "verbose"].
         - for the selection of data, the following metacol names, if present,
             will be used to construct the selector: "cat", "did"
             "stype", "id", "start", "end", "num", "unit", "dtype", "freq",
@@ -193,7 +195,8 @@ def read_abs_by_desc(
         contain a "cat" key so the data can be retrieved. Other keys that
         can be used for the data retrieval are the same as for read_abs_cat(),
         namely ["ignore_errors", "get_zip", "get_excel_if_no_zip",
-        "get_excel", "single_excel_only", "single_zip_only", "cache_only"].
+        "get_excel", "single_excel_only", "selected_excel",
+        "single_zip_only", "cache_only"].
 
 
     Returns
