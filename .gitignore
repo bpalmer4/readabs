@@ -18,10 +18,17 @@ __pycache__/
 *.readabs_cache/
 tests/test.output
 
+# tool caches
+.ruff_cache/
+.mypy_cache/
+
 # claude
 .claude
 CLAUDE.md
 
+#tests to ignore
+.extend_history/manual_test_suite.py
+.extend_history/test_extend_history.py
 
 # ignore packaging stuff
 .Python

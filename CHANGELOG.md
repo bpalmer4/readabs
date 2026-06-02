@@ -1,3 +1,26 @@
+Version 0.1.10 released 02-Jun-2026 (Canberra Australia)
+
+ - Added `extend_history` module — automatically extends ABS time series
+   backwards (or forwards) by splicing data from a sibling series at a
+   different frequency.  Works in both directions:
+   - **Forward**: pass a monthly series ID (e.g. `"A130392586J"`), get it
+     extended backwards with quarterly data from an older ABS release.
+   - **Reverse**: pass a quarterly series ID (e.g. `"A2326391L"`), get it
+     extended forwards with monthly data from the current catalogue.
+ - `extend_series(series_id)` — extend a single series, auto-resolves
+   catalogue and sibling.
+ - `extend_catalogue(cat)` — extend every series in a full catalogue.
+ - `find_cat_for_series(series_id)` — look up which catalogue a series
+   belongs to.
+ - Ships `abs_series_map.csv.gz` — a compressed 108k-row master index of
+   every active ABS series ID mapped to its catalogue number, description,
+   frequency, date range, table, and unit.
+ - `manual_test_suite.py` — 10-section test harness covering forward,
+   reverse, auto-cat, no-sibling fallback, level continuity, caching, and
+   bidirectional identity verification.
+
+---
+
 Version 0.1.9 released 21-May-2026 (Canberra Australia)
 
  - Added `selected_excel` parameter to `read_abs_cat()`, `read_abs_series()` and
