@@ -26,9 +26,9 @@ tests/test.output
 .claude
 CLAUDE.md
 
-#tests to ignore
-.extend_history/manual_test_suite.py
-.extend_history/test_extend_history.py
+# tests to ignore
+src/readabs/extend_history/manual_test_suite.py
+src/readabs/extend_history/test_extend_history.py
 
 # ignore packaging stuff
 .Python

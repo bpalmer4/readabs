@@ -1,6 +1,6 @@
 [project]
 name = "readabs"
-version = "0.1.9"
+version = "0.1.10"
 description = "Get ABS timeseries data in pandas DataFrames"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -71,4 +71,6 @@ lint.ignore = [
 "src/readabs/rba_catalogue.py" = ["ANN401", "C901"]  # Complex function for web scraping
 "src/readabs/read_rba_table.py" = ["ANN401"]
 "src/readabs/grab_abs_url.py" = ["ANN401", "BLE001"]  # Dynamic args and broad exception handling needed
+"src/readabs/extend_history/extend_history.py" = ["ANN401", "FBT001", "PLR0913", "S101"]
+"src/readabs/extend_history/extend_history.py" = ["ANN401", "FBT001", "PLR0913", "S101"]
 
