@@ -1,3 +1,26 @@
+Version 0.2.0 released 03-Jun-2026 (Canberra Australia)
+
+ - Added a series-splicing toolkit for joining mixed-frequency and multi-vintage
+   timeseries into a single continuous series — useful for building long histories
+   (e.g. a monthly CPI back-filled with quarterly data to 1948, or an unemployment
+   rate spliced from the modellers' database and the Labour Force Survey). The four
+   composable functions operate on already-fetched `(data, meta)`:
+     - `select_one(data, meta, selector)` — select one series (its ABS unit is kept
+       on `series.attrs["unit"]`).
+     - `select(sources)` — maps an iterable of `(data, meta, selector)` to a list of
+       series. Raises if the selected series carry mixed units; pass
+       `require_same_units=False` to combine different-unit series deliberately.
+     - `splice(segments)` — splice an iterable of series, highest priority first.
+       Rebases level shifts (e.g. an index reference-period change), prefers the
+       higher-priority value on overlap, and leaves honest gaps (no interpolation,
+       nothing invented). Returns the spliced series plus an auditable join report
+       of every rebase factor and overlap.
+     - `select_and_splice(sources)` — `select` then `splice` for the no-transform
+       case; returns `(series, unit, report)`.
+   See the new "Splicing Series" section in the README for worked examples.
+
+---
+
 Version 0.1.9 released 21-May-2026 (Canberra Australia)
 
  - Added `selected_excel` parameter to `read_abs_cat()`, `read_abs_series()` and

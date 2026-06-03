@@ -175,6 +175,103 @@ scaled_data, new_units = ra.recalibrate(data, "Number")
 # e.g., 1,500,000 "Number" becomes 1.5 "Million"
 ```
 
+### Splicing Series (mixed frequency / multiple vintages)
+
+Many ABS concepts are spread across frequencies and releases — e.g. a *monthly*
+CPI that only reaches back to 2017, a *quarterly* one back to 1948, and a
+discontinued monthly indicator covering the gap between. `splice` joins such
+segments into one continuous series, **highest priority first**: it rebases
+segments whose levels differ (e.g. an index reference-period change), prefers the
+higher-priority value where periods overlap, and leaves honest gaps where no
+source has data (no interpolation, nothing invented). A join report records every
+rebase factor and overlap so a splice can be audited rather than trusted blindly.
+
+Four composable functions:
+
+| Function | Role |
+|----------|------|
+| `select_one(data, meta, selector)` | Select one series from fetched `(data, meta)` (ABS unit kept on `.attrs["unit"]`) |
+| `select(sources)` | Iterable of `(data, meta, selector)` → list of series; raises on mixed units (opt out with `require_same_units=False`) |
+| `splice(segments)` | Splice an iterable of series, highest priority first → `(series, report)` |
+| `select_and_splice(sources)` | `select` then `splice` for the no-transform case; checks units → `(series, unit, report)` |
+
+A *selector* is the `{search_value: column}` form used by `find_abs_id` (with
+`validate_unique=True`, so it de-duplicates on Series ID and raises on genuine
+ambiguity rather than guessing).
+
+By default `select` **raises if the selected series carry different ABS units** —
+coherence is required to splice. Pass `require_same_units=False` to select
+different-unit series on purpose (as the unemployment example below does).
+
+**No transform — splice raw levels** (headline CPI index: new monthly over the
+discontinued indicator over the long quarterly):
+
+```python
+cur, cmeta = ra.read_abs_cat("6401.0")                       # monthly + long quarterly
+ind, imeta = ra.read_abs_cat("6484.0", url=INDICATOR_URL)    # discontinued -> fetch by URL
+
+base = {"Index Numbers ;  All groups CPI ;  Australia ;": mc.did, "Index Numbers": mc.unit}
+series, unit, report = ra.select_and_splice(
+    [
+        (cur, cmeta, base | {"Month": mc.freq}),     # new monthly CPI  (2024 ->)
+        (ind, imeta, base | {"Month": mc.freq}),     # monthly indicator (2017-2025)
+        (cur, cmeta, base | {"Quarter": mc.freq}),   # quarterly back to 1948
+    ],
+    output="M",
+)
+```
+
+The shared `base` selector resolves the same concept in all three sources; only
+the frequency override changes.
+
+**With a transform — select, transform each, then splice** (year-ended inflation:
+a Y/Y change is base-invariant, so compute it per source and splice the *rates*
+with `rebase=False`):
+
+```python
+m_idx, i_idx, q_idx = ra.select([
+    (cur, cmeta, base | {"Month": mc.freq}),
+    (ind, imeta, base | {"Month": mc.freq}),
+    (cur, cmeta, base | {"Quarter": mc.freq}),
+])
+
+def yoy(s, periods):
+    return ((s / s.shift(periods) - 1) * 100).dropna()
+
+long_yoy, report = ra.splice(
+    [yoy(m_idx, 12), yoy(i_idx, 12), yoy(q_idx, 4)],
+    rebase=False,   # rates are comparable: coalesce, never rescale
+)
+```
+
+**A transform across two series** (unemployment rate back to 1959): the
+modellers' database (1364.0.15.003) publishes *unemployed* and *labour force* but
+not the rate, while the Labour Force Survey publishes the monthly rate directly —
+so compute the quarterly rate, then splice it under the monthly one:
+
+```python
+md,  mmeta = ra.read_abs_cat("1364.0.15.003", single_excel_only="1364015003")
+lfs, lmeta = ra.read_abs_cat("6202.0", single_excel_only="62020001")
+
+# Two counts ("000") and a rate ("Percent") in one select -> the units differ on
+# purpose, so switch the coherence check off (select raises on mixed units by default):
+unemployed, labour_force, ur_monthly = ra.select([
+    (md,  mmeta, {"1364015003": mc.table, "Total unemployed ;": mc.did}),    # "000"
+    (md,  mmeta, {"1364015003": mc.table, "Total labour force ;": mc.did}),  # "000"
+    (lfs, lmeta, {"62020001": mc.table, "Unemployment rate ;  Persons ;": mc.did,
+                  "Seasonally Adjusted": mc.stype}),                         # "Percent"
+], require_same_units=False)
+
+ur_quarterly = unemployed / labour_force * 100        # the rate the source withholds
+ur, report = ra.splice([ur_monthly, ur_quarterly], rebase=False)   # monthly priority, 1959 ->
+```
+
+`splice` is source-agnostic — hand it any series you've already fetched:
+
+```python
+out, report = ra.splice([monthly_series, quarterly_series], rebase=False)
+```
+
 ## API Reference
 
 ### ABS Functions
@@ -210,6 +307,15 @@ scaled_data, new_units = ra.recalibrate(data, "Number")
 | `qtly_to_monthly(data)` | Convert quarterly to monthly frequency |
 | `monthly_to_qtly(data)` | Convert monthly to quarterly frequency |
 | `recalibrate(data, units)` | Scale values and adjust unit labels |
+
+### Splicing Functions
+
+| Function | Description |
+|----------|-------------|
+| `select_one(data, meta, selector)` | Select one series from fetched `(data, meta)` |
+| `select(sources)` | Iterable of `(data, meta, selector)` → list of series |
+| `splice(segments)` | Splice an iterable of series, highest priority first |
+| `select_and_splice(sources)` | Select + splice (no-transform case); checks units |
 
 ### Metadata Constants
 

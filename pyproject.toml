@@ -1,6 +1,6 @@
 [project]
 name = "readabs"
-version = "0.1.9"
+version = "0.2.0"
 description = "Get ABS timeseries data in pandas DataFrames"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -60,6 +60,9 @@ lint.ignore = [
     "EM102",   # Exception must not use an f-string literal
     "T201",    # Remove `print` --> But I use print to alert the user
     "TRY003",  # Long exception messages.
+    "TC001",   # Don't force first-party imports into `if TYPE_CHECKING:` blocks (ugly)
+    "TC002",   # Don't force third-party imports into `if TYPE_CHECKING:` blocks (ugly)
+    "TC003",   # Don't force std-lib imports into `if TYPE_CHECKING:` blocks (ugly)
 ]
 
 # Per-file exclusions for files using **kwargs: Any for dynamic argument handling
@@ -71,4 +74,5 @@ lint.ignore = [
 "src/readabs/rba_catalogue.py" = ["ANN401", "C901"]  # Complex function for web scraping
 "src/readabs/read_rba_table.py" = ["ANN401"]
 "src/readabs/grab_abs_url.py" = ["ANN401", "BLE001"]  # Dynamic args and broad exception handling needed
+"src/readabs/splice.py" = ["PLR0913"]  # splice()/select_and_splice() expose several keyword knobs
 

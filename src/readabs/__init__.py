@@ -25,6 +25,7 @@ from readabs.read_rba_table import read_rba_ocr, read_rba_table
 from readabs.read_support import ReadArgs
 from readabs.recalibrate import recalibrate, recalibrate_value
 from readabs.search_abs_meta import find_abs_id, search_abs_meta
+from readabs.splice import select, select_and_splice, select_one, splice
 from readabs.utilities import (
     annualise_percentages,
     annualise_rates,
@@ -67,6 +68,10 @@ __all__ = (
     "recalibrate",
     "recalibrate_value",
     "search_abs_meta",
+    "select",
+    "select_and_splice",
+    "select_one",
+    "splice",
 )
 __pdoc__ = {
     "download_cache": False,
