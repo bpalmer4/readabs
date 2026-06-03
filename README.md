@@ -180,11 +180,14 @@ scaled_data, new_units = ra.recalibrate(data, "Number")
 Many ABS concepts are spread across frequencies and releases — e.g. a *monthly*
 CPI that only reaches back to 2017, a *quarterly* one back to 1948, and a
 discontinued monthly indicator covering the gap between. `splice` joins such
-segments into one continuous series, **highest priority first**: it rebases
-segments whose levels differ (e.g. an index reference-period change), prefers the
-higher-priority value where periods overlap, and leaves honest gaps where no
-source has data (no interpolation, nothing invented). A join report records every
-rebase factor and overlap so a splice can be audited rather than trusted blindly.
+segments into one continuous series, **highest priority first**: it prefers the
+higher-priority value where periods overlap and leaves honest gaps where no
+source has data (no interpolation, nothing invented). Pass `rebase=True` to
+*multiplicatively* rescale segments whose levels differ (e.g. an index
+reference-period change) onto the running result — it is off by default, because
+rebasing transforms your data and is only valid for ratio-scale (index-like)
+series. A join report records every rebase factor and overlap so a splice can be
+audited rather than trusted blindly.
 
 Four composable functions:
 
@@ -203,8 +206,9 @@ By default `select` **raises if the selected series carry different ABS units** 
 coherence is required to splice. Pass `require_same_units=False` to select
 different-unit series on purpose (as the unemployment example below does).
 
-**No transform — splice raw levels** (headline CPI index: new monthly over the
-discontinued indicator over the long quarterly):
+**No per-series transform — splice index levels with `rebase=True`** (headline
+CPI index: new monthly over the discontinued indicator over the long quarterly,
+rescaled across reference-period changes):
 
 ```python
 cur, cmeta = ra.read_abs_cat("6401.0")                       # monthly + long quarterly
@@ -218,11 +222,14 @@ series, unit, report = ra.select_and_splice(
         (cur, cmeta, base | {"Quarter": mc.freq}),   # quarterly back to 1948
     ],
     output="M",
+    rebase=True,   # index reference-period change -> rescale onto the running result
 )
 ```
 
 The shared `base` selector resolves the same concept in all three sources; only
-the frequency override changes.
+the frequency override changes. `rebase=True` is needed because these index
+segments sit on different reference periods — for series that already share a
+level (or aren't ratio-scale), leave it off.
 
 **With a transform — select, transform each, then splice** (year-ended inflation:
 a Y/Y change is base-invariant, so compute it per source and splice the *rates*

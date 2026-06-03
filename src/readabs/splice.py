@@ -1,17 +1,26 @@
-"""Prototype: a priority splicer for mixed-frequency time series.
+"""Priority splicing of mixed-frequency time series.
 
-Layer 1 of the design discussed for readabs' extend_history rework.
+This module has two layers:
 
-It is deliberately *source-agnostic*: it takes pandas Series you have already
-fetched (by description, by ID, however you like) and splices them into one
-series.  It knows nothing about the ABS, ships no static lookup table, and
-makes no guesses about which series belong together — that judgement stays
-with the caller.
+``splice``
+    The core primitive.  Deliberately *source-agnostic*: it takes pandas Series
+    you have already fetched (by description, by ID, however you like) and
+    splices them into one series.  It knows nothing about the ABS, ships no
+    static lookup table, and makes no guesses about which series belong together
+    — that judgement stays with the caller.
 
-Design
-------
+``select`` / ``select_one`` / ``select_and_splice``
+    A thin ABS-aware convenience layer over ``splice``.  Each resolves
+    ``(data, meta, selector)`` sources to Series via ``readabs.find_abs_id``
+    (carrying each series' ABS unit on ``.attrs["unit"]``), so the common case —
+    splice a few ABS series selected by description/frequency — is one call,
+    while ``select`` stays exposed for when you need a transform between
+    selecting and splicing.
+
+Splice design
+-------------
 Given an ordered list of segments (highest priority / most authoritative
-first), the splicer:
+first), :func:`splice`:
 
 1. **align**   — put every segment on one common ``PeriodIndex``.  By default
                  the grid is the *finest* frequency present, which dissolves
@@ -19,11 +28,25 @@ first), the splicer:
                  coarse period maps cleanly onto a finer one.  Coarser segments
                  are placed at their period-*end*; finer segments are
                  aggregated down with ``agg``.
-2. **rebase**  — for each junction, scale the lower-priority segment so its
-                 level matches the running result over the *overlapping date
-                 window* (phase-agnostic; works even when two series never
-                 share an exact period).  Falls back to a single junction point
-                 if there is no overlap, and flags it.
+2. **rebase**  — *(opt-in; off by default)* for each junction,
+                 *multiplicatively* scale the lower-priority segment so its level
+                 matches the running result over the *overlapping date window*
+                 (phase-agnostic; works even when two series never share an exact
+                 period).  Falls back to a single junction point if there is no
+                 overlap, and flags it.  Off by default because it transforms
+                 your data — nothing is silently rescaled unless you ask.
+
+                 Rebasing assumes **ratio-scale** inputs — series whose zero is
+                 meaningful and whose discrepancy between segments is
+                 *proportional*.  Indexes (CPI, price/volume indices on different
+                 base periods) are the canonical case; a proportional benchmark
+                 revision of a count works too.  It is **wrong** for series that
+                 cross zero (rates of change, balances, net flows) or whose
+                 segments differ by an *additive* offset rather than a scale
+                 factor — a negative or non-finite factor is caught and raises.
+                 With ``rebase=False`` (the default) the raw levels are coalesced
+                 as-is: if two same-unit segments already agree, rebasing only
+                 invents a discrepancy to "correct".
 3. **coalesce**— ``combine_first`` down the priority chain: take segment 1,
                  fill gaps from segment 2, then 3, ...  The result keeps only
                  the periods that actually carry data — a coarse back-history
@@ -38,13 +61,14 @@ splice can be audited rather than trusted blindly.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Iterable, Sequence
 from typing import Literal, cast
 
 import pandas as pd
 from pandas import DataFrame, PeriodIndex, Series
 
-from readabs.search_abs_meta import find_abs_id  # used by splice_select()
+from readabs.search_abs_meta import find_abs_id  # used by the select() layer
 
 # Frequency rank — higher number = finer frequency.
 _FREQ_RANK: dict[str, int] = {"Y": 0, "A": 0, "Q": 1, "M": 2, "W": 3, "D": 4}
@@ -155,7 +179,7 @@ def splice(
     segments: Iterable[Series],
     *,
     target: str | None = None,
-    rebase: bool = True,
+    rebase: bool = False,
     agg: str = "mean",
     output: str | None = None,
     fill: Literal["ffill", "interpolate"] | None = None,
@@ -167,14 +191,22 @@ def splice(
     ----------
     segments
         Ordered list of pandas Series (PeriodIndex or DatetimeIndex).  The
-        first is highest priority: it wins where periods overlap and sets the
-        level everything else is rebased to.
+        first is highest priority: it wins where periods overlap and (when
+        ``rebase`` is on) sets the level everything else is rebased to.
     target
         Common-grid frequency (e.g. ``"M"``, ``"Q-DEC"``).  Defaults to the
         finest frequency present (anchor clashes step one rank finer).
     rebase
-        If ``True`` (default) rescale each lower-priority segment to the
-        running result's level before coalescing.
+        Off by default — segments are coalesced at their **raw** levels, with no
+        silent transformation of your data.  Set ``True`` to *multiplicatively*
+        rescale each lower-priority segment to the running result's level before
+        coalescing.  Rebasing assumes **ratio-scale** inputs (meaningful zero,
+        proportional discrepancy between segments) — splicing index series on
+        different base periods (CPI, price/volume indices) is the case that
+        needs it.  It is wrong for zero-crossing series (rates, balances) or
+        additive level breaks, and it *invents* a correction when same-unit
+        segments already agree — which is why it is opt-in.  A non-finite or
+        non-positive factor raises.  See the module docstring's *rebase* step.
     agg
         Aggregator used when a segment is finer than the grid (or when
         downsampling to *output*).  ``"mean"`` for index levels; use ``"sum"``
@@ -208,6 +240,20 @@ def splice(
     for i, seg in enumerate(on_grid[1:], start=1):
         if rebase:
             factor, method, n, lo, hi = _rebase_factor(result, seg)
+            # Multiplicative rebasing assumes ratio-scale inputs.  A non-finite
+            # factor (near-zero denominator) or a non-positive one (the overlap
+            # means have opposite signs, which would flip the back-history) means
+            # the data is not ratio-scale — fail loud rather than ship it.  A
+            # large *magnitude* is fine: a legitimate base-period difference can
+            # need a 50x factor, so only sign and finiteness are guarded.
+            if not (math.isfinite(factor) and factor > 0):
+                raise ValueError(
+                    f"splice: rebase factor for segment {i} ('{seg.name}') is {factor} over "
+                    f"{lo}..{hi}. Multiplicative rebasing needs ratio-scale inputs (meaningful "
+                    f"zero, proportional discrepancy); a non-finite or non-positive factor means "
+                    f"the segments cross zero or differ additively. Pass rebase=False to coalesce "
+                    f"raw levels instead."
+                )
         else:
             factor, method, n, lo, hi = 1.0, "off", 0, None, None
         seg_rebased = seg * factor
@@ -325,7 +371,7 @@ def select_and_splice(
     sources: Iterable[Source],
     *,
     target: str | None = None,
-    rebase: bool = True,
+    rebase: bool = False,
     agg: str = "mean",
     output: str | None = None,
     fill: Literal["ffill", "interpolate"] | None = None,
@@ -407,7 +453,7 @@ if __name__ == "__main__":
         index=pd.period_range("2018-01", periods=60, freq="M"),
         name="cpi",
     )
-    out, rep = splice([m, q])  # monthly priority, quarterly fills the back-history
+    out, rep = splice([m, q], rebase=True)  # monthly priority, quarterly fills the back-history
     _show("Case 1 — M (priority) spliced with Q-DEC, auto-grid", out, rep)
     print(
         f"check: rebased Q value at 2018-03 = {out.loc['2018-03']:.3f} "
@@ -430,7 +476,7 @@ if __name__ == "__main__":
         splice([q_dec, q_nov])  # no target -> must refuse rather than reanchor
     except ValueError as exc:
         print(f"default (no target) correctly raised:\n  {exc}")
-    out2, rep2 = splice([q_dec, q_nov], target="M")  # resolve on a common finer grid
+    out2, rep2 = splice([q_dec, q_nov], target="M", rebase=True)  # resolve on a common finer grid
     _show("Case 2b — same, resolved with target='M' (window rebase across anchors)", out2, rep2)
 
     # --- Case 3: daily + monthly.  Default grid is the finest present = D.
@@ -454,7 +500,7 @@ if __name__ == "__main__":
     indic = Series(np.arange(120.0, 120 + 30), index=pd.period_range("2022-07", periods=30, freq="M"), name="cpi")
     old_q_index = pd.period_range("1995Q1", periods=120, freq="Q-DEC")
     old_q = Series(np.arange(40.0, 40 + 120), index=old_q_index, name="cpi")
-    out4, rep4 = splice([new_m, indic, old_q], name="cpi_long")
+    out4, rep4 = splice([new_m, indic, old_q], name="cpi_long", rebase=True)
     _show("Case 4 — 3-way: new monthly + indicator + quarterly", out4, rep4)
     print(
         f"\nfull series spans {out4.index.min()} .. {out4.index.max()}, "
@@ -462,7 +508,7 @@ if __name__ == "__main__":
     )
 
     # --- Case 5: same, but ask for a clean quarterly output (downsample)
-    out5, rep5 = splice([new_m, indic, old_q], output="Q-DEC", name="cpi_long_q")
+    out5, rep5 = splice([new_m, indic, old_q], output="Q-DEC", name="cpi_long_q", rebase=True)
     _show("Case 5 — same 3-way, resampled to a clean Q-DEC output", out5, rep5)
 
     print("\nAll cases ran.")

@@ -1,3 +1,15 @@
+Version 0.2.1 released 03-Jun-2026 (Canberra Australia)
+
+ - `splice()` and `select_and_splice()` now default to `rebase=False` — segments
+   coalesce at their raw levels and nothing is rescaled unless you opt in with
+   `rebase=True`. Rebasing is only valid for ratio-scale (index-like) series, so
+   splicing index series across a reference-period change (e.g. CPI) now needs an
+   explicit `rebase=True`.
+ - `splice()` now raises on a non-finite or non-positive rebase factor instead of
+   producing a sign-flipped or exploded back-history.
+
+---
+
 Version 0.2.0 released 03-Jun-2026 (Canberra Australia)
 
  - Added a series-splicing toolkit for joining mixed-frequency and multi-vintage
