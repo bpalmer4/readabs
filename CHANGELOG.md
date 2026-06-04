@@ -1,3 +1,14 @@
+Version 0.2.2 released 04-Jun-2026 (Canberra Australia)
+
+ - A *selector* (in `select_one()`, `select()` and `select_and_splice()` sources)
+   can now be a bare ABS Series ID string (e.g. `"A2325846C"`) as well as the
+   `{search_value: meta_column}` dict form. A string is matched exactly against
+   the metadata's Series ID column via the same `find_abs_id` machinery (so the
+   cross-table de-duplication and uniqueness guarantees are unchanged), and an
+   unknown ID raises. The two forms mix freely across sources.
+
+---
+
 Version 0.2.1 released 03-Jun-2026 (Canberra Australia)
 
  - `splice()` and `select_and_splice()` now default to `rebase=False` — segments

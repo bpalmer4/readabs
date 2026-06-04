@@ -15,7 +15,9 @@ This module has two layers:
     (carrying each series' ABS unit on ``.attrs["unit"]``), so the common case —
     splice a few ABS series selected by description/frequency — is one call,
     while ``select`` stays exposed for when you need a transform between
-    selecting and splicing.
+    selecting and splicing.  A *selector* is either a ``{search_value:
+    meta_column}`` dict, or a bare ABS Series ID string when you already know
+    exactly which series you want.
 
 Splice design
 -------------
@@ -68,6 +70,7 @@ from typing import Literal, cast
 import pandas as pd
 from pandas import DataFrame, PeriodIndex, Series
 
+from readabs.abs_meta_data import metacol as mc  # used by the select() layer
 from readabs.search_abs_meta import find_abs_id  # used by the select() layer
 
 # Frequency rank — higher number = finer frequency.
@@ -146,9 +149,7 @@ def _to_grid(s: Series, target: str, agg: str) -> Series:
     return out.sort_index()
 
 
-def _rebase_factor(
-    result: Series, seg: Series
-) -> tuple[float, str, int, pd.Period | None, pd.Period | None]:
+def _rebase_factor(result: Series, seg: Series) -> tuple[float, str, int, pd.Period | None, pd.Period | None]:
     """Compute the factor to bring *seg* onto *result*'s level.
 
     Measured as the ratio of mean levels over the overlapping *date span*, so
@@ -294,19 +295,31 @@ def splice(
     return result, report
 
 
-# A select_and_splice() source: the fetched data dict, its meta, and a
-# {search_value: meta_column} selector (readabs' find_abs_id convention).
-Source = tuple[dict[str, DataFrame], DataFrame, dict[str, str]]
+# A select_and_splice() source: the fetched data dict, its meta, and either a
+# {search_value: meta_column} selector (readabs' find_abs_id convention) or a
+# bare ABS Series ID string (matched exactly against the Series ID column).
+Source = tuple[dict[str, DataFrame], DataFrame, dict[str, str] | str]
 
 
-def select_one(data: dict[str, DataFrame], meta: DataFrame, selector: dict[str, str]) -> Series:
+def select_one(data: dict[str, DataFrame], meta: DataFrame, selector: dict[str, str] | str) -> Series:
     """Select the single Series for one ``(data, meta, selector)`` — the single-source wrapper.
 
     Convenience for the common one-selector case; equivalent to
-    ``select([(data, meta, selector)])[0]``.  Returns the Series named by its
-    Series ID, with its ABS unit on ``.attrs["unit"]``.
+    ``select([(data, meta, selector)])[0]``.  The *selector* is either a
+    ``{search_value: meta_column}`` dict for ``find_abs_id``, or a bare ABS
+    Series ID string, matched exactly against the metadata's Series ID column.
+    Returns the Series named by its Series ID, with its ABS unit on
+    ``.attrs["unit"]``.
     """
-    table, series_id, unit = find_abs_id(meta, selector, validate_unique=True)
+    if isinstance(selector, str):
+        # A bare Series ID — same find_abs_id machinery, but exact-match on the
+        # Series ID column so one ID cannot substring-match another.
+        try:
+            table, series_id, unit = find_abs_id(meta, {selector: mc.id}, exact_match=True, validate_unique=True)
+        except ValueError as exc:
+            raise ValueError(f"select: series ID {selector!r} not found in the supplied metadata.") from exc
+    else:
+        table, series_id, unit = find_abs_id(meta, selector, validate_unique=True)
     s = data[table][series_id].copy()
     s.name = series_id
     s.attrs["unit"] = str(unit)
@@ -333,7 +346,8 @@ def select(sources: Iterable[Source], *, require_same_units: bool = True) -> lis
         - ``meta``   — the matching metadata DataFrame.
         - ``selector`` — ``{search_value: meta_column}`` for ``find_abs_id``, e.g.
           ``{"Index Numbers ;  All groups CPI ;  Australia ;": mc.did,
-          "Index Numbers": mc.unit, "Quarter": mc.freq}``.
+          "Index Numbers": mc.unit, "Quarter": mc.freq}``; or a bare ABS Series
+          ID string (e.g. ``"A2325846C"``), matched exactly.
     require_same_units
         If ``True`` (default) **raise** when the selected series do not all share
         the same ABS unit — units must cohere to be spliced.  Set ``False`` when
@@ -380,7 +394,7 @@ def select_and_splice(
 ) -> tuple[Series, str, DataFrame]:
     """Select one series per source and :func:`splice` them — the no-transform case.
 
-    Sugar for ``splice(select(*src) for src in sources)`` with a unit guard.  When
+    Sugar for ``splice(select(sources))`` with a unit guard.  When
     you need a transform *between* selecting and splicing (e.g. a growth rate),
     compose :func:`select` and :func:`splice` directly instead — that is the whole
     reason :func:`select` is exposed separately.
@@ -395,7 +409,8 @@ def select_and_splice(
         - ``meta``   — the matching metadata DataFrame.
         - ``selector`` — ``{search_value: meta_column}`` for ``find_abs_id``,
           e.g. ``{"Index Numbers ;  All groups CPI ;  Australia ;": mc.did,
-          "Index Numbers": mc.unit, "Quarter": mc.freq}``.  In the common case
+          "Index Numbers": mc.unit, "Quarter": mc.freq}``; or a bare ABS Series
+          ID string (e.g. ``"A2325846C"``), matched exactly.  In the common case
           the only thing differing between two sources is the frequency, so a
           shared *base* selector composes with ``base | {"Quarter": mc.freq}``.
     target, rebase, agg, output, fill, name
@@ -416,9 +431,7 @@ def select_and_splice(
     segments = select(sources, require_same_units=require_same_units)
     units = [str(s.attrs.get("unit", "")) for s in segments]
 
-    result, report = splice(
-        segments, target=target, rebase=rebase, agg=agg, output=output, fill=fill, name=name
-    )
+    result, report = splice(segments, target=target, rebase=rebase, agg=agg, output=output, fill=fill, name=name)
     # Audit trail: which Series ID / unit did each reported (lower-priority) segment use?
     if len(report):
         seg = [int(i) for i in report["segment"]]
@@ -455,10 +468,7 @@ if __name__ == "__main__":
     )
     out, rep = splice([m, q], rebase=True)  # monthly priority, quarterly fills the back-history
     _show("Case 1 — M (priority) spliced with Q-DEC, auto-grid", out, rep)
-    print(
-        f"check: rebased Q value at 2018-03 = {out.loc['2018-03']:.3f} "
-        f"(monthly 2018-01 = {m.iloc[0]:.3f})"
-    )
+    print(f"check: rebased Q value at 2018-03 = {out.loc['2018-03']:.3f} (monthly 2018-01 = {m.iloc[0]:.3f})")
 
     # --- Case 2: the anchor clash — Q-NOV vs Q-DEC, overlapping in time
     q_dec = Series(
@@ -503,12 +513,39 @@ if __name__ == "__main__":
     out4, rep4 = splice([new_m, indic, old_q], name="cpi_long", rebase=True)
     _show("Case 4 — 3-way: new monthly + indicator + quarterly", out4, rep4)
     print(
-        f"\nfull series spans {out4.index.min()} .. {out4.index.max()}, "
-        f"{out4.notna().sum()} observations present"
+        f"\nfull series spans {out4.index.min()} .. {out4.index.max()}, {out4.notna().sum()} observations present"
     )
 
     # --- Case 5: same, but ask for a clean quarterly output (downsample)
     out5, rep5 = splice([new_m, indic, old_q], output="Q-DEC", name="cpi_long_q", rebase=True)
     _show("Case 5 — same 3-way, resampled to a clean Q-DEC output", out5, rep5)
+
+    # --- Case 6: the select() layer — dict selector vs bare Series ID string
+    fake_meta = DataFrame(
+        {
+            mc.did: ["Index Numbers ;  All groups CPI ;  Australia ;"] * 2,
+            mc.id: ["A2325846C", "A128478317T"],
+            mc.unit: ["Index Numbers", "Index Numbers"],
+            mc.freq: ["Quarter", "Month"],
+            mc.table: ["640101", "648601"],
+        }
+    )
+    fake_data = {
+        "640101": DataFrame({"A2325846C": q.to_numpy()[:40]}, index=q.index[:40]),
+        "648601": DataFrame({"A128478317T": m.to_numpy()}, index=m.index),
+    }
+    by_id = select_one(fake_data, fake_meta, "A2325846C")  # bare Series ID string
+    by_dict = select_one(fake_data, fake_meta, {"Month": mc.freq})  # selector dict
+    print(f"\n{'=' * 70}\nCase 6 — select_one: bare Series ID vs selector dict\n{'=' * 70}")
+    print(f"by ID:   name={by_id.name} unit={by_id.attrs['unit']!r} n={len(by_id)}")
+    print(f"by dict: name={by_dict.name} unit={by_dict.attrs['unit']!r} n={len(by_dict)}")
+    out6, unit6, rep6 = select_and_splice(
+        [(fake_data, fake_meta, "A128478317T"), (fake_data, fake_meta, "A2325846C")], rebase=True
+    )
+    _show(f"Case 6b — select_and_splice by bare Series IDs (unit={unit6!r})", out6, rep6)
+    try:
+        select_one(fake_data, fake_meta, "NOSUCHID")  # unknown ID -> fail loud
+    except ValueError as exc:
+        print(f"unknown ID correctly raised:\n  {exc}")
 
     print("\nAll cases ran.")

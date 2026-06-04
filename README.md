@@ -198,9 +198,18 @@ Four composable functions:
 | `splice(segments)` | Splice an iterable of series, highest priority first → `(series, report)` |
 | `select_and_splice(sources)` | `select` then `splice` for the no-transform case; checks units → `(series, unit, report)` |
 
-A *selector* is the `{search_value: column}` form used by `find_abs_id` (with
-`validate_unique=True`, so it de-duplicates on Series ID and raises on genuine
-ambiguity rather than guessing).
+A *selector* is either the `{search_value: column}` form used by `find_abs_id`
+(with `validate_unique=True`, so it de-duplicates on Series ID and raises on
+genuine ambiguity rather than guessing), **or a bare ABS Series ID string**
+(e.g. `"A2325846C"`, matched exactly) for when you already know precisely which
+series you want. The two forms mix freely across sources:
+
+```python
+series, unit, report = ra.select_and_splice([
+    (cur, cmeta, base | {"Month": mc.freq}),   # by description
+    (cur, cmeta, "A2325846C"),                 # by Series ID (quarterly All groups CPI)
+], rebase=True)
+```
 
 By default `select` **raises if the selected series carry different ABS units** —
 coherence is required to splice. Pass `require_same_units=False` to select
