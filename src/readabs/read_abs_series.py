@@ -103,8 +103,8 @@ if __name__ == "__main__":
     def simple_test() -> None:
         """Test the read_abs_series function."""
         # simple test
-        # Trimmed Mean - through the year CPI growth - seasonally adjusted
-        data, meta = read_abs_series("6401.0", "A3604511X", single_excel_only="640106")
+        # Trimmed Mean - through the year CPI growth (monthly) - seasonally adjusted
+        data, meta = read_abs_series("6401.0", "A130400382R", single_excel_only="640106")
         print(data.tail())
         print(meta.T)
         print("Done")

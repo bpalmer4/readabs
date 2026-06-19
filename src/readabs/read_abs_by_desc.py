@@ -299,7 +299,7 @@ if __name__ == "__main__":
     def test2() -> None:
         """Test case: get a dictionary of dids."""
         gdp_table = "5206001_Key_Aggregates"
-        uer_table = "6202001"
+        uer_table = "62020001"
         sa = "Seasonally Adjusted"
         get_these = {
             # two series, each from two different ABS Catalogue Numbers

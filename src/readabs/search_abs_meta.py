@@ -76,7 +76,7 @@ def search_abs_meta(
         "Persons": mc.did,
         "Seasonally Adjusted": mc.stype,
         "Percent": mc.unit,
-        "6202001": mc.table,
+        "62020001": mc.table,
     }
     rows = search_abs_meta(meta, search_terms, verbose=True)
     print(rows)  # should have three rows : FT/PT/All Unemployment rates
@@ -168,7 +168,7 @@ def find_abs_id(
     search_terms = {
         "Employed total ;  Persons ;": mc.did,
         "Seasonally Adjusted": mc.stype,
-        "6202001": mc.table,
+        "62020001": mc.table,
     }
     table, series_id, units = find_abs_id(meta, search_terms)
     print(f"Table: {table} Series ID: {series_id} Units: {units}")
@@ -198,7 +198,7 @@ if __name__ == "__main__":
             "Persons": mc.did,
             "Seasonally Adjusted": mc.stype,
             "Percent": mc.unit,
-            "6202001": mc.table,
+            "62020001": mc.table,
         }
         rows = search_abs_meta(meta, search_terms, verbose=True)
         print(rows)  # should have three rows : FT/PT/All Unemplooyment rates
@@ -212,7 +212,7 @@ if __name__ == "__main__":
         search_terms = {
             "Employed total ;  Persons ;": mc.did,
             "Seasonally Adjusted": mc.stype,
-            "6202001": mc.table,
+            "62020001": mc.table,
         }
         table, series_id, units = find_abs_id(meta, search_terms)
         print(f"Table: {table} Series ID: {series_id} Units: {units}")

@@ -173,7 +173,7 @@ def qtly_to_monthly(
     # do the heavy lifting
     try:
         data = (
-            data.set_axis(labels=data.index.to_timestamp(how="end"), axis="index", copy=True)
+            data.set_axis(labels=data.index.to_timestamp(how="end"), axis="index")
             .resample(rule="ME")  # adds in every missing month
             .first(min_count=1)  # generates nans for new months
             # assumes only one value per quarter (ie. unique index)

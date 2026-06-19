@@ -1,3 +1,16 @@
+Version 0.2.3 released 19-Jun-2026 (Canberra Australia)
+
+ - Pandas 3.0 compatibility: removed the deprecated `copy=` keyword from the
+   `set_axis()` call in `qtly_to_monthly()` (Copy-on-Write makes it redundant).
+   This was the only deprecated pandas usage in the package; the conversion is
+   unchanged and the caller's input series is still left untouched.
+ - Refreshed the modules' built-in self-tests for current ABS structures: the
+   labour-force (6202.0) and CPI (6401.0) table identifiers are now 8 digits, and
+   the trimmed-mean CPI example series is updated to the monthly series. The
+   local-zip test in `read_abs_cat` now skips cleanly when the fixture is absent.
+
+---
+
 Version 0.2.2 released 04-Jun-2026 (Canberra Australia)
 
  - A *selector* (in `select_one()`, `select()` and `select_and_splice()` sources)

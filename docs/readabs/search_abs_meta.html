@@ -140,7 +140,7 @@ all of the search terms.</p>
 </span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a><span class="sd">        &quot;Persons&quot;: mc.did,</span>
 </span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">        &quot;Seasonally Adjusted&quot;: mc.stype,</span>
 </span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a><span class="sd">        &quot;Percent&quot;: mc.unit,</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a><span class="sd">        &quot;6202001&quot;: mc.table,</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a><span class="sd">        &quot;62020001&quot;: mc.table,</span>
 </span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a><span class="sd">    }</span>
 </span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">    rows = search_abs_meta(meta, search_terms, verbose=True)</span>
 </span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a><span class="sd">    print(rows)  # should have three rows : FT/PT/All Unemployment rates</span>
@@ -232,7 +232,7 @@ all of the search terms.</p>
 </span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a><span class="sd">    search_terms = {</span>
 </span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a><span class="sd">        &quot;Employed total ;  Persons ;&quot;: mc.did,</span>
 </span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a><span class="sd">        &quot;Seasonally Adjusted&quot;: mc.stype,</span>
-</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a><span class="sd">        &quot;6202001&quot;: mc.table,</span>
+</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a><span class="sd">        &quot;62020001&quot;: mc.table,</span>
 </span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a><span class="sd">    }</span>
 </span><span id="L-173"><a href="#L-173"><span class="linenos">173</span></a><span class="sd">    table, series_id, units = find_abs_id(meta, search_terms)</span>
 </span><span id="L-174"><a href="#L-174"><span class="linenos">174</span></a><span class="sd">    print(f&quot;Table: {table} Series ID: {series_id} Units: {units}&quot;)</span>
@@ -262,7 +262,7 @@ all of the search terms.</p>
 </span><span id="L-198"><a href="#L-198"><span class="linenos">198</span></a>            <span class="s2">&quot;Persons&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">did</span><span class="p">,</span>
 </span><span id="L-199"><a href="#L-199"><span class="linenos">199</span></a>            <span class="s2">&quot;Seasonally Adjusted&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">stype</span><span class="p">,</span>
 </span><span id="L-200"><a href="#L-200"><span class="linenos">200</span></a>            <span class="s2">&quot;Percent&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
-</span><span id="L-201"><a href="#L-201"><span class="linenos">201</span></a>            <span class="s2">&quot;6202001&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">table</span><span class="p">,</span>
+</span><span id="L-201"><a href="#L-201"><span class="linenos">201</span></a>            <span class="s2">&quot;62020001&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">table</span><span class="p">,</span>
 </span><span id="L-202"><a href="#L-202"><span class="linenos">202</span></a>        <span class="p">}</span>
 </span><span id="L-203"><a href="#L-203"><span class="linenos">203</span></a>        <span class="n">rows</span> <span class="o">=</span> <span class="n">search_abs_meta</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">search_terms</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span><span id="L-204"><a href="#L-204"><span class="linenos">204</span></a>        <span class="nb">print</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>  <span class="c1"># should have three rows : FT/PT/All Unemplooyment rates</span>
@@ -276,7 +276,7 @@ all of the search terms.</p>
 </span><span id="L-212"><a href="#L-212"><span class="linenos">212</span></a>        <span class="n">search_terms</span> <span class="o">=</span> <span class="p">{</span>
 </span><span id="L-213"><a href="#L-213"><span class="linenos">213</span></a>            <span class="s2">&quot;Employed total ;  Persons ;&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">did</span><span class="p">,</span>
 </span><span id="L-214"><a href="#L-214"><span class="linenos">214</span></a>            <span class="s2">&quot;Seasonally Adjusted&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">stype</span><span class="p">,</span>
-</span><span id="L-215"><a href="#L-215"><span class="linenos">215</span></a>            <span class="s2">&quot;6202001&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">table</span><span class="p">,</span>
+</span><span id="L-215"><a href="#L-215"><span class="linenos">215</span></a>            <span class="s2">&quot;62020001&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">table</span><span class="p">,</span>
 </span><span id="L-216"><a href="#L-216"><span class="linenos">216</span></a>        <span class="p">}</span>
 </span><span id="L-217"><a href="#L-217"><span class="linenos">217</span></a>        <span class="n">table</span><span class="p">,</span> <span class="n">series_id</span><span class="p">,</span> <span class="n">units</span> <span class="o">=</span> <span class="n">find_abs_id</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">search_terms</span><span class="p">)</span>
 </span><span id="L-218"><a href="#L-218"><span class="linenos">218</span></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Table: </span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s2"> Series ID: </span><span class="si">{</span><span class="n">series_id</span><span class="si">}</span><span class="s2"> Units: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -360,7 +360,7 @@ all of the search terms.</p>
 </span><span id="search_abs_meta-77"><a href="#search_abs_meta-77"><span class="linenos"> 77</span></a><span class="sd">        &quot;Persons&quot;: mc.did,</span>
 </span><span id="search_abs_meta-78"><a href="#search_abs_meta-78"><span class="linenos"> 78</span></a><span class="sd">        &quot;Seasonally Adjusted&quot;: mc.stype,</span>
 </span><span id="search_abs_meta-79"><a href="#search_abs_meta-79"><span class="linenos"> 79</span></a><span class="sd">        &quot;Percent&quot;: mc.unit,</span>
-</span><span id="search_abs_meta-80"><a href="#search_abs_meta-80"><span class="linenos"> 80</span></a><span class="sd">        &quot;6202001&quot;: mc.table,</span>
+</span><span id="search_abs_meta-80"><a href="#search_abs_meta-80"><span class="linenos"> 80</span></a><span class="sd">        &quot;62020001&quot;: mc.table,</span>
 </span><span id="search_abs_meta-81"><a href="#search_abs_meta-81"><span class="linenos"> 81</span></a><span class="sd">    }</span>
 </span><span id="search_abs_meta-82"><a href="#search_abs_meta-82"><span class="linenos"> 82</span></a><span class="sd">    rows = search_abs_meta(meta, search_terms, verbose=True)</span>
 </span><span id="search_abs_meta-83"><a href="#search_abs_meta-83"><span class="linenos"> 83</span></a><span class="sd">    print(rows)  # should have three rows : FT/PT/All Unemployment rates</span>
@@ -461,7 +461,7 @@ For example, if metacol is imported as mc, to refer to the
     <span class="s2">&quot;Persons&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">did</span><span class="p">,</span>
     <span class="s2">&quot;Seasonally Adjusted&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">stype</span><span class="p">,</span>
     <span class="s2">&quot;Percent&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span>
-    <span class="s2">&quot;6202001&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">table</span><span class="p">,</span>
+    <span class="s2">&quot;62020001&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">table</span><span class="p">,</span>
 <span class="p">}</span>
 <span class="n">rows</span> <span class="o">=</span> <span class="n">search_abs_meta</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">search_terms</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>  <span class="c1"># should have three rows : FT/PT/All Unemployment rates</span>
@@ -528,7 +528,7 @@ For example, if metacol is imported as mc, to refer to the
 </span><span id="find_abs_id-169"><a href="#find_abs_id-169"><span class="linenos">169</span></a><span class="sd">    search_terms = {</span>
 </span><span id="find_abs_id-170"><a href="#find_abs_id-170"><span class="linenos">170</span></a><span class="sd">        &quot;Employed total ;  Persons ;&quot;: mc.did,</span>
 </span><span id="find_abs_id-171"><a href="#find_abs_id-171"><span class="linenos">171</span></a><span class="sd">        &quot;Seasonally Adjusted&quot;: mc.stype,</span>
-</span><span id="find_abs_id-172"><a href="#find_abs_id-172"><span class="linenos">172</span></a><span class="sd">        &quot;6202001&quot;: mc.table,</span>
+</span><span id="find_abs_id-172"><a href="#find_abs_id-172"><span class="linenos">172</span></a><span class="sd">        &quot;62020001&quot;: mc.table,</span>
 </span><span id="find_abs_id-173"><a href="#find_abs_id-173"><span class="linenos">173</span></a><span class="sd">    }</span>
 </span><span id="find_abs_id-174"><a href="#find_abs_id-174"><span class="linenos">174</span></a><span class="sd">    table, series_id, units = find_abs_id(meta, search_terms)</span>
 </span><span id="find_abs_id-175"><a href="#find_abs_id-175"><span class="linenos">175</span></a><span class="sd">    print(f&quot;Table: {table} Series ID: {series_id} Units: {units}&quot;)</span>
@@ -589,7 +589,7 @@ For example, if metacol is imported as mc, to refer to the
 <span class="n">search_terms</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;Employed total ;  Persons ;&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">did</span><span class="p">,</span>
     <span class="s2">&quot;Seasonally Adjusted&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">stype</span><span class="p">,</span>
-    <span class="s2">&quot;6202001&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">table</span><span class="p">,</span>
+    <span class="s2">&quot;62020001&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">table</span><span class="p">,</span>
 <span class="p">}</span>
 <span class="n">table</span><span class="p">,</span> <span class="n">series_id</span><span class="p">,</span> <span class="n">units</span> <span class="o">=</span> <span class="n">find_abs_id</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">search_terms</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Table: </span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s2"> Series ID: </span><span class="si">{</span><span class="n">series_id</span><span class="si">}</span><span class="s2"> Units: </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>

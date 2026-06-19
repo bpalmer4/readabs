@@ -6,6 +6,7 @@ for a specified ABS catalogue identifier.
 
 import calendar
 from functools import cache
+from pathlib import Path
 from typing import Any, Unpack
 
 import pandas as pd
@@ -164,10 +165,10 @@ def read_abs_cat(
 
     """
     # --- get the time series data ---
-    if kwargs.get("zip_file"):
-        raw_abs_dict = grab_abs_zip(kwargs["zip_file"], **kwargs)
-    else:
-        raw_abs_dict = grab_abs_url(cat=cat, **kwargs)
+    zip_file = kwargs.get("zip_file")
+    raw_abs_dict = (
+        grab_abs_zip(zip_file, **kwargs) if zip_file else grab_abs_url(cat=cat, **kwargs)
+    )
     response = _get_time_series_data(cat, raw_abs_dict, **kwargs)
 
     if not response:
@@ -476,12 +477,18 @@ if __name__ == "__main__":
 
         print ("=" * 20)
 
-        d, _m = read_abs_cat("", zip_file=".test-data/Qrtly-CPI-Time-series-spreadsheets-all.zip", verbose=False)
-        print(f"--- {len(d)=} ---")
-        print(f"--- {d.keys()=} ---")
-        for table in d:
-            freq_str = getattr(d[table].index, "freqstr", "Unknown")
-            print(f"{table=} {d[table].shape=} {freq_str=}")
+        # Optional: exercise the local zip_file path. Requires a developer to
+        # have a pre-downloaded ABS zip at this location; skipped if absent.
+        local_zip = Path(".test-data/Qrtly-CPI-Time-series-spreadsheets-all.zip")
+        if local_zip.exists():
+            d, _m = read_abs_cat("", zip_file=str(local_zip), verbose=False)
+            print(f"--- {len(d)=} ---")
+            print(f"--- {d.keys()=} ---")
+            for table in d:
+                freq_str = getattr(d[table].index, "freqstr", "Unknown")
+                print(f"{table=} {d[table].shape=} {freq_str=}")
+        else:
+            print(f"Skipping local zip_file test: {local_zip} not present.")
 
         print("Test complete.")
 
