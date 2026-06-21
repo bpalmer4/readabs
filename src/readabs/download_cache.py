@@ -197,6 +197,113 @@ def retrieve_from_cache(file: Path, **kwargs: Unpack[FileKwargs]) -> bytes:
     return file.read_bytes()
 
 
+def _download_if_fresh(
+    url: str,
+    file_path: Path,
+    **kwargs: Unpack[FileKwargs],
+) -> bytes | None:
+    """Download from the URL if it is fresher than the cached copy.
+
+    Compares the URL's HTTP Last-Modified header against the cache file's
+    modification time. Downloads, caches and returns the fresh content when the
+    URL is newer (or nothing is cached yet). Returns None when the cached copy
+    is already up to date and should be used instead.
+
+    Args:
+        url: The URL to download from
+        file_path: Path object for the cache file location
+        **kwargs: Optional parameters including 'verbose' and 'ignore_errors'
+
+    Returns:
+        bytes | None: Fresh content if downloaded, or None if the cache is current
+
+    Raises:
+        HttpError: If the download fails (or returns no data)
+        requests.exceptions.RequestException: If the network is unreachable
+
+    """
+    verbose = kwargs.get("verbose", False)
+
+    # get URL modification time in UTC (raises if the network is unreachable)
+    response = requests.head(url, allow_redirects=True, timeout=HEAD_REQUEST_TIMEOUT)
+    if not check_for_bad_response(url, response, **kwargs):
+        source_time = response.headers.get("Last-Modified", None)
+    else:
+        source_time = None
+    source_mtime = None if source_time is None else pd.to_datetime(source_time, utc=True)
+
+    # get cache modification time in UTC
+    target_mtime: datetime | None = None
+    if file_path.exists() and file_path.is_file():
+        target_mtime = pd.to_datetime(
+            datetime.fromtimestamp(file_path.stat().st_mtime, tz=UTC),
+            utc=True,
+        )
+
+    # the cache is present and not superseded by the URL - use the cache
+    if target_mtime is not None and (source_mtime is None or source_mtime <= target_mtime):
+        return None
+
+    # the cache is empty or stale - download and save the fresh content
+    if verbose:
+        print(f"Retrieving from URL: {url}")
+    url_bytes = request_get(url, **kwargs)  # raises exception if it fails
+    if len(url_bytes) == 0:
+        # treat an empty download as a failure so the caller can fall back to cache
+        raise HttpError(f"No data downloaded from {url}.")
+    if verbose:
+        print(f"Saving to cache: {file_path}")
+    save_to_cache(file_path, url_bytes, **kwargs)
+    # change file mod time to reflect mtime at URL
+    if source_mtime is not None:
+        unixtime = source_mtime.value / NANOSECONDS_PER_SECOND
+        utime(file_path, (unixtime, unixtime))
+    return url_bytes
+
+
+def _stale_cache_fallback(
+    file_path: Path,
+    url: str,
+    error: Exception,
+    **kwargs: Unpack[FileKwargs],
+) -> bytes:
+    """Fall back to the cached copy when fresh data could not be downloaded.
+
+    Returns the cached bytes (with a prominent warning that the data may be
+    stale) when a cached copy exists. Otherwise honours 'ignore_errors' or
+    raises. This is what lets readabs keep working offline (e.g. on a plane).
+
+    Args:
+        file_path: Path object for the cache file location
+        url: The URL that could not be downloaded
+        error: The exception that prevented a fresh download
+        **kwargs: Optional parameters including 'ignore_errors'
+
+    Returns:
+        bytes: The cached content, or empty bytes if errors are ignored
+
+    Raises:
+        HttpError: If no cached copy exists and ignore_errors is False
+
+    """
+    if file_path.exists() and file_path.is_file():
+        cached_mtime = datetime.fromtimestamp(file_path.stat().st_mtime, tz=UTC)
+        # always warn (regardless of verbose) - the user needs to know it is stale
+        print(
+            f"WARNING: could not download fresh data for {url}.\n"
+            f"  Reason: {error}\n"
+            f"  Falling back to cached data last modified "
+            f"{cached_mtime:%Y-%m-%d %H:%M UTC} - this data may be out of date.",
+        )
+        return file_path.read_bytes()
+
+    message = f"Could not download {url} ({error}), and no cached copy is available."
+    if kwargs.get("ignore_errors", False):
+        print(message)
+        return b""
+    raise HttpError(message)
+
+
 def get_file(
     url: str,
     cache_dir: Path = READABS_CACHE_PATH,
@@ -207,6 +314,11 @@ def get_file(
 
     Downloads from URL if cached version doesn't exist or is stale based on
     HTTP Last-Modified headers. Creates cache_dir if it doesn't exist.
+
+    If fresh data cannot be downloaded (for example, the internet is
+    unreachable), and a cached copy exists, the cached copy is returned with a
+    warning that the data may be out of date. An error is only raised when there
+    is no cached copy to fall back to (and 'ignore_errors' is not set).
 
     Args:
         url: The URL to download from
@@ -219,14 +331,14 @@ def get_file(
 
     Raises:
         CacheError: If cache directory cannot be created or accessed
-        HttpError: If download fails and ignore_errors is False
+        HttpError: If download fails, ignore_errors is False, and no cache exists
 
     """
 
     def get_fpath() -> Path:
         """Convert URL string into a cache file name and return as Path object."""
         hash_name = sha256(url.encode("utf-8")).hexdigest()
-        tail_name = url.split("/")[-1].split("?")[0]
+        tail_name = url.rsplit("/", 1)[-1].split("?", 1)[0]
         file_name = re.sub(BAD_CACHE_PATTERN, "", f"{cache_prefix}--{hash_name}--{tail_name}")
         return Path(cache_dir / file_name)
 
@@ -235,42 +347,22 @@ def get_file(
     if not cache_dir.is_dir():
         raise CacheError(f"Cache path is not a directory: {cache_dir.name}")
 
-    # get URL modification time in UTC
     file_path = get_fpath()  # the cache file path
-    if not kwargs.get("cache_only", False):
-        # download from url if it is fresher than the cache version
-        response = requests.head(url, allow_redirects=True, timeout=HEAD_REQUEST_TIMEOUT)
-        if not check_for_bad_response(url, response, **kwargs):
-            source_time = response.headers.get("Last-Modified", None)
-        else:
-            source_time = None
-        source_mtime = None if source_time is None else pd.to_datetime(source_time, utc=True)
 
-        # get cache modification time in UTC
-        target_mtime: datetime | None = None
-        if file_path.exists() and file_path.is_file():
-            target_mtime = pd.to_datetime(
-                datetime.fromtimestamp(file_path.stat().st_mtime, tz=UTC),
-                utc=True,
-            )
+    # cache-only mode never touches the network
+    if kwargs.get("cache_only", False):
+        return retrieve_from_cache(file_path, **kwargs)
 
-        # get and save URL source data
-        if target_mtime is None or (  # cache is empty, or
-            source_mtime is not None and source_mtime > target_mtime  # URL is fresher than cache
-        ):
-            if kwargs.get("verbose", False):
-                print(f"Retrieving from URL: {url}")
-            url_bytes = request_get(url, **kwargs)  # raises exception if it fails
-            if kwargs.get("verbose", False):
-                print(f"Saving to cache: {file_path}")
-            save_to_cache(file_path, url_bytes, **kwargs)
-            # change file mod time to reflect mtime at URL
-            if source_mtime is not None and len(url_bytes) > 0:
-                unixtime = source_mtime.value / NANOSECONDS_PER_SECOND
-                utime(file_path, (unixtime, unixtime))
-            return url_bytes
+    # attempt to download fresh data, falling back to a stale cache on failure
+    try:
+        fresh = _download_if_fresh(url, file_path, **kwargs)
+    except (HttpError, requests.exceptions.RequestException) as e:
+        return _stale_cache_fallback(file_path, url, e, **kwargs)
 
-    # return the data that has been cached previously
+    if fresh is not None:
+        return fresh
+
+    # the cache is already up to date - return it
     return retrieve_from_cache(file_path, **kwargs)
 
 

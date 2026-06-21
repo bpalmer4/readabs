@@ -121,8 +121,8 @@ data_dict = ra.grab_abs_url(url="https://www.abs.gov.au/some/archived/page")
 # Access historical releases using the history parameter
 data, meta = ra.read_abs_cat("6202.0", history="dec-2023")
 
-# Or use a direct URL with read_abs_cat
-data, meta = ra.read_abs_cat(url="https://www.abs.gov.au/statistics/...")
+# Or fetch a discontinued series by URL (the catalogue number is still required)
+data, meta = ra.read_abs_cat("8501.0", url="https://www.abs.gov.au/statistics/...")
 ```
 
 These functions return a dictionary of DataFrames (one per Excel sheet), allowing you to work with data that may have been removed from the main ABS catalogue.

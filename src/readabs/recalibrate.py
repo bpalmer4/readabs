@@ -74,10 +74,12 @@ def recalibrate(
 
     result = data.__class__(flat_data.reshape(data.shape))
     result.index = data.index
-    if len(data.shape) == NDIM_DATAFRAME:
+    # restore the column labels (DataFrame) or series name (Series); the
+    # isinstance checks narrow the constrained TypeVar so the attributes type-check
+    if isinstance(data, DataFrame) and isinstance(result, DataFrame):
         result.columns = data.columns
-    if len(data.shape) == NDIM_SERIES:
-        result.name = data.name  # pyright: ignore[reportAttributeAccessIssue]
+    elif isinstance(data, Series) and isinstance(result, Series):
+        result.name = data.name
     return result, units
 
 

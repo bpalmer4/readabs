@@ -356,9 +356,7 @@ def _add_excel_bytes(
     # iterate over the sheets in the Excel file
     for sheet_name in excel.sheet_names:
         # grab and go - no treatment of the data
-        sheet_data = excel.parse(
-            sheet_name,
-        )
+        sheet_data = pd.read_excel(excel, sheet_name=sheet_name)
         if len(sheet_data) == EMPTY_BYTES_LENGTH:
             if verbose:
                 print(f"_add_excel_bytes(): sheet {sheet_name} in {name} is empty.")

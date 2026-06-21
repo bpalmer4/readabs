@@ -27,6 +27,7 @@ TABLE_DESC_COL = 1
 @cache  # minimise slowness for any repeat business
 def read_abs_cat(
     cat: str,
+    url: str = "",
     **kwargs: Unpack[ReadArgs],
 ) -> tuple[dict[str, DataFrame], DataFrame]:
     """For a specific catalogue identifier, return the complete ABS Catalogue information as DataFrames.
@@ -167,7 +168,7 @@ def read_abs_cat(
     # --- get the time series data ---
     zip_file = kwargs.get("zip_file")
     raw_abs_dict = (
-        grab_abs_zip(zip_file, **kwargs) if zip_file else grab_abs_url(cat=cat, **kwargs)
+        grab_abs_zip(zip_file, **kwargs) if zip_file else grab_abs_url(cat=cat, url=url, **kwargs)
     )
     response = _get_time_series_data(cat, raw_abs_dict, **kwargs)
 

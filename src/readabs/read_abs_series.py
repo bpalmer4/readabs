@@ -14,6 +14,7 @@ from readabs.read_support import ReadArgs, check_kwargs, get_args
 def read_abs_series(
     cat: str,
     series_id: str | Sequence[str],
+    url: str = "",
     **kwargs: Unpack[ReadArgs],
 ) -> tuple[DataFrame, DataFrame]:
     """Get specific ABS data series by their ABS catalogue and series identifiers.
@@ -25,6 +26,12 @@ def read_abs_series(
 
     series_id : str | Sequence[str]
         An ABS series ID or a sequence of ABS series IDs.
+
+    url : str = ""
+        The URL of an ABS landing page. Use this for discontinued series
+        that are no longer in the ABS Time Series Directory. If provided,
+        data is retrieved from this URL instead of looking up the catalogue
+        number. Passed through to read_abs_cat().
 
     **kwargs : Any
         Keyword arguments for the read_abs_series function,
@@ -56,7 +63,7 @@ def read_abs_series(
     args = get_args(kwargs, "read_abs_series")
 
     # read the ABS category data
-    cat_data, cat_meta = read_abs_cat(cat, **args)
+    cat_data, cat_meta = read_abs_cat(cat, url=url, **args)
 
     # drop repeated series_ids in the meta data,
     # make unique series_ids the index

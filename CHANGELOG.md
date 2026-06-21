@@ -1,3 +1,33 @@
+Version 0.2.4 released 21-Jun-2026 (Canberra Australia)
+
+ - Offline fallback: when fresh data cannot be downloaded (for example, there is
+   no internet connection), `get_file()` now returns a previously cached copy
+   with a prominent warning that the data may be out of date. The intent is to
+   let you keep working with your existing cached data while offline — e.g. on a
+   plane. Previously the freshness `HEAD` request was made before the cache was
+   ever consulted, so being offline raised a connection error on the very first
+   step. An error is now only raised when there is no cached copy to fall back to
+   (and `ignore_errors` is not set). This covers every retrieval path, as they
+   all funnel through `get_file()`.
+ - Caveat: the fallback can only return what is already in the cache. If the ABS
+   catalogue was never cached, the catalogue-based entry points can do nothing
+   offline, because a catalogue number is resolved to a URL via the catalogue.
+   Likewise, offline `grab_abs_url()` needs the landing page to have been cached,
+   since the file links are discovered by parsing it.
+ - `url` is now an explicit parameter of `read_abs_cat()` and `read_abs_series()`
+   (with a `""` default), instead of being smuggled through `**kwargs` as a
+   `ReadArgs` member. Existing calls are unaffected. This also fixes a latent bug
+   where a `url` passed to `read_abs_series()` was silently dropped (and so never
+   reached the download), and resolves the associated type-checker complaints.
+ - Type-checking cleanups (no behavioural change): `recalibrate()` now narrows
+   the Series/DataFrame branches so the column-label/series-name restoration is
+   type-safe (removing a `# pyright: ignore`), and `grab_abs_url()` reads Excel
+   sheets via `pd.read_excel()`. `mypy` now passes cleanly over `src/`.
+ - Docs: fixed a README example that called `read_abs_cat(url=...)` without the
+   required `cat` catalogue number.
+
+---
+
 Version 0.2.3 released 19-Jun-2026 (Canberra Australia)
 
  - Pandas 3.0 compatibility: removed the deprecated `copy=` keyword from the

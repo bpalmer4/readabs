@@ -26,12 +26,11 @@ class ReadArgs(TypedDict):
     cache_only: NotRequired[bool]
     keep_non_ts: NotRequired[bool]
     zip_file: NotRequired[str]
-    url: NotRequired[str]
 
 
 # Default values for all supported arguments
-# Note: 'url' is intentionally excluded - it's handled as a separate parameter
-# in grab_abs_url() and should not be included in the args dict
+# Note: 'url' is intentionally excluded - it's an explicit parameter of the
+# public reader functions and should not be included in the args dict
 DEFAULTS: ReadArgs = {
     "verbose": False,
     "ignore_errors": False,
@@ -57,8 +56,8 @@ _DATA_SOURCE_ARGS = [
     "selected_excel",
 ]
 
-# Valid kwargs includes DEFAULTS plus 'url' (which is handled separately as a parameter)
-_VALID_KWARGS = set(DEFAULTS.keys()) | {"url"}
+# Valid kwargs are exactly the ReadArgs keys; 'url' is an explicit parameter, not a kwarg
+_VALID_KWARGS = set(DEFAULTS.keys())
 
 
 def check_kwargs(kwargs: ReadArgs, name: str) -> None:
