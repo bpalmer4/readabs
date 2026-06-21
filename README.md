@@ -42,7 +42,7 @@ data, meta = ra.read_abs_cat("6202.0")
 # meta is a DataFrame containing all series metadata
 
 # Access a specific table
-labour_force = data["6202001"]
+labour_force = data["62020001"]
 print(labour_force.head())
 ```
 
@@ -92,6 +92,8 @@ wanted = {
 series_dict, meta = ra.read_abs_by_desc(wanted)
 ```
 
+By default, search terms are matched as substrings (via `.str.contains()`), so a partial description like `"Unemployment rate ;  Persons ;"` will match the full `"Unemployment rate ;  Persons ;  Australia ;"`. Pass `exact_match=True` to `search_abs_meta()` to require an exact (`==`) match instead.
+
 ### RBA Data
 
 ```python
@@ -134,7 +136,7 @@ The `read_abs_cat()` function accepts several optional parameters for fine-tunin
 ```python
 data, meta = ra.read_abs_cat(
     "6202.0",
-    single_excel_only="6202001",  # Only download one specific table (faster)
+    single_excel_only="62020001",  # Only download one specific table (faster)
     cache_only=True,              # Use cached data only (offline mode)
     verbose=True,                 # Print diagnostic messages
     ignore_errors=True,           # Continue if some files fail to download
@@ -150,7 +152,7 @@ data, meta = ra.read_abs_cat(
 
 | Parameter | Description |
 |-----------|-------------|
-| `single_excel_only` | Download only the specified Excel file (e.g., "6202001") |
+| `single_excel_only` | Download only the specified Excel file (e.g., "62020001") |
 | `selected_excel` | Tuple of Excel file names to download (e.g., `("62020001", "62020017")`). Must be a tuple, not a list. |
 | `single_zip_only` | Download only the specified ZIP file |
 | `cache_only` | Only use locally cached files, don't download |
@@ -370,6 +372,33 @@ Most ABS functions return a tuple:
 
 DataFrames use pandas `PeriodIndex` with appropriate frequency (Monthly, Quarterly, Yearly).
 
+## How readabs gets data (and why it can occasionally break)
+
+There is no official, stable ABS API that exposes the full time series
+collection. The ABS publishes its data as Excel/zip files linked from
+statistics landing pages, following conventions that are consistent but
+undocumented: predictable file names, an `Index` sheet carrying the metadata,
+and `{table}---{sheet}` sheet naming. readabs works by following those
+conventions — it fetches the landing page, finds the spreadsheet links,
+downloads them, and parses the sheets.
+
+This means readabs depends on ABS *practice*, not a contract. When the ABS
+renames a table, restructures a page, or discontinues a series, a call may
+fail or return less than expected — not because of a bug here, but because the
+upstream habit changed. readabs is built to fail loudly when this happens, and
+it caches downloads so transient outages don't block you. If something stops
+working, check whether the ABS has changed that release, and use the `url=` and
+`history=` parameters to reach archived data.
+
+The ABS does run an SDMX/REST data API at `data.api.abs.gov.au`. As of 2025 the
+ABS describes it as *beta*: it carries only a subset of what's published on the
+ABS website (some dataflows are not uploaded at all), it lags the website
+release, and it has no mechanism for retrieving earlier vintages of a revised
+series. For the data it does cover, a companion package —
+[`sdmxabs`](https://github.com/bpalmer4/sdmxabs) — wraps that API directly.
+readabs instead targets the published spreadsheets, which remain the most
+complete source and (via `history=`) allow access to earlier vintages.
+
 ## Documentation
 
 Full API documentation is available in the `./docs` directory. Generate updated documentation with:
@@ -393,3 +422,5 @@ This project is open source. See the repository for license details.
 
 - **Repository**: https://github.com/bpalmer4/readabs
 - **PyPI**: https://pypi.org/project/readabs/
+- **sdmxabs** (companion package for the ABS SDMX/REST data API): https://github.com/bpalmer4/sdmxabs
+- **readabs for R** (a separate, like-named ABS package by Matt Cowgill): https://github.com/mattcowgill/readabs

@@ -1,3 +1,17 @@
+Version 0.2.5 released 22-Jun-2026 (Canberra Australia)
+
+ - Docs only; no code or behavioural change.
+ - Updated stale 7-digit `6202001` Labour Force table names to the current
+   8-digit `62020001` in the README, the `read_abs_series()` docstring, and the
+   `grab_abs_url()` self-test.
+ - Documented that `search_abs_meta()` matches substrings by default
+   (`exact_match=True` for exact matches).
+ - Added a "How readabs gets data" section (spreadsheet conventions, not a stable
+   API; SDMX Data API is beta/partial), plus links to the `sdmxabs` companion
+   package and Matt Cowgill's R `readabs`.
+
+---
+
 Version 0.2.4 released 21-Jun-2026 (Canberra Australia)
 
  - Offline fallback: when fresh data cannot be downloaded (for example, there is

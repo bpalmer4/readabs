@@ -442,7 +442,7 @@ if __name__ == "__main__":
             name,
             cat="6202.0",
             get_excel=True,
-            single_excel_only="6202001",
+            single_excel_only="62020001",
             verbose=False,
         )
 

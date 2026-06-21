@@ -51,7 +51,7 @@ def read_abs_series(
     from pandas import DataFrame
     cat_num = "6202.0"  # The ABS labour force survey
     unemployment_rate = "A84423050A"
-    seo = "6202001"  # The ABS table name
+    seo = "62020001"  # The ABS table name
     data, meta = ra.read_abs_series(
         cat=cat_num, series_id=unemployment_rate, single_excel_only=seo
     )
