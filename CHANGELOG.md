@@ -1,3 +1,16 @@
+Version 0.2.6 released 22-Aug-2026 (Canberra Australia)
+
+ - Docs and tooling only; no code or behavioural change.
+ - README: the two `select_and_splice()` CPI examples are now self-contained —
+   the first shows the `read_abs_cat("6401.0")` call and the `base` selector it
+   uses, and the second replaces the undefined `INDICATOR_URL` placeholder with
+   a named `indicator_url` variable.
+ - Lint: added `CPY001` (missing copyright notice) to the ruff ignore list in
+   `pyproject.toml`. It was the only rule firing under the aggressive `ALL`
+   ruleset, once per module, and this project does not carry copyright headers.
+   `ruff check src/readabs` now passes cleanly.
+ - Refreshed the locked dependencies in `uv.lock`.
+
 Version 0.2.5 released 22-Jun-2026 (Canberra Australia)
 
  - Docs only; no code or behavioural change.

@@ -1,6 +1,6 @@
 [project]
 name = "readabs"
-version = "0.2.5"
+version = "0.2.6"
 description = "Get ABS timeseries data in pandas DataFrames"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -54,6 +54,7 @@ lint.select = [ "ALL" ]  # Aggresively select all rules
 lint.ignore = [
     # --- specific rules to ignore
     "COM812",  # missing or trailing comma - recommended by ruff format
+    "CPY001",  # Missing copyright notice at top of file - this project does not use them
     "D203",    # Incorrect blank line before class - recommended by ruff check
     "D213",    # Multi-line docstring summary should start at the first line - recommended by ruff
     "EM101",   # Exception must not use a string literal

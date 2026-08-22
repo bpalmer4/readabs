@@ -207,6 +207,9 @@ genuine ambiguity rather than guessing), **or a bare ABS Series ID string**
 series you want. The two forms mix freely across sources:
 
 ```python
+cur, cmeta = ra.read_abs_cat("6401.0")                                                  # CPI catalogue
+base = {"Index Numbers ;  All groups CPI ;  Australia ;": mc.did, "Index Numbers": mc.unit}
+
 series, unit, report = ra.select_and_splice([
     (cur, cmeta, base | {"Month": mc.freq}),   # by description
     (cur, cmeta, "A2325846C"),                 # by Series ID (quarterly All groups CPI)
@@ -223,7 +226,8 @@ rescaled across reference-period changes):
 
 ```python
 cur, cmeta = ra.read_abs_cat("6401.0")                       # monthly + long quarterly
-ind, imeta = ra.read_abs_cat("6484.0", url=INDICATOR_URL)    # discontinued -> fetch by URL
+indicator_url = "https://www.abs.gov.au/statistics/.../6484.0.zip"  # archived release page/zip
+ind, imeta = ra.read_abs_cat("6484.0", url=indicator_url)    # discontinued -> fetch by URL
 
 base = {"Index Numbers ;  All groups CPI ;  Australia ;": mc.did, "Index Numbers": mc.unit}
 series, unit, report = ra.select_and_splice(
