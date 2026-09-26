@@ -1,7 +1,5 @@
 """Utilities for working with ABS timeseries data."""
 
-from typing import cast
-
 from numpy import nan
 from pandas import DataFrame, DatetimeIndex, PeriodIndex, Series
 
@@ -53,6 +51,10 @@ def percent_change(data: DataT, n_periods: int) -> DataT:
         raise InvalidDataError("data must be a pandas Series or DataFrame")
 
     try:
+        # identical branches: pandas-stubs types Series[Any] scalar arithmetic as Any,
+        # which pyright cannot match to the Series constraint of DataT unless narrowed
+        if isinstance(data, Series):
+            return (data / data.shift(n_periods) - 1) * 100
         return (data / data.shift(n_periods) - 1) * 100
     except Exception as e:
         raise InvalidDataError(f"Error calculating percentage change: {e}") from e
@@ -86,6 +88,9 @@ def annualise_rates(data: DataT, *, periods_per_year: float) -> DataT:
         raise InvalidParameterError("periods_per_year must be a positive number")
 
     try:
+        # identical branches: see percent_change()
+        if isinstance(data, Series):
+            return (((1 + data) ** periods_per_year) - 1) * 100
         return (((1 + data) ** periods_per_year) - 1) * 100
     except Exception as e:
         raise InvalidDataError(f"Error annualising rates: {e}") from e
@@ -215,13 +220,22 @@ def monthly_to_qtly(data: DataT, q_ending: str = "DEC", f: str = "mean") -> Data
         For DataFrame input, the function is applied to each column.
 
     Raises:
-        InvalidDataError - If data is not a Series or DataFrame.
+        InvalidDataError - If data is not a Series or DataFrame, or does not
+            have a monthly PeriodIndex.
         InvalidParameterError - If q_ending or f parameters are invalid.
 
     """
     # Validate inputs
     if not isinstance(data, (Series, DataFrame)):
         raise InvalidDataError("data must be a pandas Series or DataFrame")
+
+    # non-monthly data would otherwise silently return an empty result
+    index = data.index
+    if not isinstance(index, PeriodIndex) or index.freqstr != "M":
+        raise InvalidDataError(
+            f"data must have a monthly PeriodIndex, got {type(index).__name__}"
+            f" with freq {getattr(index, 'freqstr', None)!r}"
+        )
 
     valid_endings = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
     if q_ending.upper() not in valid_endings:
@@ -234,13 +248,8 @@ def monthly_to_qtly(data: DataT, q_ending: str = "DEC", f: str = "mean") -> Data
     try:
         if isinstance(data, Series):
             return _monthly_to_qtly_series(data, q_ending, f)
-        if isinstance(data, DataFrame):
-            result_dict = {}
-            for col in data.columns:
-                result_dict[col] = _monthly_to_qtly_series(data[col], q_ending, f)
-            return data.__class__(result_dict)
-        # This should never be reached due to validation above
-        raise InvalidDataError("Unexpected data type")  # noqa: TRY301
+        # the guard above means this must be a DataFrame
+        return data.__class__({col: _monthly_to_qtly_series(data[col], q_ending, f) for col in data.columns})
     except Exception as e:
         raise InvalidDataError(f"Error converting monthly to quarterly data: {e}") from e
 
@@ -248,7 +257,10 @@ def monthly_to_qtly(data: DataT, q_ending: str = "DEC", f: str = "mean") -> Data
 # --- private helper functions
 def _set_axis_monthly_periods(data: DataT) -> DataT:
     """Convert a DatetimeIndex to a Monthly PeriodIndex."""
-    return data.set_axis(labels=cast("DatetimeIndex", data.index).to_period(freq="M"), axis="index")
+    index = data.index
+    if not isinstance(index, DatetimeIndex):
+        raise InvalidDataError(f"Expected a DatetimeIndex, got {type(index).__name__}")
+    return data.set_axis(labels=index.to_period(freq="M"), axis="index")
 
 
 def _monthly_to_qtly_series(data: Series, q_ending: str = "DEC", f: str = "mean") -> Series:

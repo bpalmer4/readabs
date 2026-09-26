@@ -1,3 +1,32 @@
+Version 0.3.0 released 26-Sep-2026 (Canberra Australia)
+
+ - Behaviour change: `monthly_to_qtly()` now raises `InvalidDataError` unless the
+   data has a monthly `PeriodIndex`. Previously, non-monthly data (e.g. quarterly
+   or daily) silently returned an empty or near-empty result, and a monthly
+   `DatetimeIndex` was accepted - convert it first with `.to_period("M")`.
+   Tests in `test/test_monthly_to_qtly.py`.
+ - Mistyped keyword arguments to `find_abs_id()` and `search_abs_meta()` are now
+   reported, rather than silently ignored. For example,
+   `find_abs_id(meta, terms, exact=True)` (for `exact_match=True`) prints
+   `find_abs_id(): Unexpected keyword argument 'exact'. Valid arguments are: [...]`,
+   in the same style as the ABS reader functions. The call otherwise behaves as
+   before: the unknown keyword is ignored, and it is reported once only.
+ - The accepted keywords are declared in a new `SearchArgs` TypedDict
+   (`exact_match`, `regex`, `validate_unique`, `verbose`) in `read_support.py`,
+   so type checkers also flag a mistyped keyword. `check_kwargs()` takes an
+   optional set of valid names, so the one checker serves both.
+ - No change to matching behaviour or defaults.
+ - Added hermetic tests in `test/test_search_kwargs.py`.
+ - Typing in `utilities.py`, no behavioural change: fixed two pyright errors in
+   `percent_change()` and `annualise_rates()` by narrowing Series vs DataFrame
+   with `isinstance`, and replaced a `cast()` in the quarterly-to-monthly helper
+   with an `isinstance(..., DatetimeIndex)` check. `pyright src/readabs` now
+   passes cleanly. In `monthly_to_qtly()`, removed an unreachable `raise` (and
+   its `noqa: TRY301`); the input guard already rejects non-Series/DataFrame data.
+ - Formatting only in `grab_abs_url.py` and `read_abs_cat.py`;
+   `ruff format --check src/readabs` now passes cleanly.
+ - Refreshed the locked dependencies in `uv.lock`.
+
 Version 0.2.6 released 22-Aug-2026 (Canberra Australia)
 
  - Docs and tooling only; no code or behavioural change.

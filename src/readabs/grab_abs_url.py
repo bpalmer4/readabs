@@ -98,10 +98,7 @@ def grab_abs_url(
     return _process_all_files(abs_dict, links, args)
 
 
-def grab_abs_zip(
-    zip_path: Path | str,
-    **kwargs: Unpack[ReadArgs]
-) -> dict[str, DataFrame]:
+def grab_abs_zip(zip_path: Path | str, **kwargs: Unpack[ReadArgs]) -> dict[str, DataFrame]:
     """Grab and process a single ABS ZIP file from a file system location.
 
     This is a convenience function that opens an ABS ZIP file from a local

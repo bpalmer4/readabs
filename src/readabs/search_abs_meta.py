@@ -4,13 +4,14 @@ Using a dictionary of search terms, identify the row or rows that match
 all of the search terms.
 """
 
-from typing import Any
+from typing import Unpack
 
 from pandas import DataFrame, Index
 
 # local imports
 from readabs.abs_meta_data import metacol as mc
 from readabs.read_abs_cat import read_abs_cat
+from readabs.read_support import _SEARCH_KWARGS, SearchArgs, VerboseArgs, check_kwargs
 
 
 def search_abs_meta(
@@ -20,7 +21,7 @@ def search_abs_meta(
     exact_match: bool = False,
     regex: bool = False,
     validate_unique: bool = False,  # useful safety-net if you expect only one match
-    **kwargs: Any,  # verbose flag
+    **kwargs: Unpack[VerboseArgs],
 ) -> DataFrame:
     """Extract from the ABS meta data those rows that match the search_terms.
 
@@ -41,9 +42,9 @@ def search_abs_meta(
         Whether to use regular expressions in the search.
     validate_unique : bool = False
         Raise a ValueError if the search result is not unique.
-    **kwargs : Any
+    **kwargs : Unpack[VerboseArgs]
         Additional keyword arguments. The only keyword argument
-        that is used is verbose.
+        that is used is verbose. Unknown keyword arguments are reported.
     verbose : bool = False
         Print additional information while searching; which can
         be useful when diagnosing problems with search terms.
@@ -83,6 +84,10 @@ def search_abs_meta(
     ```
 
     """
+    # warn if invalid kwargs; the named parameters never reach kwargs,
+    # so checking against all the SearchArgs names only affects the message
+    check_kwargs(kwargs, "search_abs_meta", _SEARCH_KWARGS)
+
     # get the verbose-flag from kwargs
     verbose = kwargs.get("verbose", False)
 
@@ -125,7 +130,7 @@ def search_abs_meta(
 def find_abs_id(
     meta: DataFrame,
     search_terms: dict[str, str],
-    **kwargs: Any,
+    **kwargs: Unpack[SearchArgs],
 ) -> tuple[str, str, str]:  # table, series_id, units
     """Find a unique ABS series identifier in the ABS metadata.
 
@@ -138,9 +143,10 @@ def find_abs_id(
         A dictionary {search_phrase: meta_column_name, ...} of search terms.
         Note: the search terms must be unique, as a dictionary cannot hold the
         same search term to be applied to different columns.
-    **kwargs : Any
-        Additional keyword arguments. The only additional keyword argument
-        that is used is validate_unique.
+    **kwargs : Unpack[SearchArgs]
+        Keyword arguments passed on to search_abs_meta(): exact_match,
+        regex, validate_unique and verbose. Unknown keyword arguments
+        are reported, and not passed on.
     validate_unique : bool = True
         Raise a ValueError if the search result is not a single
         unique match. Note: the default is True for safety.
@@ -176,8 +182,17 @@ def find_abs_id(
     ```
 
     """
-    validate_unique = kwargs.pop("validate_unique", True)
-    found = search_abs_meta(meta, search_terms, validate_unique=validate_unique, **kwargs).iloc[0]
+    check_kwargs(kwargs, "find_abs_id", _SEARCH_KWARGS)  # warn if invalid kwargs
+
+    # pass on only the known kwargs, so an unknown one is reported once
+    found = search_abs_meta(
+        meta,
+        search_terms,
+        exact_match=kwargs.get("exact_match", False),
+        regex=kwargs.get("regex", False),
+        validate_unique=kwargs.get("validate_unique", True),
+        verbose=kwargs.get("verbose", False),
+    ).iloc[0]
     table, series_id, units = (
         found[mc.table],
         found[mc.id],

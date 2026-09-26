@@ -167,9 +167,7 @@ def read_abs_cat(
     """
     # --- get the time series data ---
     zip_file = kwargs.get("zip_file")
-    raw_abs_dict = (
-        grab_abs_zip(zip_file, **kwargs) if zip_file else grab_abs_url(cat=cat, url=url, **kwargs)
-    )
+    raw_abs_dict = grab_abs_zip(zip_file, **kwargs) if zip_file else grab_abs_url(cat=cat, url=url, **kwargs)
     response = _get_time_series_data(cat, raw_abs_dict, **kwargs)
 
     if not response:
@@ -476,7 +474,7 @@ if __name__ == "__main__":
             freq_str = getattr(d[table].index, "freqstr", "Unknown")
             print(f"{table=} {d[table].shape=} {freq_str=}")
 
-        print ("=" * 20)
+        print("=" * 20)
 
         # Optional: exercise the local zip_file path. Requires a developer to
         # have a pre-downloaded ABS zip at this location; skipped if absent.

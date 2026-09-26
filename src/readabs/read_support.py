@@ -5,10 +5,34 @@ used across ABS data reading functions. It ensures consistent parameter handling
 and validates that at least one data source option is enabled.
 """
 
+from collections.abc import Mapping
 from typing import Any, NotRequired, TypedDict
 
 # Constants
 HYPHEN = "---"
+
+
+class SearchArgs(TypedDict):
+    """Type definition for find_abs_id() / search_abs_meta() keyword arguments."""
+
+    exact_match: NotRequired[bool]
+    regex: NotRequired[bool]
+    validate_unique: NotRequired[bool]
+    verbose: NotRequired[bool]
+
+
+class VerboseArgs(TypedDict):
+    """Type definition for the keyword arguments left in search_abs_meta()'s **kwargs.
+
+    exact_match, regex and validate_unique are explicit parameters there, so
+    (per PEP 692) they cannot also appear in the unpacked TypedDict.
+    """
+
+    verbose: NotRequired[bool]
+
+
+# Valid search kwargs are exactly the SearchArgs keys
+_SEARCH_KWARGS: frozenset[str] = SearchArgs.__optional_keys__
 
 
 class ReadArgs(TypedDict):
@@ -60,23 +84,23 @@ _DATA_SOURCE_ARGS = [
 _VALID_KWARGS = set(DEFAULTS.keys())
 
 
-def check_kwargs(kwargs: ReadArgs, name: str) -> None:
+def check_kwargs(kwargs: Mapping[str, object], name: str, valid: frozenset[str] | set[str] | None = None) -> None:
     """Warn if there are any invalid keyword arguments.
 
     Args:
-        kwargs: ReadArgs keyword arguments to validate
+        kwargs: keyword arguments to validate (a ReadArgs or SearchArgs TypedDict)
         name: Name of the calling function for error messages
+        valid: the valid keyword names; defaults to the ReadArgs keys
 
     """
     if not isinstance(name, str):
         print("Function name must be a string")
         return
 
+    valid_names = _VALID_KWARGS if valid is None else valid
     for arg_name in kwargs:
-        if arg_name not in _VALID_KWARGS:
-            print(
-                f"{name}(): Unexpected keyword argument '{arg_name}'. Valid arguments are: {list(_VALID_KWARGS)}"
-            )
+        if arg_name not in valid_names:
+            print(f"{name}(): Unexpected keyword argument '{arg_name}'. Valid arguments are: {list(valid_names)}")
 
 
 def get_args(kwargs: ReadArgs, name: str) -> dict[str, Any]:
